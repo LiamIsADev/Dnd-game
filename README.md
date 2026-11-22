@@ -45,7 +45,8 @@ In the [Supabase dashboard](https://supabase.com/dashboard) for the project:
    ```html
    <p>Or enter this code on the sign-in page: <strong>{{ .Token }}</strong></p>
    ```
-4. **Before inviting lots of players**, connect a real email sender under **Authentication → Emails → SMTP Settings** (for example [Resend](https://resend.com), which has a free tier). Supabase's built-in sender only sends a few emails per hour.
+4. **Let people create password accounts without an email.** Open **Authentication → Sign In / Providers → Email**, make sure **Email** is enabled, and turn **Confirm email** off, then save. Players can then sign in with a password (no email needed), and use email links as a backup. If you leave Confirm email on, new password accounts get one confirmation email first.
+5. **Before inviting lots of players**, connect a real email sender under **Authentication → Emails → SMTP Settings** (for example [Resend](https://resend.com), which has a free tier). Supabase's built-in sender only sends about 2 emails per hour. Password sign-in doesn't send emails, so it isn't affected.
 
 ## Project layout
 
