@@ -1,0 +1,22 @@
+{
+  "version": "SRD 5.2.1",
+  "attribution": "This work includes material from the System Reference Document 5.2.1 (\"SRD 5.2.1\") by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode. Markdown conversion by downfallx/dnd-5e-srd-markdown; reformatted into JSON for this site.",
+  "counts": {
+    "spells": 339,
+    "monsters": 330,
+    "magic-items": 258,
+    "feats": 17,
+    "backgrounds": 4,
+    "species": 9,
+    "classes": 12,
+    "equipment": {
+      "weapons": 38,
+      "armor": 13,
+      "properties": 10,
+      "masteryProperties": 8,
+      "gear": 81
+    },
+    "glossary": 154,
+    "chapters": 7
+  }
+}
