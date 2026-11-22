@@ -3,14 +3,15 @@ import { getAuth } from '../lib/auth.js';
 import { loadSrd, loadCharacterRules } from '../lib/srd.js';
 import { listCharacters } from '../lib/character/store.js';
 import { characterSummary } from './characters.js';
+import { joinForm, wireJoin } from './campaigns.js';
 
-export async function renderHome(root) {
+export async function renderHome(root, ctx) {
   const { session } = getAuth();
-  return session ? renderDashboard(root) : renderWelcome(root);
+  return session ? renderDashboard(root, ctx.navigate) : renderWelcome(root);
 }
 
 /* Signed in: the home screen with the three main areas. */
-async function renderDashboard(root) {
+async function renderDashboard(root, navigate) {
   const { profile } = getAuth();
   root.innerHTML = String(html`
     <section class="page">
@@ -24,7 +25,7 @@ async function renderDashboard(root) {
         <a class="home-card campaigns" href="#/campaigns">
           <span class="home-icon" aria-hidden="true">🗺</span>
           <h2>Campaigns</h2>
-          <p>Run or join a campaign with your party. <em>Coming in the next step.</em></p>
+          <p>Run a campaign as the DM, or play in one with your party.</p>
         </a>
         <a class="home-card account" href="#/account">
           <span class="home-icon" aria-hidden="true">⚙</span>
@@ -33,6 +34,8 @@ async function renderDashboard(root) {
         </a>
       </div>
 
+      <div class="home-join">${joinForm()}</div>
+
       <div class="section-head">
         <h2>Your characters</h2>
         <a class="button" href="#/characters/new">Create a character</a>
@@ -40,6 +43,7 @@ async function renderDashboard(root) {
       <div id="recent" class="character-grid"><p class="loading">Loading…</p></div>
     </section>`);
 
+  wireJoin(root, navigate);
   const recent = root.querySelector('#recent');
   try {
     const [rows, srd] = await Promise.all([listCharacters(), loadCharacterRules()]);

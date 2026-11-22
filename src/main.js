@@ -9,7 +9,8 @@ import { renderCredits } from './pages/credits.js';
 import { renderCharacters } from './pages/characters.js';
 import { renderBuilder } from './pages/builder.js';
 import { renderSheet } from './pages/sheet.js';
-import { renderCampaigns } from './pages/campaigns.js';
+import { renderCampaigns, renderJoin } from './pages/campaigns.js';
+import { renderTable } from './pages/table.js';
 
 const app = document.getElementById('app');
 const siteNav = document.getElementById('site-nav');
@@ -25,6 +26,8 @@ const routes = [
   { pattern: /^\/characters\/([^/]+)\/edit$/, nav: 'characters', render: renderBuilder, requiresAuth: true },
   { pattern: /^\/characters\/([^/]+)$/, nav: 'characters', render: renderSheet, requiresAuth: true },
   { pattern: /^\/campaigns$/, nav: 'campaigns', render: renderCampaigns, requiresAuth: true },
+  { pattern: /^\/campaigns\/([^/]+)$/, nav: 'campaigns', render: renderTable, requiresAuth: true, wide: true },
+  { pattern: /^\/join\/([^/]+)$/, nav: 'campaigns', render: renderJoin, requiresAuth: true },
   { pattern: /^\/rules(?:\/([^/]+))?(?:\/([^/]+))?$/, nav: 'rules', render: renderRules },
   { pattern: /^\/credits$/, nav: 'credits', render: renderCredits },
 ];
@@ -57,7 +60,7 @@ async function route() {
   }
   // Each page gets a fresh element, so event listeners never pile up between pages.
   const view = document.createElement('div');
-  view.className = 'view';
+  view.className = match.r.wide ? 'view wide' : 'view';
   app.replaceChildren(view);
   try {
     cleanup = await match.r.render(view, { params: match.m.slice(1).map((p) => (p ? decodeURIComponent(p) : p)), navigate });
