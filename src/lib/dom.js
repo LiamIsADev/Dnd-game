@@ -51,10 +51,24 @@ export function raw(value) {
   return new Raw(String(value ?? ''));
 }
 
+/** Delay calls until `ms` after the last one. `.flush()` runs a pending call now. */
 export function debounce(fn, ms = 150) {
   let t;
-  return (...args) => {
+  let pending = null;
+  const debounced = (...args) => {
     clearTimeout(t);
-    t = setTimeout(() => fn(...args), ms);
+    pending = args;
+    t = setTimeout(() => {
+      pending = null;
+      fn(...args);
+    }, ms);
   };
+  debounced.flush = () => {
+    if (!pending) return;
+    clearTimeout(t);
+    const args = pending;
+    pending = null;
+    fn(...args);
+  };
+  return debounced;
 }

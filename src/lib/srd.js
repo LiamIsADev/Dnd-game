@@ -51,3 +51,11 @@ export function spellLevelLabel(level) {
   const suffix = level === 1 ? 'st' : level === 2 ? 'nd' : level === 3 ? 'rd' : 'th';
   return `${level}${suffix} level`;
 }
+
+/** Everything the character builder and sheet need, loaded together. */
+export async function loadCharacterRules() {
+  const [classes, species, backgrounds, feats, equipment, spells] = await Promise.all(
+    ['classes', 'species', 'backgrounds', 'feats', 'equipment', 'spells'].map(loadSrd),
+  );
+  return { classes, species, backgrounds, feats, equipment, spells };
+}

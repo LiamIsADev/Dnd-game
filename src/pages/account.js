@@ -7,7 +7,7 @@ export function renderAccount(root) {
   root.innerHTML = String(html`
     <section class="page narrow">
       <div class="card">
-        <h1>Your account</h1>
+        <h1>Account settings</h1>
         <p class="muted">Signed in as ${session.user.email}</p>
         ${profile?.missingTable
           ? html`<p class="message error">The database isn't set up yet, so your name can't be saved. Run <code>supabase/migrations/0001_profiles.sql</code> in the Supabase SQL editor.</p>`

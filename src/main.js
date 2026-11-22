@@ -1,14 +1,18 @@
 import './styles.css';
 import { initAuth, onAuthChange, getAuth, signOut } from './lib/auth.js';
-import { html, esc } from './lib/dom.js';
+import { html } from './lib/dom.js';
 import { renderHome } from './pages/home.js';
 import { renderSignIn } from './pages/signin.js';
 import { renderAccount } from './pages/account.js';
 import { renderRules } from './pages/rules.js';
 import { renderCredits } from './pages/credits.js';
+import { renderCharacters } from './pages/characters.js';
+import { renderBuilder } from './pages/builder.js';
+import { renderSheet } from './pages/sheet.js';
+import { renderCampaigns } from './pages/campaigns.js';
 
 const app = document.getElementById('app');
-const authNav = document.getElementById('auth-nav');
+const siteNav = document.getElementById('site-nav');
 
 // Routes are hash-based (#/rules/spells/fireball) so the site works on any
 // static host without server rewrite rules.
@@ -16,6 +20,11 @@ const routes = [
   { pattern: /^\/$/, nav: 'home', render: renderHome },
   { pattern: /^\/sign-in$/, nav: 'account', render: renderSignIn },
   { pattern: /^\/account$/, nav: 'account', render: renderAccount, requiresAuth: true },
+  { pattern: /^\/characters$/, nav: 'characters', render: renderCharacters, requiresAuth: true },
+  { pattern: /^\/characters\/new$/, nav: 'characters', render: renderBuilder, requiresAuth: true },
+  { pattern: /^\/characters\/([^/]+)\/edit$/, nav: 'characters', render: renderBuilder, requiresAuth: true },
+  { pattern: /^\/characters\/([^/]+)$/, nav: 'characters', render: renderSheet, requiresAuth: true },
+  { pattern: /^\/campaigns$/, nav: 'campaigns', render: renderCampaigns, requiresAuth: true },
   { pattern: /^\/rules(?:\/([^/]+))?(?:\/([^/]+))?$/, nav: 'rules', render: renderRules },
   { pattern: /^\/credits$/, nav: 'credits', render: renderCredits },
 ];
@@ -46,11 +55,15 @@ async function route() {
     navigate('/sign-in');
     return;
   }
+  // Each page gets a fresh element, so event listeners never pile up between pages.
+  const view = document.createElement('div');
+  view.className = 'view';
+  app.replaceChildren(view);
   try {
-    cleanup = await match.r.render(app, { params: match.m.slice(1).map((p) => (p ? decodeURIComponent(p) : p)), navigate });
+    cleanup = await match.r.render(view, { params: match.m.slice(1).map((p) => (p ? decodeURIComponent(p) : p)), navigate });
   } catch (err) {
     console.error(err);
-    app.innerHTML = String(html`<section class="page narrow"><h1>Something went wrong</h1><p class="error">${err.message}</p></section>`);
+    view.innerHTML = String(html`<section class="page narrow"><h1>Something went wrong</h1><p class="error">${err.message}</p></section>`);
   }
 }
 
@@ -60,17 +73,22 @@ function highlightNav(nav) {
   }
 }
 
-function renderAuthNav({ session, profile }) {
-  if (session) {
-    authNav.innerHTML = `<a href="#/account" data-nav="account">${esc(profile?.display_name || 'Account')}</a>
-      <button type="button" class="link-button" id="sign-out">Sign out</button>`;
-    authNav.querySelector('#sign-out').addEventListener('click', async () => {
-      await signOut();
-      navigate('/');
-    });
-  } else {
-    authNav.innerHTML = `<a href="#/sign-in" class="button small" data-nav="account">Sign in</a>`;
-  }
+function renderAuthNav({ session }) {
+  // The main bar: Characters, Campaigns and Account settings once signed in.
+  siteNav.innerHTML = session
+    ? `<a href="#/" data-nav="home">Home</a>
+       <a href="#/characters" data-nav="characters">Characters</a>
+       <a href="#/campaigns" data-nav="campaigns">Campaigns</a>
+       <a href="#/rules" data-nav="rules">Rules</a>
+       <a href="#/account" data-nav="account">Account settings</a>
+       <button type="button" class="link-button" id="sign-out">Sign out</button>`
+    : `<a href="#/" data-nav="home">Home</a>
+       <a href="#/rules" data-nav="rules">Rules</a>
+       <a href="#/sign-in" class="button small" data-nav="account">Sign in</a>`;
+  siteNav.querySelector('#sign-out')?.addEventListener('click', async () => {
+    await signOut();
+    navigate('/');
+  });
   highlightNav(routes.find((r) => currentPath().match(r.pattern))?.nav);
 }
 
