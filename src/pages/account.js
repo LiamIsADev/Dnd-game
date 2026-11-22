@@ -1,5 +1,5 @@
 import { html } from '../lib/dom.js';
-import { getAuth, updateDisplayName } from '../lib/auth.js';
+import { getAuth, updateDisplayName, setPassword, MIN_PASSWORD } from '../lib/auth.js';
 
 export function renderAccount(root) {
   const { session, profile } = getAuth();
@@ -20,10 +20,46 @@ export function renderAccount(root) {
         </form>
         <p class="message" role="status" aria-live="polite"></p>
       </div>
+      <div class="card">
+        <h2>Password</h2>
+        <p class="hint">Set a password so you can sign in without waiting for an email. You can still use email links too.</p>
+        <form id="password-form">
+          <input type="email" name="username" autocomplete="username" value="${session.user.email}" hidden />
+          <label for="new-password">New password</label>
+          <input id="new-password" name="password" type="password" autocomplete="new-password" minlength="${MIN_PASSWORD}" required />
+          <label for="confirm-password">Type it again</label>
+          <input id="confirm-password" name="confirm" type="password" autocomplete="new-password" minlength="${MIN_PASSWORD}" required />
+          <button type="submit" class="button">Save password</button>
+        </form>
+        <p class="message" id="password-status" role="status" aria-live="polite"></p>
+      </div>
     </section>`);
 
+  const pwForm = root.querySelector('#password-form');
+  const pwStatus = root.querySelector('#password-status');
+  pwForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const show = (text, kind = '') => {
+      pwStatus.className = `message ${kind}`;
+      pwStatus.textContent = text;
+    };
+    if (pwForm.password.value !== pwForm.confirm.value) return show("The two passwords don't match.", 'error');
+    const btn = pwForm.querySelector('button');
+    btn.disabled = true;
+    show('Saving…');
+    try {
+      await setPassword(pwForm.password.value);
+      pwForm.reset();
+      show('Password saved. Next time, choose Password on the sign-in page.', 'success');
+    } catch (err) {
+      show(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
   const form = root.querySelector('#name-form');
-  const status = root.querySelector('.message[role=status]');
+  const status = root.querySelector('#name-form + .message');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = form.querySelector('button');

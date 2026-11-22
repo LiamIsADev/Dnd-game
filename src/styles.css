@@ -2922,3 +2922,11 @@ button.vital:hover {
     margin-top: 10rem;
   }
 }
+
+.page.narrow .card + .card {
+  margin-top: 1.5rem;
+}
+
+.page.narrow .card > h2:first-child {
+  margin-top: 0;
+}
