@@ -11,6 +11,9 @@ function check(error) {
   if (/relation .*characters.* does not exist|Could not find the table/i.test(error.message)) {
     throw new Error('The characters table is missing. Run supabase/migrations/0002_characters.sql in the Supabase SQL editor.');
   }
+  if (/permission denied for table/i.test(error.message)) {
+    throw new Error('The database is blocking access to characters. Re-run supabase/migrations/0002_characters.sql in the Supabase SQL editor.');
+  }
   throw new Error(error.message);
 }
 

@@ -11,6 +11,12 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+-- Newer Supabase projects don't expose new tables to signed-in users
+-- automatically, so grant access explicitly. Row-level security below still
+-- decides which rows each player can see or change.
+grant usage on schema public to authenticated;
+grant select, insert, update on table public.profiles to authenticated;
+
 -- Any signed-in player can see display names (needed later to show party members).
 drop policy if exists "Profiles are visible to signed-in users" on public.profiles;
 create policy "Profiles are visible to signed-in users"
