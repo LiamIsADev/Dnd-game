@@ -453,7 +453,7 @@ $$;
 -- a natural 1 always misses.
 create or replace function public.attack(
   attacker uuid, target uuid, bonus int, damage text default '', damage_type text default '',
-  mode text default 'normal', label text default ''
+  mode text default 'normal', label text default '', extra jsonb default '[]'::jsonb
 )
 returns jsonb
 language plpgsql
@@ -475,6 +475,9 @@ declare
   hp jsonb := null;
   what text;
   result jsonb;
+  part jsonb;
+  more jsonb;
+  extras jsonb := '[]'::jsonb;
 begin
   if not public.can_act_for(attacker) then
     raise exception 'You can only attack with your own token';
@@ -500,6 +503,14 @@ begin
   if hit and coalesce(damage, '') <> '' then
     dmg := public.dice_roll(damage, 'normal', crit);
     dealt := public.adjust_damage(greatest((dmg ->> 'total')::int, 0), damage_type, s);
+    -- Extra damage of other types (e.g. a ghoul's bite: Piercing plus Necrotic).
+    if jsonb_typeof(extra) = 'array' then
+      for part in select * from jsonb_array_elements(extra) limit 4 loop
+        more := public.dice_roll(part ->> 'dice', 'normal', crit);
+        dealt := dealt + public.adjust_damage(greatest((more ->> 'total')::int, 0), part ->> 'type', s);
+        extras := extras || jsonb_build_object('type', part ->> 'type', 'roll', more);
+      end loop;
+    end if;
     if dealt > 0 then
       hp := public.change_hp(target, -dealt, crit);
     end if;
@@ -507,7 +518,7 @@ begin
   what := coalesce(nullif(label, ''), 'Attack');
   result := jsonb_build_object(
     'kind', 'attack', 'attacker', a.name, 'target', t.name, 'hit', hit, 'crit', crit,
-    'damage', dealt, 'damageType', nullif(damage_type, ''), 'damageRoll', dmg,
+    'damage', dealt, 'damageType', nullif(damage_type, ''), 'damageRoll', dmg, 'extra', extras,
     'down', coalesce((hp ->> 'down')::boolean, false), 'dead', coalesce((hp ->> 'dead')::boolean, false));
   perform public.log_roll(a.campaign_id,
     a.name || ' attacks ' || t.name || ' (' || what || ')', r, mode, a.hidden or t.hidden, result);
@@ -945,7 +956,7 @@ declare
 begin
   foreach f in array array[
     'public.roll_initiative(uuid, int, text)', 'public.combat_start(uuid)', 'public.combat_end(uuid)',
-    'public.combat_next(uuid)', 'public.attack(uuid, uuid, int, text, text, text, text)',
+    'public.combat_next(uuid)', 'public.attack(uuid, uuid, int, text, text, text, text, jsonb)',
     'public.saving_throw(uuid, uuid[], text, int, text, text, boolean, text, text)',
     'public.heal(uuid, uuid, text, text)', 'public.adjust_hp(uuid, int, boolean)',
     'public.set_condition(uuid, text, boolean)', 'public.death_save(uuid)',

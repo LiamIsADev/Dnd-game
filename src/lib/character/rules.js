@@ -171,6 +171,10 @@ export function abilityScores(c) {
       if (b.plus2 === a) s += 2;
       if (b.plus1 === a) s += 1;
     }
+    // Ability Score Improvements from levelling up (can't go above 20).
+    for (const [lvl, choice] of Object.entries(c.levelChoices || {})) {
+      if (Number(lvl) <= (Number(c.level) || 1) && choice?.type === 'asi') s += Number(choice.plus?.[a] || 0);
+    }
     s = Math.min(s, 20);
     s += Number(c.scoreAdjust?.[a] ?? 0) || 0;
     out[a] = Math.max(1, Math.min(30, s));
@@ -367,6 +371,9 @@ export function derive(c, srd) {
   const featNames = [];
   if (background?.feat) featNames.push(background.feat);
   if (c.speciesId === 'human' && c.speciesOptions?.feat) featNames.push(c.speciesOptions.feat);
+  for (const [lvl, choice] of Object.entries(c.levelChoices || {})) {
+    if (Number(lvl) <= level && choice?.type === 'feat' && choice.feat) featNames.push(choice.feat);
+  }
   const feats = featNames.map((label) => {
     const base = label.replace(/\s*\(.*\)$/, '');
     const f = srd.feats.find((x) => x.name === base);
@@ -376,7 +383,13 @@ export function derive(c, srd) {
 
   // Hit points.
   const hitDie = cls?.hitDie || 8;
-  let hpMax = hitDie + mods.con + (level - 1) * (hitDie / 2 + 1 + mods.con);
+  // Level 1: the full Hit Die. Each level after: the roll made when levelling
+  // up, or the fixed average (half the die + 1). Plus Con each level.
+  let hpMax = hitDie + mods.con;
+  for (let l = 2; l <= level; l++) {
+    const rolled = Number(c.hpRolls?.[l]);
+    hpMax += (rolled >= 1 && rolled <= hitDie ? rolled : hitDie / 2 + 1) + mods.con;
+  }
   hpMax = Math.max(level, hpMax);
   if (c.speciesId === 'dwarf') hpMax += level;
   hpMax += Number(c.hpMaxAdjust || 0);

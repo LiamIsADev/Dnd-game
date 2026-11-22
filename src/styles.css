@@ -2633,3 +2633,35 @@ button.vital:hover {
 .roll-detail s {
   opacity: 0.6;
 }
+
+/* ===================================================== step 4: rules */
+.xp-line {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.levelup-dialog {
+  max-width: min(94vw, 560px);
+}
+
+.levelup-dialog fieldset {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.levelup-dialog legend {
+  font-weight: 600;
+  padding: 0 0.3rem;
+}
+
+.levelup-dialog .asi-pick label {
+  display: grid;
+  gap: 0.2rem;
+}

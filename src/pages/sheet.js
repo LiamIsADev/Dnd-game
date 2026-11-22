@@ -15,6 +15,8 @@ import {
   uid,
 } from '../lib/character/rules.js';
 import { getCharacter, saveCharacter, downloadCharacter } from '../lib/character/store.js';
+import { canLevelUp, XP_FOR_LEVEL } from '../lib/character/automation.js';
+import { levelUpDialog } from '../components/levelup.js';
 import { roll, d20, critical, describe } from '../lib/dice.js';
 import { confirmDialog, toast } from '../lib/ui.js';
 
@@ -53,6 +55,7 @@ export async function renderSheet(root, { params }) {
   }
 
   let c = row.data;
+  let updatedAt = row.updated_at;
   let tab = sessionStorage.getItem('sheetTab') || 'combat';
   let mode = 'normal'; // advantage / disadvantage for the next d20 rolls
   const log = [];
@@ -63,12 +66,41 @@ export async function renderSheet(root, { params }) {
   const persist = debounce(async () => {
     setSaveState('saving');
     try {
-      await saveCharacter(id, c);
+      const res = await saveCharacter(id, c, updatedAt);
+      if (res.conflict) {
+        // Changed somewhere else (e.g. took damage at the live table): show the latest.
+        await refresh();
+        toast('This character was just updated at the table, so the sheet now shows the latest. Please redo your last change.');
+        return;
+      }
+      updatedAt = res.updated_at;
       setSaveState('saved');
     } catch (err) {
       setSaveState('error', err.message);
     }
   }, 600);
+
+  async function refresh() {
+    const latest = await getCharacter(id);
+    if (!latest) return;
+    c = latest.data;
+    updatedAt = latest.updated_at;
+    setSaveState('saved');
+    draw();
+  }
+
+  // Coming back to this tab: pick up anything that happened at the table.
+  const onVisible = async () => {
+    if (document.visibilityState !== 'visible' || saveState === 'saving') return;
+    persist.flush();
+    const latest = await getCharacter(id).catch(() => null);
+    if (latest && latest.updated_at !== updatedAt && saveState === 'saved') {
+      c = latest.data;
+      updatedAt = latest.updated_at;
+      draw();
+    }
+  };
+  document.addEventListener('visibilitychange', onVisible);
 
   function setSaveState(state, message = '') {
     saveState = state;
@@ -114,6 +146,8 @@ export async function renderSheet(root, { params }) {
           <div>
             <h1>${c.name}</h1>
             <p class="muted">${[d.species?.name + (c.speciesOptions?.lineage ? ` (${c.speciesOptions.lineage})` : ''), d.background?.name, d.cls ? `${d.cls.name} ${d.level}` : null, d.subclass?.name].filter(Boolean).join(' · ')}</p>
+            <p class="xp-line">${c.level >= 20 ? html`${(Number(c.xp) || 0).toLocaleString()} XP` : html`${(Number(c.xp) || 0).toLocaleString()} / ${XP_FOR_LEVEL[(Number(c.level) || 1) + 1].toLocaleString()} XP to level ${(Number(c.level) || 1) + 1}`}
+              ${c.level < 20 ? html`<button type="button" class="button small ${canLevelUp(c) ? '' : 'secondary'}" data-act="level-up">${canLevelUp(c) ? '★ Level up!' : 'Level up'}</button>` : ''}</p>
             <p class="save-state" data-state="${saveState}" role="status" aria-live="polite">All changes saved</p>
           </div>
           <div class="head-actions">
@@ -447,6 +481,18 @@ export async function renderSheet(root, { params }) {
       update({ ...applyHealing(c, healed, d.hpMax), hitDiceSpent: (c.hitDiceSpent || 0) + 1 });
       return;
     }
+    if (t.dataset.act === 'level-up') {
+      if (!canLevelUp(c)) {
+        const ok = await confirmDialog({ title: 'Level up without enough XP?', message: 'Do this if your DM levels the party up by milestones instead of XP.', confirmLabel: 'Level up' });
+        if (!ok) return;
+      }
+      const next = await levelUpDialog(c, srd);
+      if (next) {
+        update(next);
+        toast(`${c.name} is now level ${next.level}!`, 'success');
+      }
+      return;
+    }
     if (t.dataset.act === 'inspiration') return update({ ...c, heroicInspiration: !c.heroicInspiration });
     if (t.dataset.act === 'long-rest') {
       const ok = await confirmDialog({ title: 'Take a Long Rest?', message: 'Restores all Hit Points, Hit Point Dice and spell slots, and removes one level of Exhaustion.', confirmLabel: 'Long rest' });
@@ -562,5 +608,6 @@ export async function renderSheet(root, { params }) {
   return () => {
     flush();
     window.removeEventListener('beforeunload', flush);
+    document.removeEventListener('visibilitychange', onVisible);
   };
 }
