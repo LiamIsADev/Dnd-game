@@ -100,6 +100,7 @@ const loaders = {
 // active map decide which tokens a player can see, so they reload tokens too.
 const RELOAD = {
   campaigns: ['campaign', 'maps', 'tokens'],
+  characters: ['members', 'tokens'],
   campaign_members: ['members'],
   maps: ['maps', 'tokens'],
   tokens: ['tokens'],
@@ -270,3 +271,44 @@ export async function rollDice(campaignId, expr, { label = '', mode = 'normal', 
   check(error);
   return data;
 }
+
+/* ------------------------------------------------------- rules automation */
+// Every one of these is rolled and applied by the database (see 0004_rules.sql).
+
+async function rpc(fn, args) {
+  const { data, error } = await supabase.rpc(fn, args);
+  if (error) {
+    if (/Could not find the function/i.test(error.message)) {
+      throw new Error('Combat rules are missing. Run supabase/migrations/0004_rules.sql in the Supabase SQL editor.');
+    }
+    // Rule messages from the database are written for players; show them as they are.
+    if (error.code === 'P0001') throw new Error(error.message);
+    check(error);
+  }
+  return data;
+}
+
+export const combat = {
+  start: (cid) => rpc('combat_start', { cid }),
+  end: (cid) => rpc('combat_end', { cid }),
+  next: (cid) => rpc('combat_next', { cid }),
+  initiative: (token, bonus, mode = 'normal') => rpc('roll_initiative', { token, bonus, mode }),
+  attack: (a) =>
+    rpc('attack', {
+      attacker: a.attacker, target: a.target, bonus: a.bonus, damage: a.damage || '', damage_type: a.damageType || '',
+      mode: a.mode || 'normal', label: a.label || '', extra: a.extra || [],
+    }),
+  save: (a) =>
+    rpc('saving_throw', {
+      source: a.source, targets: a.targets, ability: a.ability, dc: a.dc, damage: a.damage || '', damage_type: a.damageType || '',
+      half: !!a.half, condition: a.condition || '', label: a.label || '',
+    }),
+  heal: (healer, target, amount, label = '') => rpc('heal', { healer, target, amount, label }),
+  adjustHp: (target, delta, temp = false) => rpc('adjust_hp', { target, delta, temp }),
+  condition: (token, name, present) => rpc('set_condition', { token, name, present }),
+  deathSave: (token) => rpc('death_save', { token }),
+  useSlot: (charId, level, used) => rpc('use_slot', { char_id: charId, level, used }),
+  hitDie: (token, die, conMod) => rpc('spend_hit_die', { token, die, con_mod: conMod }),
+  rest: (cid, kind) => rpc('party_rest', { cid, kind }),
+  awardXp: (cid, amount) => rpc('award_xp', { cid, amount }),
+};

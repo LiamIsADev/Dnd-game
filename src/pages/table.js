@@ -3,11 +3,12 @@
 // map (through the fog), their own character and anything the DM has shown.
 import { html, raw, debounce } from '../lib/dom.js';
 import { getAuth } from '../lib/auth.js';
-import { loadSrd, loadCharacterRules, formatMod, ABILITY_NAMES } from '../lib/srd.js';
+import { loadSrd, loadCharacterRules, formatMod, ABILITY_NAMES, spellLevelLabel } from '../lib/srd.js';
 import { toast, confirmDialog } from '../lib/ui.js';
 import { roll as localRoll } from '../lib/dice.js';
 import { derive, SKILLS } from '../lib/character/rules.js';
 import { listCharacters } from '../lib/character/store.js';
+import { monsterSecrets, characterSecrets, monsterActions, castableSpells, spellMechanics, CONDITIONS } from '../lib/character/automation.js';
 import { statBlock } from '../components/statblock.js';
 import { createBoard, DRAG_TYPE } from '../components/board.js';
 import { fitFog, setCells, countRevealed } from '../lib/campaign/fog.js';
@@ -48,6 +49,8 @@ export async function renderTable(root, { params, navigate }) {
     seenHandouts: new Map(),
     live: 'connecting',
     gone: false,
+    target: null, // choosing who an attack or spell hits
+    lastTurn: null,
   };
   // Handouts already up when the page opens don't pop up again.
   for (const h of s.handouts) if (h.shown) ui.seenHandouts.set(h.id, h.shown_at);
@@ -101,6 +104,7 @@ export async function renderTable(root, { params, navigate }) {
       </header>
       <div class="table-layout">
         <div class="table-main">
+          <div class="combat-bar" aria-live="polite"></div>
           <div class="board-toolbar"></div>
           <div class="board-host"></div>
         </div>
@@ -137,6 +141,7 @@ export async function renderTable(root, { params, navigate }) {
     title: root.querySelector('.table-title'),
     live: root.querySelector('.live-dot'),
     toolbar: root.querySelector('.board-toolbar'),
+    combat: root.querySelector('.combat-bar'),
     tabs: root.querySelector('.tabs'),
     body: root.querySelector('.tab-body'),
     log: root.querySelector('.roll-log'),
@@ -147,6 +152,10 @@ export async function renderTable(root, { params, navigate }) {
     isDm,
     onMove: moveToken,
     onSelect(t) {
+      if (ui.target) {
+        if (t) pickTarget(t);
+        return;
+      }
       ui.selectedId = t?.id || null;
       if (t && isDm) ui.tab = 'token';
       drawBoard();
@@ -154,6 +163,7 @@ export async function renderTable(root, { params, navigate }) {
     },
     onDrop: spawn,
     onCellClick(x, y) {
+      if (ui.target) return;
       if (ui.pending) {
         const p = ui.pending;
         ui.pending = null;
@@ -167,6 +177,7 @@ export async function renderTable(root, { params, navigate }) {
   function drawAll() {
     els.title.textContent = s.campaign.name;
     drawLive();
+    drawCombat();
     drawToolbar();
     drawBoard();
     drawSide();
@@ -191,6 +202,9 @@ export async function renderTable(root, { params, navigate }) {
       canMove,
       hpFor,
       pending: ui.pending,
+      activeId: s.campaign.combat_round != null ? s.campaign.combat_turn : null,
+      targetIds: new Set(ui.target?.targets || []),
+      targeting: !!ui.target,
       emptyText: isDm ? 'Create a map in the Maps tab.' : "The DM hasn't opened a map yet. Hang tight!",
     });
   }
@@ -219,9 +233,149 @@ export async function renderTable(root, { params, navigate }) {
               : ''}`
         : ''}
       <div class="toolbar-group grow"></div>
+      ${ui.target
+        ? html`<p class="toolbar-note warn">${ui.target.multi
+            ? html`Click each creature in the area (${ui.target.targets.length} chosen), then
+                <button type="button" class="button small" data-act="confirm-targets" ${ui.target.targets.length ? '' : raw('disabled')}>${ui.target.label}</button>`
+            : html`Click the target for <strong>${ui.target.label}</strong>.`}
+            <button type="button" class="link-button" data-act="cancel-target">Cancel</button></p>`
+        : ''}
       ${ui.pending ? html`<p class="toolbar-note">Click a square to place <strong>${ui.pending.name}</strong>. <button type="button" class="link-button" data-act="cancel-place">Cancel</button></p>` : ''}
       ${preparing ? html`<p class="toolbar-note warn">Preparing <strong>${m.name}</strong>. Players can't see it. <button type="button" class="button small" data-act="activate-map" data-id="${m.id}">Open for players</button></p>` : ''}
       ${isDm && m && !preparing ? html`<p class="toolbar-note">Players see: <strong>${m.name}</strong></p>` : ''}`);
+  }
+
+  /* --------------------------------------------------------------- combat */
+  const myToken = () => {
+    const m = activeMap();
+    return s.tokens.find((t) => t.owner_id === me && m && t.map_id === m.id) || null;
+  };
+  const turnOrder = () => {
+    const m = activeMap();
+    return s.tokens
+      .filter((t) => m && t.map_id === m.id && t.initiative != null)
+      .sort((a, b) => b.initiative - a.initiative || String(a.created_at).localeCompare(String(b.created_at)) || a.id.localeCompare(b.id));
+  };
+
+  function drawCombat() {
+    const c = s.campaign;
+    const active = c.combat_round != null;
+    if (!active) {
+      els.combat.hidden = !isDm;
+      els.combat.innerHTML = isDm
+        ? String(html`<div class="combat-head"><button type="button" class="button small" data-act="combat-start">⚔ Start combat</button>
+            <span class="muted small">Everyone rolls initiative and the site tracks whose turn it is.</span></div>`)
+        : '';
+      return;
+    }
+    const current = s.tokens.find((t) => t.id === c.combat_turn);
+    const mine = myToken();
+    els.combat.hidden = false;
+    els.combat.innerHTML = String(html`
+      <div class="combat-head">
+        <strong>Round ${c.combat_round}</strong>
+        <span>${current ? (current.owner_id === me ? html`<strong class="your-turn">Your turn!</strong>` : html`${current.name}’s turn`) : c.combat_turn ? 'Something unseen is acting…' : 'Roll for initiative!'}</span>
+        <span class="grow"></span>
+        ${isDm
+          ? html`<button type="button" class="button small secondary" data-act="init-enemies">Roll initiative for enemies</button>
+              <button type="button" class="button small" data-act="next-turn">${c.combat_turn ? 'Next turn →' : 'Start first turn'}</button>
+              <button type="button" class="link-button small" data-act="combat-end">End combat</button>`
+          : html`${mine && mine.initiative == null ? html`<button type="button" class="button small" data-act="my-initiative">Roll initiative</button>` : ''}
+              ${current && current.owner_id === me ? html`<button type="button" class="button small" data-act="next-turn">End my turn</button>` : ''}`}
+      </div>
+      <ol class="turn-order">
+        ${turnOrder().map(
+          (t) => html`<li class="${t.id === c.combat_turn ? 'current' : ''} ${t.conditions?.includes('Dead') ? 'dead' : ''} ${t.kind}">
+            <span class="init">${t.initiative}</span> ${t.name}${t.hidden ? ' (hidden)' : ''}</li>`,
+        )}
+      </ol>`);
+  }
+
+  function checkTurn() {
+    const turn = s.campaign.combat_round != null ? s.campaign.combat_turn : null;
+    if (turn && turn !== ui.lastTurn) {
+      const t = s.tokens.find((x) => x.id === turn);
+      if (t && t.owner_id === me && !isDm) toast(`Your turn, ${t.name}!`, 'success');
+    }
+    ui.lastTurn = turn;
+  }
+
+  function initiativeBonus(t) {
+    if (t.monster_id) {
+      const mon = monsterById(t.monster_id);
+      return mon?.initiative?.bonus ?? mon?.abilities?.dex?.mod ?? 0;
+    }
+    const ch = t.character_id && s.characters[t.character_id];
+    if (ch) {
+      const d = derive(ch.data, rules);
+      return d.initiative - d.d20Penalty;
+    }
+    return 0;
+  }
+
+  /** Advantage/disadvantage from the dice box applies to the next attack, then resets. */
+  function takeMode() {
+    const m = ui.rollMode;
+    if (m !== 'normal') {
+      ui.rollMode = 'normal';
+      drawMode();
+    }
+    return m;
+  }
+
+  function startTarget(opts) {
+    ui.target = { ...opts, targets: [] };
+    ui.pending = null;
+    drawToolbar();
+    drawBoard();
+    toast(opts.multi ? 'Click each creature in the area on the map.' : `Click who to target with ${opts.label}.`);
+    root.querySelector('.board-host')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  async function pickTarget(t) {
+    const tg = ui.target;
+    if (tg.multi) {
+      tg.targets = tg.targets.includes(t.id) ? tg.targets.filter((x) => x !== t.id) : [...tg.targets, t.id];
+      drawToolbar();
+      drawBoard();
+      return;
+    }
+    ui.target = null;
+    drawToolbar();
+    drawBoard();
+    await resolveTarget(tg, [t.id]);
+  }
+
+  async function resolveTarget(tg, ids) {
+    const res = await guard(() => tg.run(ids));
+    if (!res) return;
+    report(res);
+    queueReload(['tokens', 'members']);
+  }
+
+  function report(x) {
+    if (x.kind === 'attack') {
+      toast(x.hit ? `${x.crit ? 'Critical hit! ' : 'Hit! '}${x.target} takes ${x.damage} damage${x.down ? ' and drops!' : '.'}` : `Miss! ${x.attacker} misses ${x.target}.`, x.hit ? 'success' : '');
+    } else if (x.kind === 'save') {
+      const failed = x.targets.filter((t) => !t.saved).length;
+      toast(`${x.targets.length - failed} saved, ${failed} failed.`, 'success');
+    } else if (x.kind === 'heal') {
+      toast(`${x.target} regains ${x.amount} hit points.`, 'success');
+    }
+  }
+
+  /** The DM's browser keeps the party's AC, max HP and saves up to date in the database. */
+  async function syncParty() {
+    if (!isDm) return;
+    for (const t of s.tokens) {
+      if (t.kind !== 'pc' || !t.character_id || !s.characters[t.character_id]) continue;
+      const want = characterSecrets(s.characters[t.character_id].data, rules);
+      const have = s.secrets[t.id] || {};
+      const same = have.ac === want.ac && have.hp_max === want.hp_max && Object.keys(want.saves).every((k) => Number(have.saves?.[k]) === want.saves[k]);
+      if (same) continue;
+      s.secrets[t.id] = { ...have, ...want, token_id: t.id };
+      await store.saveSecret(t.id, s.id, want).catch((err) => console.error(err));
+    }
   }
 
   function drawMode() {
@@ -351,10 +505,30 @@ export async function renderTable(root, { params, navigate }) {
           })}
         </ul>
         ${isDm && s.members.length < 2 ? html`<p class="muted">Nobody has joined yet. Send your players the invite link.</p>` : ''}
+        ${isDm ? restAndXp() : ''}
         ${isDm
           ? html`<hr><button type="button" class="button small danger" data-act="delete-campaign">Delete campaign</button>`
           : html`<hr><button type="button" class="button small secondary" data-act="leave">Leave campaign</button>`}
       </div>`;
+  }
+
+  function restAndXp() {
+    const m = activeMap();
+    const defeatedXp = s.tokens
+      .filter((t) => m && t.map_id === m.id && t.kind === 'monster' && (t.conditions || []).includes('Dead'))
+      .reduce((sum, t) => sum + (Number(s.secrets[t.id]?.xp) || 0), 0);
+    return html`
+      <h2 class="panel-title">Rests and XP</h2>
+      <div class="row">
+        <button type="button" class="button small secondary" data-act="rest" data-kind="short">Short rest</button>
+        <button type="button" class="button small secondary" data-act="rest" data-kind="long">Long rest</button>
+      </div>
+      <p class="muted small">Long rest: full HP, spell slots and Hit Dice back, one less Exhaustion. Short rest: Warlocks get their slots back; players spend Hit Dice on their own tab.</p>
+      <form data-form="xp" class="row">
+        <label>XP to share <input name="amount" type="number" min="1" max="1000000" inputmode="numeric" value="${defeatedXp || ''}" required></label>
+        <button class="button small">Give to the party</button>
+      </form>
+      ${defeatedXp ? html`<p class="muted small">Defeated enemies on this map are worth ${defeatedXp} XP in total.</p>` : ''}`;
   }
 
   /* ------------------------------------------------------------- maps */
@@ -468,14 +642,17 @@ export async function renderTable(root, { params, navigate }) {
             : ''}
           <button class="button small">Save</button>
         </form>
-        ${t.kind !== 'pc'
+        ${t.kind === 'pc' ? html`<p class="muted small">${ch ? `${ch.name}: AC ${d.ac}, HP ${ch.data.hp?.current ?? d.hpMax}/${d.hpMax}, Speed ${d.speed} ft.` : 'Player token'}</p>` : ''}
+        ${t.kind !== 'pc' || ch
           ? html`<form data-form="hp-change" class="row hp-change">
               <label class="sr-only" for="hp-amount">Amount</label>
               <input id="hp-amount" name="amount" type="number" min="1" max="9999" placeholder="Amount" inputmode="numeric" required>
               <button class="button small danger" name="kind" value="damage">Damage</button>
               <button class="button small secondary" name="kind" value="heal">Heal</button>
             </form>`
-          : html`<p class="muted small">${ch ? `${ch.name}: AC ${d.ac}, HP ${ch.data.hp?.current ?? d.hpMax}/${d.hpMax}, Speed ${d.speed} ft.` : 'Player token'}</p>`}
+          : ''}
+        ${conditionChips(t, 'toggle-condition')}
+        ${s.campaign.combat_round != null ? html`<p><button type="button" class="button small secondary" data-act="token-initiative">${t.initiative == null ? 'Roll initiative' : `Initiative ${t.initiative} (reroll)`}</button></p>` : ''}
         <div class="row">
           <button type="button" class="button small ${t.hidden ? '' : 'secondary'}" data-act="toggle-hidden">${t.hidden ? 'Reveal to players' : 'Hide from players'}</button>
           <button type="button" class="button small secondary" data-act="duplicate-token">Duplicate</button>
@@ -489,8 +666,20 @@ export async function renderTable(root, { params, navigate }) {
   function monsterPanel(mon) {
     const attacks = (mon.actions || []).filter((a) => a.attack);
     const saves = Object.entries(mon.abilities || {});
+    const auto = monsterActions(mon);
     return html`
       <hr>
+      ${auto.length
+        ? html`<h3>Actions</h3>
+          <p class="muted small">Pick an action, then click the target on the map. The site rolls and applies the damage.</p>
+          <div class="roll-buttons">
+            ${auto.map(
+              (a, i) => html`<button type="button" class="chip act" data-act="monster-action" data-index="${i}">
+                ${a.kind === 'attack' ? '⚔' : '✸'} ${a.name}${a.kind === 'attack' ? ` ${formatMod(a.bonus)}` : ` (DC ${a.dc} ${a.save.toUpperCase()})`}${a.damage ? ` · ${a.damage} ${a.damageType}` : ''}${a.extra?.length ? ` + ${a.extra.map((x) => `${x.dice} ${x.type}`).join(' + ')}` : ''}</button>`,
+            )}
+          </div>
+          ${auto.some((a) => a.rider) ? html`<p class="muted small">Some hits also force a saving throw; use Saving throws below for those.</p>` : ''}`
+        : ''}
       <h3>Roll for ${mon.name}</h3>
       <div class="roll-buttons">
         ${mon.initiative ? html`<button type="button" class="chip" data-act="roll" data-label="${mon.name}: Initiative" data-expr="${withMod('1d20', mon.initiative.bonus)}" data-d20="1">Initiative ${formatMod(mon.initiative.bonus)}</button>` : ''}
@@ -504,6 +693,14 @@ export async function renderTable(root, { params, navigate }) {
       </div></details>
       <p class="muted small">The DM's rolls for enemies are secret unless you untick “Secret”.</p>
       <details class="statblock-wrap"><summary>Stat block</summary>${statBlock(mon)}</details>`;
+  }
+
+  function conditionChips(t, act) {
+    const on = new Set(t.conditions || []);
+    return html`<details class="conditions-box" ${on.size ? raw('open') : ''}><summary>Conditions${on.size ? `: ${[...on].join(', ')}` : ''}</summary>
+      <div class="roll-buttons">${[...CONDITIONS, 'Dead'].map(
+        (n) => html`<button type="button" class="chip ${on.has(n) ? 'on' : ''}" data-act="${act}" data-name="${n}" aria-pressed="${on.has(n)}">${n}</button>`,
+      )}</div></details>`;
   }
 
   /* ------------------------------------------------- player: character */
@@ -539,6 +736,7 @@ export async function renderTable(root, { params, navigate }) {
     const pen = d.d20Penalty;
     const r = (label, mod) => html`<button type="button" class="chip" data-act="roll" data-label="${ch.name}: ${label}" data-expr="${withMod('1d20', mod - pen)}" data-d20="1">${label} ${formatMod(mod - pen)}</button>`;
     const hasToken = s.tokens.some((t) => t.owner_id === me);
+    const tok = myToken();
     return html`
       <div class="panel">
         <div class="char-head">
@@ -555,17 +753,21 @@ export async function renderTable(root, { params, navigate }) {
           <span><strong>${d.passivePerception}</strong> Passive Perception</span>
         </div>
         ${!hasToken ? html`<p class="muted small">Your DM will place your token on the map.</p>` : html`<p class="muted small">Drag your token to move. Fog clears around you as you go.</p>`}
-        <h3>Quick rolls</h3>
-        <div class="roll-buttons">${r('Initiative', d.initiative)}</div>
-        <h4>Attacks</h4>
+        ${vitalsPanel(ch, d, tok)}
+        ${s.campaign.combat_round != null && tok
+          ? html`<div class="roll-buttons">${tok.initiative == null ? html`<button type="button" class="chip act" data-act="my-initiative">Roll initiative ${formatMod(d.initiative - pen)}</button>` : html`<span class="muted small">Initiative ${tok.initiative}</span>`}</div>`
+          : html`<div class="roll-buttons">${r('Initiative', d.initiative)}</div>`}
+        <h3>Attacks</h3>
+        ${tok ? html`<p class="muted small">Pick an attack, then click your target on the map. Hit or miss, and the damage, are worked out for you.</p>` : ''}
         <div class="roll-buttons">
-          ${d.attacks.map(
-            (a) => html`<button type="button" class="chip" data-act="roll" data-label="${ch.name}: ${a.name}" data-expr="${withMod('1d20', a.toHit - pen)}" data-d20="1">${a.name} ${formatMod(a.toHit - pen)}</button>
-              <button type="button" class="chip dmg" data-act="roll" data-label="${ch.name}: ${a.name} damage" data-expr="${a.damage}">${a.damage} ${a.damageType}</button>`,
+          ${d.attacks.map((a) =>
+            tok
+              ? html`<button type="button" class="chip act" data-act="attack-weapon" data-uid="${a.uid}">⚔ ${a.name} ${formatMod(a.toHit - pen)} · ${a.damage} ${a.damageType}</button>`
+              : html`<button type="button" class="chip" data-act="roll" data-label="${ch.name}: ${a.name}" data-expr="${withMod('1d20', a.toHit - pen)}" data-d20="1">${a.name} ${formatMod(a.toHit - pen)}</button>
+                  <button type="button" class="chip dmg" data-act="roll" data-label="${ch.name}: ${a.name} damage" data-expr="${a.damage}">${a.damage} ${a.damageType}</button>`,
           )}
-          ${d.spell ? html`<button type="button" class="chip" data-act="roll" data-label="${ch.name}: Spell attack" data-expr="${withMod('1d20', d.spell.attack - pen)}" data-d20="1">Spell attack ${formatMod(d.spell.attack - pen)}</button>` : ''}
         </div>
-        ${d.spell ? html`<p class="muted small">Spell save DC ${d.spell.saveDc}</p>` : ''}
+        ${d.spell ? spellsPanel(ch, d, tok) : ''}
         <h4>Ability checks</h4>
         <div class="roll-buttons">${Object.keys(ABILITY_NAMES).map((k) => r(ABILITY_NAMES[k], d.mods[k]))}</div>
         <h4>Saving throws</h4>
@@ -574,6 +776,115 @@ export async function renderTable(root, { params, navigate }) {
         <hr>
         <button type="button" class="link-button small" data-act="change-character">Bring a different character</button>
       </div>`;
+  }
+
+  function vitalsPanel(ch, d, tok) {
+    const hp = ch.data.hp?.current ?? d.hpMax;
+    const ds = ch.data.deathSaves || { successes: 0, failures: 0 };
+    const dead = (ch.data.conditions || []).includes('Dead');
+    const diceLeft = d.level - (Number(ch.data.hitDiceSpent) || 0);
+    return html`
+      ${dead ? html`<p class="callout error">${ch.name} has died.</p>` : ''}
+      ${hp === 0 && !dead
+        ? html`<div class="callout death-box">
+            <strong>You're down!</strong> Death saves: ${ds.successes} ✓ · ${ds.failures} ✗
+            ${tok ? html`<button type="button" class="button small" data-act="death-save">Roll death saving throw</button>` : ''}
+          </div>`
+        : ''}
+      ${tok
+        ? html`<form data-form="my-hp" class="row hp-change">
+            <label class="sr-only" for="my-hp-amount">Amount</label>
+            <input id="my-hp-amount" name="amount" type="number" min="1" max="9999" placeholder="HP" inputmode="numeric" required>
+            <button class="button small danger" name="kind" value="damage">Damage</button>
+            <button class="button small secondary" name="kind" value="heal">Heal</button>
+            <button class="button small secondary" name="kind" value="temp">Temp HP</button>
+          </form>
+          <div class="row">
+            <button type="button" class="button small secondary" data-act="hit-die" ${diceLeft <= 0 || hp >= d.hpMax ? raw('disabled') : ''}>Spend a Hit Die (d${d.hitDie}, ${diceLeft} left)</button>
+          </div>
+          ${conditionChips({ conditions: ch.data.conditions || [] }, 'my-condition')}`
+        : ''}`;
+  }
+
+  function spellsPanel(ch, d, tok) {
+    const list = castableSpells(ch.data, rules);
+    const slots = d.spell.slots || {};
+    const used = ch.data.slotsUsed || {};
+    return html`
+      <h3>Spells</h3>
+      <p class="muted small">Spell attack ${formatMod(d.spell.attack - d.d20Penalty)} · Save DC ${d.spell.saveDc}${tok ? ' · Casting spends the slot and works out the result.' : ''}</p>
+      ${Object.keys(slots).length
+        ? html`<div class="slot-line">${Object.entries(slots).map(([lvl, n]) => html`<span class="slot-pill">Level ${lvl}: <strong>${n - (Number(used[lvl]) || 0)}</strong>/${n}</span>`)}</div>`
+        : ''}
+      <ul class="spell-cast-list">
+        ${list.map(({ spell, open }) => {
+          const mech = spellMechanics(spell, { slotLevel: open[0] ?? spell.level, casterLevel: d.level, castingMod: d.mods[d.spell.ability] });
+          const what = mech.kind === 'attack' ? `${mech.attackType} spell attack` : mech.kind === 'save' ? `${mech.save.toUpperCase()} save${mech.half ? ', half on success' : ''}` : mech.kind === 'heal' ? `heals ${mech.heal}` : '';
+          return html`<li>
+            <div><strong>${spell.name}</strong> <span class="muted small">${spellLevelLabel(spell.level)}${what ? ` · ${what}` : ''}${mech.damage ? ` · ${mech.damage} ${mech.damageType}` : ''}${mech.condition ? ` · ${mech.condition}` : ''}</span></div>
+            ${open.length
+              ? html`<div class="row">
+                  ${spell.level > 0 && open.length > 1
+                    ? html`<label class="sr-only" for="slot-${spell.id}">Slot level</label>
+                      <select id="slot-${spell.id}" class="slot-select">${open.map((l) => html`<option value="${l}">Level ${l} slot</option>`)}</select>`
+                    : ''}
+                  <button type="button" class="button small" data-act="cast" data-spell="${spell.id}" data-slot="${open[0]}">Cast</button>
+                </div>`
+              : html`<span class="muted small">No slots left</span>`}
+          </li>`;
+        })}
+      </ul>
+      ${list.length === 0 ? html`<p class="muted small">No spells prepared. Choose them on your sheet.</p>` : ''}`;
+  }
+
+  async function cast(spellId, slotLevel) {
+    const ch = myCharacter();
+    const d = derive(ch.data, rules);
+    const spell = rules.spells.find((x) => x.id === spellId);
+    const tok = myToken();
+    const mech = spellMechanics(spell, { slotLevel, casterLevel: d.level, castingMod: d.mods[d.spell.ability] });
+    const label = `${spell.name}${slotLevel > spell.level ? ` at level ${slotLevel}` : ''}`;
+    const spend = async () => {
+      if (slotLevel > 0) await store.combat.useSlot(ch.id, slotLevel, (Number(ch.data.slotsUsed?.[slotLevel]) || 0) + 1);
+    };
+    if (!tok || mech.kind === 'other') {
+      await guard(async () => {
+        await spend();
+        if (mech.damage) await store.rollDice(s.id, mech.damage, { label: `${ch.name} casts ${label} (${mech.damageType})` });
+      }, `${ch.name} casts ${label}.`);
+      return queueReload(['members']);
+    }
+    const pen = d.d20Penalty;
+    if (mech.kind === 'attack') {
+      startTarget({
+        label,
+        run: async ([target]) => {
+          const mode = takeMode();
+          const res = await store.combat.attack({ attacker: tok.id, target, bonus: d.spell.attack - pen, damage: mech.damage, damageType: mech.damageType, mode, label: spell.name });
+          await spend();
+          return res;
+        },
+      });
+    } else if (mech.kind === 'save') {
+      startTarget({
+        label: `Cast ${label}`,
+        multi: true,
+        run: async (targets) => {
+          const res = await store.combat.save({ source: tok.id, targets, ability: mech.save, dc: d.spell.saveDc, damage: mech.damage, damageType: mech.damageType, half: mech.half, condition: mech.condition, label: spell.name });
+          await spend();
+          return res;
+        },
+      });
+    } else if (mech.kind === 'heal') {
+      startTarget({
+        label,
+        run: async ([target]) => {
+          const res = await store.combat.heal(tok.id, target, mech.heal, spell.name);
+          await spend();
+          return res;
+        },
+      });
+    }
   }
 
   function summary(c) {
@@ -589,14 +900,32 @@ export async function renderTable(root, { params, navigate }) {
         return html`<li class="roll ${r.private ? 'private' : ''} ${nat === 20 ? 'crit' : nat === 1 ? 'fumble' : ''}">
           <div class="roll-top">
             <span class="roll-who">${r.roller_name}${r.user_id === s.campaign.dm_id ? ' (DM)' : ''}</span>
-            <span class="roll-total">${r.total}</span>
+            ${['rest', 'xp', 'save'].includes(r.result?.kind) ? '' : html`<span class="roll-total">${r.total}</span>`}
           </div>
           <div class="roll-what">${r.label || r.expr}${r.mode !== 'normal' ? html` <em>with ${r.mode}</em>` : ''}${r.private ? html` <span class="badge">${r.user_id === me ? 'secret' : 'private'}</span>` : ''}</div>
-          <div class="roll-detail muted small">${raw(strike(describeRoll(r)))}${nat === 20 ? ' · Natural 20!' : nat === 1 ? ' · Natural 1' : ''}</div>
+          ${outcome(r) ? html`<div class="roll-outcome ${r.result?.hit === false ? 'miss' : ''}">${outcome(r)}</div>` : ''}
+          ${['rest', 'xp'].includes(r.result?.kind) ? '' : html`<div class="roll-detail muted small">${raw(strike(describeRoll(r)))}${nat === 20 ? ' · Natural 20!' : nat === 1 ? ' · Natural 1' : ''}</div>`}
         </li>`;
       })}`,
     );
     if (!s.rolls.length) els.log.innerHTML = '<li class="muted small">No rolls yet.</li>';
+  }
+
+  function outcome(r) {
+    const x = r.result;
+    if (!x) return '';
+    if (x.kind === 'attack') {
+      if (!x.hit) return 'Miss';
+      return `${x.crit ? 'Critical hit!' : 'Hit'}${x.damage ? ` · ${x.damage} damage` : ''}${x.dead ? ` · ${x.target} is dead` : x.down ? ` · ${x.target} drops` : ''}`;
+    }
+    if (x.kind === 'save') {
+      return x.targets
+        .map((t) => `${t.name}: ${t.total} ${t.saved ? 'saved' : 'failed'}${t.damage ? `, ${t.damage} damage` : ''}${t.down ? ', drops' : ''}`)
+        .join(' · ') + (x.condition ? ` (failed: ${x.condition})` : '');
+    }
+    if (x.kind === 'heal') return `${x.target} regains ${x.amount} HP`;
+    if (x.kind === 'death') return x.outcome;
+    return '';
   }
 
   function strike(text) {
@@ -662,7 +991,7 @@ export async function renderTable(root, { params, navigate }) {
         }
       }
       fields = { kind: 'monster', name: nextName(mon.name), monster_id: mon.id, size: squaresForSize(mon.size), color: '#8b2c2c', hidden: ui.spawnHidden };
-      secret = { hp_current: hp, hp_max: hp, ac: mon.acValue ?? (parseInt(mon.ac, 10) || null) };
+      secret = monsterSecrets(mon, { hp });
     } else if (payload.type === 'pc') {
       const p = member(payload.userId);
       const ch = s.characters[p?.character_id];
@@ -676,7 +1005,9 @@ export async function renderTable(root, { params, navigate }) {
       if (!src) return;
       fields = { kind: src.kind, name: nextName(src.name.replace(/ \d+$/, '')), monster_id: src.monster_id, size: src.size, color: src.color, hidden: src.hidden, owner_id: src.owner_id, character_id: src.character_id };
       const sec = s.secrets[src.id];
-      if (sec) secret = { hp_current: sec.hp_max ?? sec.hp_current, hp_max: sec.hp_max, ac: sec.ac, notes: sec.notes };
+      if (sec) {
+        secret = { hp_current: sec.hp_max ?? sec.hp_current, hp_max: sec.hp_max, ac: sec.ac, notes: sec.notes, saves: sec.saves, resist: sec.resist, immune: sec.immune, vulnerable: sec.vulnerable, xp: sec.xp };
+      }
     } else return;
     const size = fields.size || 1;
     fields = { ...fields, campaign_id: s.id, map_id: m.id, x: Math.min(x, m.cols - size), y: Math.min(y, m.rows - size) };
@@ -689,6 +1020,7 @@ export async function renderTable(root, { params, navigate }) {
       // Light up the fog around a newly placed hero.
       await guard(() => store.moveToken(token.id, token.x, token.y));
     }
+    if (payload.type === 'pc') await syncParty();
     drawToolbar();
     drawBoard();
     drawSide();
@@ -882,6 +1214,121 @@ export async function renderTable(root, { params, navigate }) {
         await guard(() => store.deleteToken(t.id), `${t.name} removed.`);
         return;
       }
+      case 'combat-start': {
+        await guard(() => store.combat.start(s.id), 'Combat! Roll initiative.');
+        return reloadNow(['campaign', 'tokens']);
+      }
+      case 'combat-end': {
+        const ok = await confirmDialog({ title: 'End combat?', message: 'Clears the turn order. You can give out XP from the Party tab.', confirmLabel: 'End combat' });
+        if (!ok) return;
+        await guard(() => store.combat.end(s.id), 'Combat over.');
+        ui.tab = 'party';
+        return reloadNow(['campaign', 'tokens']);
+      }
+      case 'next-turn':
+        await guard(() => store.combat.next(s.id));
+        return reloadNow(['campaign', 'tokens']);
+      case 'init-enemies': {
+        const m = activeMap();
+        const list = s.tokens.filter((t) => m && t.map_id === m.id && t.kind !== 'pc' && t.initiative == null && !(t.conditions || []).includes('Dead'));
+        if (!list.length) return toast('Every enemy on this map already has initiative.');
+        for (const t of list) await guard(() => store.combat.initiative(t.id, initiativeBonus(t)));
+        toast(`Rolled initiative for ${list.length} creature${list.length > 1 ? 's' : ''}.`);
+        return reloadNow(['tokens']);
+      }
+      case 'my-initiative': {
+        const t = myToken();
+        if (!t) return toast('Your DM needs to place your token first.', 'error');
+        const total = await guard(() => store.combat.initiative(t.id, initiativeBonus(t), takeMode()));
+        if (total != null) toast(`Initiative: ${total}`);
+        return reloadNow(['tokens']);
+      }
+      case 'token-initiative': {
+        const t = selected();
+        await guard(() => store.combat.initiative(t.id, initiativeBonus(t), takeMode()));
+        return reloadNow(['tokens']);
+      }
+      case 'attack-weapon': {
+        const ch = myCharacter();
+        const d = derive(ch.data, rules);
+        const a = d.attacks.find((x) => x.uid === el.dataset.uid);
+        const tok = myToken();
+        if (!a || !tok) return;
+        return startTarget({
+          label: a.name,
+          run: ([target]) => store.combat.attack({ attacker: tok.id, target, bonus: a.toHit - d.d20Penalty, damage: a.damage, damageType: a.damageType, mode: takeMode(), label: a.name }),
+        });
+      }
+      case 'monster-action': {
+        const t = selected();
+        const mon = t && monsterById(t.monster_id);
+        const a = mon && monsterActions(mon)[Number(el.dataset.index)];
+        if (!a) return;
+        if (a.kind === 'attack') {
+          return startTarget({
+            label: `${t.name}: ${a.name}`,
+            run: ([target]) => store.combat.attack({ attacker: t.id, target, bonus: a.bonus, damage: a.damage, damageType: a.damageType, extra: a.extra, mode: takeMode(), label: a.name }),
+          });
+        }
+        return startTarget({
+          label: `${t.name}: ${a.name}`,
+          multi: true,
+          run: (targets) => store.combat.save({ source: t.id, targets, ability: a.save, dc: a.dc, damage: a.damage, damageType: a.damageType, half: a.half, condition: a.condition, label: a.name }),
+        });
+      }
+      case 'cast': {
+        const sel = els.body.querySelector(`#slot-${CSS.escape(el.dataset.spell)}`);
+        return cast(el.dataset.spell, Number(sel?.value ?? el.dataset.slot));
+      }
+      case 'confirm-targets': {
+        const tg = ui.target;
+        if (!tg?.targets.length) return;
+        ui.target = null;
+        drawToolbar();
+        drawBoard();
+        return resolveTarget(tg, tg.targets);
+      }
+      case 'cancel-target':
+        ui.target = null;
+        drawToolbar();
+        return drawBoard();
+      case 'toggle-condition': {
+        const t = selected();
+        const name = el.dataset.name;
+        await guard(() => store.combat.condition(t.id, name, !(t.conditions || []).includes(name)));
+        return reloadNow(['tokens', 'members']);
+      }
+      case 'my-condition': {
+        const t = myToken();
+        const ch = myCharacter();
+        if (!t || !ch) return;
+        const name = el.dataset.name;
+        await guard(() => store.combat.condition(t.id, name, !(ch.data.conditions || []).includes(name)));
+        return reloadNow(['tokens', 'members']);
+      }
+      case 'death-save': {
+        const res = await guard(() => store.combat.deathSave(myToken().id));
+        if (res) toast(`Death save: rolled ${res.roll}. ${res.outcome}.`, res.roll >= 10 ? 'success' : 'error');
+        return reloadNow(['members', 'tokens']);
+      }
+      case 'hit-die': {
+        const ch = myCharacter();
+        const d = derive(ch.data, rules);
+        const res = await guard(() => store.combat.hitDie(myToken().id, d.hitDie, d.mods.con));
+        if (res) toast(`Healed ${res.healed} HP.`, 'success');
+        return reloadNow(['members']);
+      }
+      case 'rest': {
+        const long = el.dataset.kind === 'long';
+        const ok = await confirmDialog({
+          title: long ? 'Long rest for the party?' : 'Short rest for the party?',
+          message: long ? 'Everyone gets back all HP, spell slots and Hit Dice, and loses one level of Exhaustion.' : 'Warlocks get their spell slots back. Players can spend Hit Dice to heal.',
+          confirmLabel: long ? 'Long rest' : 'Short rest',
+        });
+        if (!ok) return;
+        await guard(() => store.combat.rest(s.id, long ? 'long' : 'short'), long ? 'The party is rested.' : 'Short rest taken.');
+        return reloadNow(['members']);
+      }
       case 'roll':
         return doRoll(el.dataset.expr, el.dataset.label, el.dataset.d20 === '1');
       case 'quick-die':
@@ -1018,21 +1465,26 @@ export async function renderTable(root, { params, navigate }) {
         toast('Saved.', 'success');
         document.activeElement?.blur();
         await reloadNow(['tokens']);
-      } else if (kind === 'hp-change') {
-        const t = selected();
-        const sec = s.secrets[t.id] || {};
+      } else if (kind === 'hp-change' || kind === 'my-hp') {
+        const t = kind === 'my-hp' ? myToken() : selected();
+        if (!t) return;
         const amount = num('amount') || 0;
-        const heal = e.submitter?.value === 'heal';
-        const max = sec.hp_max ?? null;
-        let hp = (sec.hp_current ?? max ?? 0) + (heal ? amount : -amount);
-        if (heal && max != null) hp = Math.min(hp, max);
-        hp = Math.max(0, hp);
-        await guard(() => store.saveSecret(t.id, s.id, { hp_current: hp, hp_max: max, ac: sec.ac ?? null, notes: sec.notes ?? null }));
-        s.secrets[t.id] = { ...sec, token_id: t.id, hp_current: hp };
-        toast(hp === 0 ? `${t.name} is down!` : `${t.name}: ${hp}${max != null ? `/${max}` : ''} HP`, hp === 0 ? 'success' : '');
+        const how = e.submitter?.value || 'damage';
+        const res = await guard(() => store.combat.adjustHp(t.id, how === 'heal' ? amount : how === 'temp' ? amount : -amount, how === 'temp'));
+        if (res) {
+          if (how === 'temp') toast(`${t.name} has ${res.temp} temporary HP.`);
+          else toast(res.dead ? `${t.name} has died.` : res.down ? `${t.name} is down!` : `${t.name}: ${res.hp} HP`, res.down ? 'success' : '');
+        }
+        form.reset();
         document.activeElement?.blur();
-        drawBoard();
-        drawSide({ force: true });
+        await reloadNow(['tokens', 'members']);
+      } else if (kind === 'xp') {
+        const amount = num('amount') || 0;
+        const each = await guard(() => store.combat.awardXp(s.id, amount));
+        if (each) toast(`Each character gains ${each} XP.`, 'success');
+        form.reset();
+        document.activeElement?.blur();
+        await reloadNow(['members']);
       }
     } finally {
       if (btn) btn.disabled = false;
@@ -1118,17 +1570,24 @@ export async function renderTable(root, { params, navigate }) {
     if (ui.selectedId && !s.tokens.some((t) => t.id === ui.selectedId)) ui.selectedId = null;
     if (ui.viewMapId && !s.maps.some((m) => m.id === ui.viewMapId)) ui.viewMapId = null;
     els.title.textContent = s.campaign.name;
+    checkTurn();
+    drawCombat();
     drawToolbar();
     drawBoard();
     drawSide();
     if (parts.includes('handouts')) checkNewHandouts();
+    if (isDm && (parts.includes('members') || parts.includes('tokens'))) syncParty();
   }
 
   const unsubscribe = store.subscribe(s.id, {
     onChange: queueReload,
     onRoll(row) {
       addRoll(row);
-      if (row.user_id !== me) toast(`${row.roller_name}: ${row.label || row.expr} = ${row.total}`);
+      if (row.user_id !== me) {
+        const kind = row.result?.kind;
+        const text = `${row.roller_name}: ${row.label || row.expr}`;
+        toast(['rest', 'xp', 'save'].includes(kind) ? text : `${text} = ${row.total}`);
+      }
     },
     onStatus(status) {
       const wasLive = ui.live === 'SUBSCRIBED';

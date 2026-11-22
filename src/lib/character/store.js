@@ -51,14 +51,23 @@ export async function createCharacter(character) {
   return { ...data, data: normalize(data.data) };
 }
 
-export async function saveCharacter(id, character) {
-  const { data, error } = await supabase
+/**
+ * Save a character. Pass the updated_at you loaded to make sure nothing else
+ * (like damage at the live table) changed it in the meantime: if it did, this
+ * returns { conflict: true } and nothing is overwritten.
+ */
+export async function saveCharacter(id, character, expectedUpdatedAt) {
+  let query = supabase
     .from('characters')
     .update({ name: character.name.trim() || 'Unnamed hero', data: character })
-    .eq('id', id)
-    .select('id, updated_at')
-    .single();
+    .eq('id', id);
+  if (expectedUpdatedAt) query = query.eq('updated_at', expectedUpdatedAt);
+  const { data, error } = await query.select('id, updated_at').maybeSingle();
   check(error);
+  if (!data) {
+    if (expectedUpdatedAt) return { conflict: true };
+    throw new Error('Character not found.');
+  }
   return data;
 }
 
