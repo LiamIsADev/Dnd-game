@@ -9,7 +9,7 @@ Built with plain HTML, CSS and JavaScript, using [Vite](https://vite.dev) to run
 1. **Foundation** (done): project setup, email sign-in, and the SRD rules converted into data the site can use, with a rules browser.
 2. **Characters** (done): home screen, step-by-step character builder, digital character sheet with dice rolling, saved character library, import/export as a file.
 3. **Live table** (done): campaigns and invite links, separate DM and player views, grid map with tokens and fog of war, drag-and-drop enemies, image reveals, dice roller.
-4. **Rules automation**: initiative, attacks, saving throws, damage, HP, conditions, spell slots, rests and levelling.
+4. **Rules automation** (done): initiative, attacks, saving throws, damage, HP, conditions, spell slots, rests and levelling.
 
 ## Running it on your computer
 
@@ -63,7 +63,7 @@ scripts/build-srd.mjs      Converts srd-source/*.md into public/data/srd/*.json
 srd-source/                SRD 5.2.1 Markdown, copied from downfallx/dnd-5e-srd-markdown
 supabase/migrations/       SQL to run in Supabase, in order
 tests/                     Automated checks (node --test)
-tests/db/                  Database security tests against a local PostgreSQL (bash tests/db/run.sh)
+tests/db/                  Database security and rules tests against a local PostgreSQL (bash tests/db/run.sh)
 ```
 
 ## Campaigns and the live table
@@ -75,6 +75,20 @@ tests/db/                  Database security tests against a local PostgreSQL (b
 - **Dice** are rolled by the database, so nobody can fake a roll. Everyone sees the shared roll log; secret rolls only show for the roller (and the DM).
 
 All of the secrecy is enforced by the database's row-level security, not by the page. A player's browser never receives hidden enemies, enemies in the fog, enemy HP, unopened maps or unshown images. `tests/db/security.test.sql` checks this.
+
+## Rules automation
+
+Run `0004_rules.sql` in the Supabase SQL Editor to turn this on.
+
+- **Combat and turns.** The DM presses **Start combat**, rolls initiative for the enemies in one click, and players roll their own. The turn order shows above the map, the current creature glows, and **Next turn** moves on (players can end their own turn). Dead creatures are skipped.
+- **Attacks.** Players click a weapon or attack spell, then click the target. The DM clicks a monster's action in its panel, then the target. The site rolls to hit against the target's AC (which players never see), handles natural 20s (double dice) and natural 1s, rolls damage and applies it, including resistances, immunities and vulnerabilities.
+- **Saving throws.** Save spells and monster abilities like breath weapons can hit several targets. Each target rolls its own save against the DC, takes full or half damage, and gains a condition (for example Paralyzed from Hold Person) on a failed save.
+- **Hit points and conditions.** Damage uses Temporary HP first. At 0 HP a character falls Unconscious and rolls death saves from the table; damage while down counts as failures, and massive damage kills outright. Monsters at 0 HP are marked dead. Condition chips can be toggled by the DM or the player and show on the token.
+- **Spell slots.** Casting a levelled spell picks a slot (upcasting adds the extra dice) and spends it after the spell is cast. Cantrips scale with level, healing spells add the casting modifier.
+- **Rests and XP.** The DM can give the party a short or long rest (long rest restores HP, Hit Point Dice, slots and death saves, and lowers Exhaustion) and award XP, split evenly. The XP box is filled in with the defeated enemies' XP.
+- **Levelling up.** When a character has enough XP, the sheet shows **Level up**. It walks through Hit Points (average or roll), a subclass at level 3, ability score increases or a feat, and lists the new features. Milestone levelling works too.
+
+Every roll and every change to HP runs inside the database, so a player can only act for their own character. `tests/db/rules.test.sql` checks the rules.
 
 ## Character files
 

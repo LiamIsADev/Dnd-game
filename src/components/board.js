@@ -112,15 +112,20 @@ export function createBoard(host, opts) {
       .map((t) => {
         const x = drag?.token.id === t.id ? drag.x : t.x;
         const y = drag?.token.id === t.id ? drag.y : t.y;
-        const cls = ['token', t.kind, t.hidden ? 'is-hidden' : '', state.selectedId === t.id ? 'selected' : '', state.canMove(t) ? 'movable' : '', drag?.token.id === t.id ? 'dragging' : '']
+        const conds = t.conditions || [];
+        const dead = conds.includes('Dead');
+        const cls = ['token', t.kind, t.hidden ? 'is-hidden' : '', state.selectedId === t.id ? 'selected' : '', state.canMove(t) ? 'movable' : '', drag?.token.id === t.id ? 'dragging' : '',
+          state.activeId === t.id ? 'active-turn' : '', state.targetIds?.has(t.id) ? 'targeted' : '', dead ? 'is-dead' : '',
+          conds.includes('Unconscious') ? 'is-down' : '', state.targeting ? 'targetable' : '']
           .filter(Boolean)
           .join(' ');
         const hp = state.hpFor?.(t);
         const hpBar = hp && hp.max ? `<span class="token-hp" style="--hp:${Math.max(0, Math.min(1, hp.current / hp.max))}"></span>` : '';
         return `<button type="button" class="${cls}" data-token="${esc(t.id)}"
             style="left:${x * c}px;top:${y * c}px;width:${t.size * c}px;height:${t.size * c}px;--token:${esc(t.color)}"
-            title="${esc(t.name)}${t.hidden ? ' (hidden from players)' : ''}" aria-label="${esc(t.name)}">
-            <span class="token-face">${esc(initials(t.name))}</span>${hpBar}
+            title="${esc(t.name)}${t.hidden ? ' (hidden from players)' : ''}${conds.length ? ' · ' + esc(conds.join(', ')) : ''}" aria-label="${esc(t.name)}${conds.length ? ', ' + esc(conds.join(', ')) : ''}">
+            <span class="token-face">${dead ? '☠' : esc(initials(t.name))}</span>${hpBar}
+            ${conds.filter((x) => x !== 'Dead').length ? `<span class="token-conds">${conds.filter((x) => x !== 'Dead').slice(0, 3).map((x) => `<i title="${esc(x)}">${esc(x.slice(0, 2))}</i>`).join('')}${conds.length > 4 ? '<i>…</i>' : ''}</span>` : ''}
             <span class="token-name">${esc(t.name)}</span>
           </button>`;
       })

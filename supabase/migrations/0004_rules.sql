@@ -364,7 +364,7 @@ begin
     raise exception 'Only the DM can start combat';
   end if;
   update public.tokens set initiative = null where campaign_id = cid and initiative is not null;
-  update public.campaigns set combat_round = 1, combat_turn = null where id = cid;
+  update public.campaigns set combat_round = 1, combat_turn = null, version = version + 1, last_change = 'campaigns' where id = cid;
 end;
 $$;
 
@@ -378,7 +378,7 @@ begin
   if not public.is_campaign_dm(cid) then
     raise exception 'Only the DM can end combat';
   end if;
-  update public.campaigns set combat_round = null, combat_turn = null where id = cid;
+  update public.campaigns set combat_round = null, combat_turn = null, version = version + 1, last_change = 'campaigns' where id = cid;
   update public.tokens set initiative = null where campaign_id = cid and initiative is not null;
 end;
 $$;
@@ -416,7 +416,7 @@ begin
     order by t.initiative desc, t.created_at, t.id);
   n := coalesce(array_length(ids, 1), 0);
   if n = 0 then
-    update public.campaigns set combat_turn = null where id = cid;
+    update public.campaigns set combat_turn = null, version = version + 1, last_change = 'campaigns' where id = cid;
     return null;
   end if;
   pos := array_position(ids, c.combat_turn);
@@ -441,7 +441,7 @@ begin
     end if;
     nxt := ids[i];
   end if;
-  update public.campaigns set combat_turn = nxt, combat_round = rnd where id = cid;
+  update public.campaigns set combat_turn = nxt, combat_round = rnd, version = version + 1, last_change = 'campaigns' where id = cid;
   return nxt;
 end;
 $$;
