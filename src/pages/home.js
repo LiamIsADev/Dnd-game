@@ -1,33 +1,81 @@
 import { html } from '../lib/dom.js';
 import { getAuth } from '../lib/auth.js';
-import { loadSrd } from '../lib/srd.js';
+import { loadSrd, loadCharacterRules } from '../lib/srd.js';
+import { listCharacters } from '../lib/character/store.js';
+import { characterSummary } from './characters.js';
 
 export async function renderHome(root) {
-  const { session, profile } = getAuth();
+  const { session } = getAuth();
+  return session ? renderDashboard(root) : renderWelcome(root);
+}
+
+/* Signed in: the home screen with the three main areas. */
+async function renderDashboard(root) {
+  const { profile } = getAuth();
+  root.innerHTML = String(html`
+    <section class="page">
+      <h1 class="page-title">Welcome, ${profile?.display_name || 'adventurer'}</h1>
+      <div class="home-grid">
+        <a class="home-card characters" href="#/characters">
+          <span class="home-icon" aria-hidden="true">⚔</span>
+          <h2>Characters</h2>
+          <p>Create new heroes, open their sheets, and manage your saved characters.</p>
+        </a>
+        <a class="home-card campaigns" href="#/campaigns">
+          <span class="home-icon" aria-hidden="true">🗺</span>
+          <h2>Campaigns</h2>
+          <p>Run or join a campaign with your party. <em>Coming in the next step.</em></p>
+        </a>
+        <a class="home-card account" href="#/account">
+          <span class="home-icon" aria-hidden="true">⚙</span>
+          <h2>Account settings</h2>
+          <p>Change the name your party sees.</p>
+        </a>
+      </div>
+
+      <div class="section-head">
+        <h2>Your characters</h2>
+        <a class="button" href="#/characters/new">Create a character</a>
+      </div>
+      <div id="recent" class="character-grid"><p class="loading">Loading…</p></div>
+    </section>`);
+
+  const recent = root.querySelector('#recent');
+  try {
+    const [rows, srd] = await Promise.all([listCharacters(), loadCharacterRules()]);
+    if (!rows.length) {
+      recent.innerHTML = String(html`<div class="empty card">
+        <p>You don't have any characters yet.</p>
+        <a class="button" href="#/characters/new">Create your first character</a>
+      </div>`);
+      return;
+    }
+    recent.innerHTML = String(
+      html`${rows.slice(0, 3).map((r) => characterSummary(r, srd))}
+        ${rows.length > 3 ? html`<a class="character-card more" href="#/characters">See all ${rows.length} characters →</a>` : ''}`,
+    );
+  } catch (err) {
+    recent.innerHTML = String(html`<p class="message error">${err.message}</p>`);
+  }
+}
+
+/* Signed out: a short introduction. */
+async function renderWelcome(root) {
   root.innerHTML = String(html`
     <section class="hero">
-      <h1>${session ? `Welcome back, ${profile?.display_name || 'adventurer'}` : 'Run your Fifth Edition campaigns online'}</h1>
+      <h1>Run your Fifth Edition campaigns online</h1>
       <p class="lead">Build characters, gather your party, and play live on a shared battle map. The site rolls the dice and keeps track of everything, and the Dungeon Master's secrets stay secret.</p>
       <div class="hero-actions">
-        ${session
-          ? html`<a class="button" href="#/rules">Browse the rules</a>`
-          : html`<a class="button" href="#/sign-in">Sign in with email</a> <a class="button secondary" href="#/rules">Browse the rules</a>`}
+        <a class="button" href="#/sign-in">Sign in with email</a>
+        <a class="button secondary" href="#/rules">Browse the rules</a>
       </div>
     </section>
     <section class="page">
-      <h2>What's here so far</h2>
       <div class="tiles" id="counts"></div>
-      <h2>Coming next</h2>
-      <ul class="roadmap">
-        <li><strong>Characters:</strong> a step-by-step character builder, digital sheets and a saved character library.</li>
-        <li><strong>Live table:</strong> campaigns, invite links, a grid battle map with fog of war, and dice rolling.</li>
-        <li><strong>Rules automation:</strong> initiative, attacks, damage, conditions and spell slots handled for you.</li>
-      </ul>
     </section>`);
 
   try {
-    const index = await loadSrd('index');
-    const c = index.counts;
+    const c = (await loadSrd('index')).counts;
     const tiles = [
       ['Spells', c.spells, 'spells'],
       ['Monsters & animals', c.monsters, 'monsters'],
