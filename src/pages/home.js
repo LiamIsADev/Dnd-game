@@ -14,9 +14,9 @@ export async function renderHome(root, ctx) {
 async function renderDashboard(root, navigate) {
   const { profile } = getAuth();
   root.innerHTML = String(html`
-    <section class="page">
-      <h1 class="page-title">Welcome, ${profile?.display_name || 'adventurer'}</h1>
-      <div class="home-grid">
+    <section class="home-hero">
+      <h1 class="home-welcome">Welcome, ${profile?.display_name || 'adventurer'}</h1>
+      <div class="home-menu">
         <a class="home-card characters" href="#/characters">
           <span class="home-icon" aria-hidden="true">⚔</span>
           <h2>Characters</h2>
@@ -27,15 +27,10 @@ async function renderDashboard(root, navigate) {
           <h2>Campaigns</h2>
           <p>Run a campaign as the DM, or play in one with your party.</p>
         </a>
-        <a class="home-card account" href="#/account">
-          <span class="home-icon" aria-hidden="true">⚙</span>
-          <h2>Account settings</h2>
-          <p>Change the name your party sees.</p>
-        </a>
+        <div class="home-join">${joinForm()}</div>
       </div>
-
-      <div class="home-join">${joinForm()}</div>
-
+    </section>
+    <section class="page">
       <div class="section-head">
         <h2>Your characters</h2>
         <a class="button" href="#/characters/new">Create a character</a>

@@ -12,24 +12,8 @@
   --blood: #8b2c2c;
   --radius: 10px;
   --font-display: 'Cinzel', Georgia, serif;
-  --font-body: 'Inter', system-ui, -apple-system, Segoe UI, sans-serif;
+  --font-body: 'Open Sans', system-ui, -apple-system, Segoe UI, sans-serif;
   color-scheme: dark;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f6f0e4;
-    --surface: #fffaf0;
-    --surface-2: #f1e7d4;
-    --border: #d8c6a6;
-    --text: #2a2118;
-    --muted: #6d5d48;
-    --accent: #8b2c2c;
-    --accent-ink: #fff;
-    --danger: #a33a2a;
-    --success: #2f6b2c;
-    color-scheme: light;
-  }
 }
 
 * {
@@ -94,7 +78,7 @@ code {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--text);
+  color: var(--accent);
   text-decoration: none;
   font-family: var(--font-display);
   font-size: 1.2rem;
@@ -2836,4 +2820,105 @@ button.vital:hover {
   display: flex;
   justify-content: flex-start;
   text-align: left;
+}
+
+/* ---------- home: dark fantasy (Figma "Option C") ---------- */
+.home-hero {
+  --hero-fade: 21, 18, 15;
+  position: relative;
+  min-height: calc(100vh - 52px);
+  padding: 1.75rem clamp(1rem, 3vw, 2.75rem) 3rem clamp(1rem, 4.5vw, 4rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  grid-template-rows: auto 1fr;
+  column-gap: 2rem;
+  background:
+    linear-gradient(90deg, rgba(var(--hero-fade), 0.25) 0%, rgba(var(--hero-fade), 0.15) 50%, rgba(var(--hero-fade), 0.85) 72%, rgb(var(--hero-fade)) 100%),
+    url('/images/home-bg.jpg') center / cover no-repeat,
+    var(--bg);
+}
+
+.home-welcome {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: clamp(1.6rem, 3.2vw, 2rem);
+  line-height: 1.35;
+  color: var(--text);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+.home-menu {
+  grid-column: 2;
+  align-self: start;
+  margin-top: 5.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.home-hero .home-card,
+.home-hero .home-join .card {
+  background: rgba(33, 28, 23, 0.94);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  padding: 1.25rem 1.25rem 1.4rem;
+}
+
+.home-hero .home-card:hover {
+  border-color: var(--accent);
+}
+
+.home-hero .home-icon {
+  display: block;
+  font-size: 1.5rem;
+  line-height: 1;
+  margin: 0.5rem 0 1rem;
+}
+
+.home-hero .home-card h2,
+.home-hero .home-join h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.5rem;
+  line-height: 1.35;
+  color: var(--accent);
+}
+
+.home-hero .home-join {
+  margin: 0;
+  max-width: none;
+}
+
+.home-hero .home-join .muted {
+  margin: 0.75rem 0 1.25rem;
+}
+
+.home-hero .home-join .code-input {
+  background: var(--surface-2);
+  height: 55px;
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  letter-spacing: 5px;
+}
+
+.home-hero .home-join .button {
+  height: 55px;
+  padding: 0 1.5rem;
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
+  .home-hero {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    background:
+      linear-gradient(180deg, rgba(var(--hero-fade), 0.2) 0%, rgba(var(--hero-fade), 0.55) 40%, rgb(var(--hero-fade)) 100%),
+      url('/images/home-bg.jpg') 30% top / cover no-repeat,
+      var(--bg);
+  }
+
+  .home-menu {
+    grid-column: 1;
+    margin-top: 10rem;
+  }
 }
