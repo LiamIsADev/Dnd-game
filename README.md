@@ -8,7 +8,7 @@ Built with plain HTML, CSS and JavaScript, using [Vite](https://vite.dev) to run
 
 1. **Foundation** (done): project setup, email sign-in, and the SRD rules converted into data the site can use, with a rules browser.
 2. **Characters** (done): home screen, step-by-step character builder, digital character sheet with dice rolling, saved character library, import/export as a file.
-3. **Live table**: campaigns and invite links, separate DM and player views, grid map with tokens and fog of war, drag-and-drop enemies, image reveals, dice roller.
+3. **Live table** (done): campaigns and invite links, separate DM and player views, grid map with tokens and fog of war, drag-and-drop enemies, image reveals, dice roller.
 4. **Rules automation**: initiative, attacks, saving throws, damage, HP, conditions, spell slots, rests and levelling.
 
 ## Running it on your computer
@@ -54,15 +54,27 @@ index.html                 Page shell (header, footer)
 src/main.js                Starts the app and routes between pages (#/rules, #/account, ...)
 src/lib/                   Supabase client, sign-in, rules data loader, dice, HTML helpers
 src/lib/character/         Character rules math (rules.js) and saving/loading (store.js)
+src/lib/campaign/          Campaign data and live updates (store.js), fog of war, dice text helpers
 src/pages/                 One file per page
-src/components/            Reusable pieces (e.g. the monster stat block)
+src/components/            Reusable pieces (the battle map board, the monster stat block)
 src/styles.css             All styles (dark and light themes)
 public/data/srd/           Rules data as JSON (generated, committed)
 scripts/build-srd.mjs      Converts srd-source/*.md into public/data/srd/*.json
 srd-source/                SRD 5.2.1 Markdown, copied from downfallx/dnd-5e-srd-markdown
 supabase/migrations/       SQL to run in Supabase, in order
 tests/                     Automated checks (node --test)
+tests/db/                  Database security tests against a local PostgreSQL (bash tests/db/run.sh)
 ```
+
+## Campaigns and the live table
+
+- **Start a campaign** on the Campaigns page. You become its Dungeon Master and get a 6-letter join code.
+- **Invite players** by sending the link (Invite players button) or the code. Players type the code in the "Join a campaign" box on their home screen.
+- **Players** pick one of their saved characters, see the map the DM has opened (through the fog), move their own token, roll from quick-roll buttons, and see images when the DM shows them.
+- **The DM** sees everything: drag enemies from the 330 SRD creatures onto the map (hidden from players until revealed), place the party's tokens, track enemy HP and AC, roll secretly from stat blocks, paint fog away or back, prepare maps before opening them for players, upload map backgrounds, and show or hide images.
+- **Dice** are rolled by the database, so nobody can fake a roll. Everyone sees the shared roll log; secret rolls only show for the roller (and the DM).
+
+All of the secrecy is enforced by the database's row-level security, not by the page. A player's browser never receives hidden enemies, enemies in the fog, enemy HP, unopened maps or unshown images. `tests/db/security.test.sql` checks this.
 
 ## Character files
 

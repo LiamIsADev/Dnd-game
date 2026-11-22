@@ -15,6 +15,12 @@ create index if not exists characters_owner_idx on public.characters (owner_id, 
 
 alter table public.characters enable row level security;
 
+-- Newer Supabase projects don't expose new tables to signed-in users
+-- automatically, so grant access explicitly. Row-level security below still
+-- decides which rows each player can see or change.
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on table public.characters to authenticated;
+
 -- Players can only see, create, change and delete their own characters.
 -- (Step 3 will add a rule letting a campaign's Dungeon Master see the party's characters.)
 drop policy if exists "Players read their own characters" on public.characters;
