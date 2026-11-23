@@ -278,11 +278,38 @@ export async function renderTable(root, { params, navigate }) {
     const c = s.campaign;
     const active = c.combat_round != null;
     if (!active) {
-      els.combat.hidden = !isDm;
-      els.combat.innerHTML = isDm
-        ? String(html`<div class="combat-head"><button type="button" class="button small" data-act="combat-start">⚔ Start combat</button>
-            <span class="muted small">Everyone rolls initiative and the site tracks whose turn it is.</span></div>`)
-        : '';
+      const exploring = c.explore_round != null;
+      const mine = myToken();
+      if (!isDm) {
+        els.combat.hidden = !exploring;
+        if (!exploring) return void (els.combat.innerHTML = '');
+        const left = mine ? exploreLeft(mine) : null;
+        els.combat.innerHTML = String(html`<div class="combat-head">
+            <strong>Exploration · Round ${c.explore_round}</strong>
+            ${mine ? html`<span class="econ ${left <= 0 ? 'used' : ''}">Move: ${Math.max(0, left)} of ${c.explore_feet} ft</span>` : ''}
+            <span class="muted small">${left <= 0 ? 'Your DM will start the next round.' : `You can move up to ${c.explore_feet} ft this round.`}</span>
+          </div>`);
+        return;
+      }
+      els.combat.hidden = false;
+      els.combat.innerHTML = String(html`<div class="combat-head">
+          <div class="segmented mode-switch" role="group" aria-label="Table mode">
+            <button type="button" data-act="table-mode" data-to="free" aria-pressed="${!exploring}">Free Roam</button>
+            <button type="button" data-act="table-mode" data-to="explore" aria-pressed="${exploring}">Exploration</button>
+            <button type="button" data-act="combat-start" aria-pressed="false">⚔ Combat</button>
+          </div>
+          ${exploring
+            ? html`<strong>Round ${c.explore_round}</strong>
+                <form data-form="explore-feet" class="row explore-feet">
+                  <label for="explore-feet">Players move up to</label>
+                  <input id="explore-feet" name="feet" type="number" min="5" max="1000" step="5" value="${c.explore_feet}" inputmode="numeric"> ft
+                  <button class="button small secondary">Set</button>
+                </form>
+                <span class="grow"></span>
+                <button type="button" class="button small" data-act="explore-next">Next round →</button>`
+            : html`<span class="muted small">Players move freely. Exploration limits how far they move each round; Combat rolls initiative.</span>`}
+        </div>
+        ${exploring ? exploreParty() : ''}`);
       return;
     }
     const current = s.tokens.find((t) => t.id === c.combat_turn);
@@ -369,10 +396,26 @@ export async function renderTable(root, { params, navigate }) {
       </div>`;
   }
 
-  /** How far a token may still move (null = no limit). Only players are limited, in combat. */
+  /* Exploration: feet left this round, and who has moved (for the DM). */
+  const exploreLeft = (t) => (s.campaign.explore_feet ?? 150) - (turnOf(t).explored || 0);
+  function exploreParty() {
+    const m = activeMap();
+    const pcs = s.tokens.filter((t) => t.kind === 'pc' && m && t.map_id === m.id);
+    if (!pcs.length) return '';
+    return html`<div class="turn-economy"><span class="muted">Movement left:</span>
+      ${pcs.map((t) => html`<span class="econ ${exploreLeft(t) <= 0 ? 'used' : ''}">${t.name}: ${Math.max(0, exploreLeft(t))} ft</span>`)}</div>`;
+  }
+
+  /** How far a token may still move (null = no limit). Only players are limited, in combat or exploration. */
   function moveInfo(t) {
     const c = s.campaign;
-    if (isDm || c.combat_round == null || t.map_id !== c.active_map_id) return null;
+    if (isDm || t.map_id !== c.active_map_id) return null;
+    if (c.combat_round == null) {
+      if (c.explore_round == null) return null;
+      const held = (t.conditions || []).find((x) => SPEED_ZERO.includes(x));
+      if (held) return { left: 0, reason: `you can't move while ${held.toLowerCase()}` };
+      return { left: exploreLeft(t), factor: (t.conditions || []).includes('Prone') ? 2 : 1, per: 'round' };
+    }
     if (c.combat_turn !== t.id) return { left: 0, reason: 'wait for your turn to move' };
     const held = (t.conditions || []).find((x) => SPEED_ZERO.includes(x));
     if (held) return { left: 0, reason: `you can't move while ${held.toLowerCase()}` };
@@ -1405,8 +1448,19 @@ export async function renderTable(root, { params, navigate }) {
         await guard(() => store.combat.start(s.id), 'Combat! Roll initiative.');
         return reloadNow(['campaign', 'tokens']);
       }
+      case 'table-mode': {
+        const exploring = s.campaign.explore_round != null;
+        if (el.dataset.to === 'explore' && !exploring) await guard(() => store.combat.exploreStart(s.id, s.campaign.explore_feet ?? 150), 'Exploration: players move up to the limit each round.');
+        if (el.dataset.to === 'free' && exploring) await guard(() => store.combat.exploreEnd(s.id), 'Free Roam: players move freely.');
+        return reloadNow(['campaign', 'tokens']);
+      }
+      case 'explore-next': {
+        const round = await guard(() => store.combat.exploreNext(s.id));
+        if (round) toast(`Exploration round ${round}: everyone can move again.`, 'success');
+        return reloadNow(['campaign', 'tokens']);
+      }
       case 'combat-end': {
-        const ok = await confirmDialog({ title: 'End combat?', message: 'Clears the turn order. You can give out XP from the Party tab.', confirmLabel: 'End combat' });
+        const ok = await confirmDialog({ title: 'End combat?', message: s.campaign.explore_round != null ? 'Clears the turn order and goes back to Exploration. You can give out XP from the Party tab.' : 'Clears the turn order. You can give out XP from the Party tab.', confirmLabel: 'End combat' });
         if (!ok) return;
         await guard(() => store.combat.end(s.id), 'Combat over.');
         ui.tab = 'party';
@@ -1639,6 +1693,11 @@ export async function renderTable(root, { params, navigate }) {
     const btn = form.querySelector('button:not([type=button])');
     if (btn) btn.disabled = true;
     try {
+      if (kind === 'explore-feet') {
+        const feet = Math.max(5, Math.min(1000, Math.round((num('feet') || 150) / 5) * 5));
+        await guard(() => store.combat.exploreStart(s.id, feet), `Players can move up to ${feet} ft each round.`);
+        return reloadNow(['campaign', 'tokens']);
+      }
       if (kind === 'custom-token') {
         const payload = { type: 'custom', name: String(f.get('name')).trim(), kind: f.get('kind'), size: Number(f.get('size')), hp: num('hp'), ac: num('ac'), color: f.get('color') };
         ui.pending = payload;

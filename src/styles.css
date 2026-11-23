@@ -2727,6 +2727,22 @@ button.vital:hover {
 }
 
 /* ---------- combat bar ---------- */
+.explore-feet {
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.explore-feet label {
+  margin: 0;
+  font-weight: 400;
+}
+
+.explore-feet input {
+  width: 5rem;
+  padding: 0.25rem 0.4rem;
+}
+
 .turn-economy {
   display: flex;
   flex-wrap: wrap;

@@ -191,3 +191,35 @@ exception when others then
   raise notice 'ok: spend_turn is locked';
 end $$;
 reset role;
+
+/* ------------------------------------------------------- exploration */
+set role authenticated;
+set request.jwt.claim.sub = 'bbbbbbbb-1111-0000-0000-000000000002';
+select t_fails($q$select public.explore_start(public.rid('c'), 150)$q$, 'only the dm', 'only the DM starts exploration');
+set request.jwt.claim.sub = 'aaaaaaaa-1111-0000-0000-000000000001';
+update public.tokens set x = 0, y = 0, conditions = '{}' where id = rid('pia');
+select public.explore_start(rid('c'), 20);
+set request.jwt.claim.sub = 'bbbbbbbb-1111-0000-0000-000000000002';
+select public.move_token(rid('pia'), 3, 3);
+select t_eq(public.jint(turn_of('pia'), 'explored'), 15, 'exploration movement is counted');
+select t_fails($q$select public.move_token(public.rid('pia'), 5, 3)$q$, '5 ft left this exploration round', 'can''t move past the round''s limit');
+set request.jwt.claim.sub = 'cccccccc-1111-0000-0000-000000000003';
+select public.move_token(rid('quin'), 1, 4);
+set request.jwt.claim.sub = 'aaaaaaaa-1111-0000-0000-000000000001';
+select public.move_token(rid('ogre'), 0, 9);
+select t_eq(public.explore_next(rid('c')), 2, 'the DM starts the next round');
+select t_eq(public.jint(turn_of('pia'), 'explored'), 0, 'and everyone gets their movement back');
+-- Combat on top of exploration, then back to exploration.
+select public.combat_start(rid('c'));
+select t_true((select explore_round is not null from public.campaigns where id = rid('c')), 'exploration stays on under combat');
+select public.combat_end(rid('c'));
+set request.jwt.claim.sub = 'bbbbbbbb-1111-0000-0000-000000000002';
+select public.move_token(rid('pia'), 5, 5);
+select t_eq(public.jint(turn_of('pia'), 'explored'), 10, 'after combat it''s exploration again');
+set request.jwt.claim.sub = 'aaaaaaaa-1111-0000-0000-000000000001';
+select public.explore_end(rid('c'));
+set request.jwt.claim.sub = 'bbbbbbbb-1111-0000-0000-000000000002';
+select public.move_token(rid('pia'), 5, 0);
+select public.move_token(rid('pia'), 5, 9);
+select t_true((select y = 9 from public.tokens where id = rid('pia')), 'Free Roam: no limit');
+reset role;

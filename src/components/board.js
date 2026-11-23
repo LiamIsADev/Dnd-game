@@ -348,7 +348,7 @@ export function createBoard(host, opts) {
         // Too far (or not allowed): snap back and say why.
         drawTokens();
         drawFx();
-        opts.onMoveRefused?.(d.token, d.info.reason || `That's ${cost} ft. You have ${Math.max(0, d.info.left)} ft of movement left this turn.`);
+        opts.onMoveRefused?.(d.token, d.info.reason || `That's ${cost} ft. You have ${Math.max(0, d.info.left)} ft of movement left this ${d.info.per || 'turn'}.`);
         return;
       }
       drawFx();
