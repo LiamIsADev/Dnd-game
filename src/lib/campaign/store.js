@@ -213,6 +213,8 @@ export async function deleteToken(id) {
 export async function moveToken(id, x, y) {
   const { error } = await supabase.rpc('move_token', { token: id, nx: x, ny: y });
   if (error && /only move your own/.test(error.message)) throw new Error('You can only move your own token.');
+  // Rule messages (not your turn, too far) are written for players.
+  if (error?.code === 'P0001') throw new Error(error.message);
   check(error);
 }
 
@@ -279,7 +281,7 @@ async function rpc(fn, args) {
   const { data, error } = await supabase.rpc(fn, args);
   if (error) {
     if (/Could not find the function/i.test(error.message)) {
-      throw new Error('Combat rules are missing. Run supabase/migrations/0004_rules.sql in the Supabase SQL editor.');
+      throw new Error('Combat rules are missing or out of date. Run the newest files in supabase/migrations (0004_rules.sql, then 0005_turns.sql) in the Supabase SQL editor.');
     }
     // Rule messages from the database are written for players; show them as they are.
     if (error.code === 'P0001') throw new Error(error.message);
@@ -293,17 +295,23 @@ export const combat = {
   end: (cid) => rpc('combat_end', { cid }),
   next: (cid) => rpc('combat_next', { cid }),
   initiative: (token, bonus, mode = 'normal') => rpc('roll_initiative', { token, bonus, mode }),
+  /** One or more attacks (targets can repeat: each ray or beam is its own attack). */
   attack: (a) =>
     rpc('attack', {
-      attacker: a.attacker, target: a.target, bonus: a.bonus, damage: a.damage || '', damage_type: a.damageType || '',
+      attacker: a.attacker, targets: a.targets || [a.target], bonus: a.bonus, damage: a.damage || '', damage_type: a.damageType || '',
       mode: a.mode || 'normal', label: a.label || '', extra: a.extra || [],
+      use: a.use || 'attack', slot: a.slot || 0, spell: !!a.spell, auto: !!a.auto,
     }),
   save: (a) =>
     rpc('saving_throw', {
       source: a.source, targets: a.targets, ability: a.ability, dc: a.dc, damage: a.damage || '', damage_type: a.damageType || '',
       half: !!a.half, condition: a.condition || '', label: a.label || '',
+      use: a.use || 'action', slot: a.slot || 0, spell: !!a.spell, area: a.area || null,
     }),
-  heal: (healer, target, amount, label = '') => rpc('heal', { healer, target, amount, label }),
+  heal: (a) =>
+    rpc('heal', { healer: a.healer, targets: a.targets, amount: a.amount, label: a.label || '', use: a.use || 'action', slot: a.slot || 0, spell: !!a.spell }),
+  /** Dash, Disengage, Dodge, stand up, a spell with no target, Action Surge, Second Wind, Rage. */
+  action: (token, what, { use = 'action', slot = 0, label = '' } = {}) => rpc('combat_action', { token, what, use, slot, label }),
   adjustHp: (target, delta, temp = false) => rpc('adjust_hp', { target, delta, temp }),
   condition: (token, name, present) => rpc('set_condition', { token, name, present }),
   deathSave: (token) => rpc('death_save', { token }),

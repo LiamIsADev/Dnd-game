@@ -85,11 +85,27 @@ Run `0004_rules.sql` in the Supabase SQL Editor to turn this on.
 - **Attacks.** Players click a weapon or attack spell, then click the target. The DM clicks a monster's action in its panel, then the target. The site rolls to hit against the target's AC (which players never see), handles natural 20s (double dice) and natural 1s, rolls damage and applies it, including resistances, immunities and vulnerabilities.
 - **Saving throws.** Save spells and monster abilities like breath weapons can hit several targets. Each target rolls its own save against the DC, takes full or half damage, and gains a condition (for example Paralyzed from Hold Person) on a failed save.
 - **Hit points and conditions.** Damage uses Temporary HP first. At 0 HP a character falls Unconscious and rolls death saves from the table; damage while down counts as failures, and massive damage kills outright. Monsters at 0 HP are marked dead. Condition chips can be toggled by the DM or the player and show on the token.
-- **Spell slots.** Casting a levelled spell picks a slot (upcasting adds the extra dice) and spends it after the spell is cast. Cantrips scale with level, healing spells add the casting modifier.
+- **Spell slots.** Casting a levelled spell picks a slot (upcasting adds the extra dice) and spends it as the spell is cast. Cantrips scale with level, healing spells add the casting modifier.
 - **Rests and XP.** The DM can give the party a short or long rest (long rest restores HP, Hit Point Dice, slots and death saves, and lowers Exhaustion) and award XP, split evenly. The XP box is filled in with the defeated enemies' XP.
 - **Levelling up.** When a character has enough XP, the sheet shows **Level up**. It walks through Hit Points (average or roll), a subclass at level 3, ability score increases or a feat, and lists the new features. Milestone levelling works too.
 
 Every roll and every change to HP runs inside the database, so a player can only act for their own character. `tests/db/rules.test.sql` checks the rules.
+
+## Turns in combat
+
+Run `0005_turns.sql` in the Supabase SQL Editor (after `0004_rules.sql`) to turn this on.
+
+- **One action, one bonus action, one reaction.** On their turn a creature gets one action and one bonus action, and its movement. A reaction (for example Shield) can be used on anyone's turn, once, and comes back at the start of its own turn. The bar above the map shows what's left.
+- **Players only act and move on their own turn.** Attacks, spells and movement outside your turn are refused (reactions aside). The DM is never blocked; the bar shows what the DM's current creature has used, as a reminder.
+- **More than one action.** Extra Attack gives Fighters, Barbarians, Monks, Paladins and Rangers 2 attacks per Attack action (Fighters get 3 at level 11 and 4 at level 20). Action Surge gives a Fighter one more action.
+- **Bonus actions** come from bonus-action spells (Healing Word, Misty Step...), Second Wind, Rage, a Rogue's Cunning Action (Dash, Disengage or Hide), a Monk's bonus Unarmed Strike and an off-hand attack with a second Light weapon. A turn with a bonus-action spell can only have a cantrip as its other spell.
+- **Speed and movement.** 5 feet per square, diagonals too. Speed comes from the character's species, armour (too heavy for your Strength: −10 ft.), Exhaustion, Barbarian Fast Movement and Monk Unarmored Movement. Grappled, Restrained, Paralyzed, Petrified and Unconscious creatures can't move; crawling while Prone costs double and standing up costs half your speed. Dash doubles your movement for the turn. While you drag your token an arrow shows how far it is and how much movement you have left, and a move that's too far snaps back.
+- **Spell slots.** With no slot of a level left, the spell can't be cast at that level.
+- **Area spells.** Fireball, Burning Hands, Lightning Bolt, Thunderwave and the rest show their shape on the map (circle, cone, line or cube) while you aim. Click to place it: everyone inside is chosen (click to leave someone out), and every player sees the area for the rest of the turn.
+- **Single-target spells** can only target as many creatures as the spell allows: one for most, three darts for Magic Missile, three rays for Scorching Ray, Eldritch Blast's beams by level, and more for some spells cast with a higher slot.
+- **The roll log** has one line for the attack roll (hit or miss) and, on a hit, a separate line for the damage.
+
+`tests/db/turns.test.sql` checks the turn rules.
 
 ## Character files
 

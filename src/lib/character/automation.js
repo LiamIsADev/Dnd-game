@@ -71,7 +71,75 @@ export function spellMechanics(spell, { slotLevel = spell?.level || 0, casterLev
     out.damage = addDice(out.damage, cantrip[1], steps);
   }
   if (out.kind === 'heal' && out.addMod && castingMod) out.heal += castingMod > 0 ? `+${castingMod}` : `${castingMod}`;
+
+  // Spells that always hit (Magic Missile's darts).
+  if (out.kind === 'other' && out.damage && /\b(?:strikes|hits) a creature of your choice/i.test(text)) out.kind = 'auto';
+
+  out.use = actionFor(spell.castingTime);
+  out.area = spellArea(text);
+  Object.assign(out, spellTargets(spell, text, { slotLevel, casterLevel, area: out.area }));
   return out;
+}
+
+const NUMBER_WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, twelve: 12 };
+const num = (w) => NUMBER_WORDS[String(w).toLowerCase()] ?? Number(w);
+
+/** 'Action', 'Bonus Action, which you take...', 'Reaction, which...' -> the part of a turn it uses. */
+export function actionFor(castingTime) {
+  const t = String(castingTime || '').toLowerCase();
+  if (t.startsWith('bonus action')) return 'bonus';
+  if (t.startsWith('reaction')) return 'reaction';
+  return 'action';
+}
+
+/**
+ * The area a spell covers, from text like "20-foot-radius Sphere",
+ * "15-foot Cone", "100-foot-long, 5-foot-wide Line" or "15-foot Cube".
+ * @returns {{shape: 'circle'|'cone'|'line'|'cube', size: number, width?: number, self: boolean} | null}
+ *   size in feet (a circle's radius, a cone's or line's length, a cube's side).
+ *   self = the area starts at the caster rather than at a point you choose.
+ */
+export function spellArea(text) {
+  const t = String(text || '');
+  const line = t.match(/(\d+)-foot-long,? (\d+)-foot-wide Line/i);
+  if (line) return { shape: 'line', size: Number(line[1]), width: Number(line[2]), self: true };
+  const m = t.match(/(\d+)-foot(?:-radius)?(?:,? \d+-foot-(?:high|tall))? (Sphere|Cylinder|Emanation|Cone|Cube|Line)\b/i);
+  if (!m) return null;
+  const size = Number(m[1]);
+  const kind = m[2].toLowerCase();
+  if (kind === 'cone') return { shape: 'cone', size, self: true };
+  if (kind === 'line') return { shape: 'line', size, width: 5, self: true };
+  if (kind === 'cube') return { shape: 'cube', size, self: /originating from you|from you\b/i.test(t) };
+  if (kind === 'emanation') return { shape: 'circle', size, self: true };
+  return { shape: 'circle', size, self: false };
+}
+
+/**
+ * How many creatures a spell can affect, so a single-target spell can't hit
+ * a crowd. repeat = the same creature can be chosen more than once (rays,
+ * darts and beams, each its own attack or hit). An area spell has no limit:
+ * it affects whoever is inside.
+ */
+export function spellTargets(spell, text, { slotLevel = spell.level, casterLevel = 1, area = null } = {}) {
+  if (area) return { targets: Infinity, repeat: false };
+  const above = Math.max(0, slotLevel - spell.level);
+  const higher = spell.higherLevels || '';
+  // Rays, darts and beams.
+  const shots = text.match(/(?:create|hurl|fire|launch)s? (one|two|three|four|five|\d+) (?:glowing |fiery |crackling |\w+ )?(darts|rays|beams|bolts|motes)/i);
+  if (shots) {
+    const more = /one (?:more|additional) (?:dart|ray|beam|bolt|mote) for each spell slot level above/i.test(higher) ? above : 0;
+    return { targets: num(shots[1]) + more, repeat: true, shots: shots[2].toLowerCase() };
+  }
+  const beams = (spell.cantripUpgrade || '').match(/creates two beams at level (\d+), three beams at level (\d+), and four beams at level (\d+)/i);
+  if (beams) {
+    const n = 1 + [beams[1], beams[2], beams[3]].filter((l) => casterLevel >= Number(l)).length;
+    return { targets: n, repeat: true, shots: 'beams' };
+  }
+  const upTo = text.match(/up to (one|two|three|four|five|six|seven|eight|nine|ten|twelve|\d+) (?:creatures|targets|willing creatures|Humanoids|Beasts)/i);
+  let n = upTo ? num(upTo[1]) : 1;
+  const extra = higher.match(/(?:target|affect) (one|two) additional (?:creature|Humanoid|Beast|target)s? for each (?:spell )?slot level above/i);
+  if (extra) n += num(extra[1]) * above;
+  return { targets: n, repeat: false };
 }
 
 function cap(w) {
@@ -123,6 +191,50 @@ export function monsterSecrets(mon, { hp } = {}) {
     immune: damageTypesFrom(mon.immunities),
     vulnerable: damageTypesFrom(mon.vulnerabilities),
     xp: mon.cr?.xp ?? null,
+  };
+}
+
+/** First walking speed in a stat block's "30 ft., Fly 60 ft.". */
+export function walkSpeed(text) {
+  const m = String(text || '').match(/^(\d+) ft/);
+  return m ? Number(m[1]) : 30;
+}
+
+/**
+ * What a character can do in a turn, for the database to count: speed,
+ * attacks per Attack action (Extra Attack), uses of Action Surge, Second
+ * Wind and Rage, spell slots. Written to the token by the DM's browser.
+ */
+export function combatStats(c, srd) {
+  const d = derive(c, srd);
+  const names = new Set(d.features.map((f) => f.name));
+  const lvl = d.level;
+  const stats = { speed: d.speed, attacks: 1, level: lvl };
+  if (names.has('Three Extra Attacks')) stats.attacks = 4;
+  else if (names.has('Two Extra Attacks')) stats.attacks = 3;
+  else if (names.has('Extra Attack')) stats.attacks = 2;
+  if (names.has('Action Surge')) stats.actionSurge = lvl >= 17 ? 2 : 1;
+  if (names.has('Second Wind')) stats.secondWind = Number(d.classRow['Second Wind']) || 2;
+  if (names.has('Rage')) stats.rage = Number(d.classRow['Rages']) || 2;
+  if (d.spell && Object.keys(d.spell.slots || {}).length) stats.slots = { ...d.spell.slots };
+  return stats;
+}
+
+/** Bonus actions a character's class gives them (beyond bonus-action spells). */
+export function classBonusActions(c, srd) {
+  const d = derive(c, srd);
+  const names = new Set(d.features.map((f) => f.name));
+  const armored = (c.inventory || []).some((i) => i.equipped && i.ref?.kind === 'armor');
+  const light = d.attacks.filter((a) => a.properties?.includes('Light'));
+  return {
+    cunning: names.has('Cunning Action'),
+    // Monk Martial Arts: an Unarmed Strike as a Bonus Action, with no armor or shield.
+    martialArts: names.has('Martial Arts') && !armored,
+    // Two Light weapons: an extra attack with the other one (no ability modifier to damage unless it's negative).
+    offHand: light.length >= 2 ? light : [],
+    secondWind: names.has('Second Wind'),
+    rage: names.has('Rage'),
+    actionSurge: names.has('Action Surge'),
   };
 }
 

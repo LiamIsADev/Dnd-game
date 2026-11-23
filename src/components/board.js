@@ -4,6 +4,7 @@
 import { esc } from '../lib/dom.js';
 import { fitFog, circleCells, setCells } from '../lib/campaign/fog.js';
 import { initials } from '../lib/campaign/util.js';
+import { areaGeometry, cellInArea, FEET_PER_SQUARE } from '../lib/campaign/areas.js';
 
 const BASE_CELL = 40;
 export const DRAG_TYPE = 'application/x-dnd-token';
@@ -12,7 +13,12 @@ export const DRAG_TYPE = 'application/x-dnd-token';
  * @param {HTMLElement} host
  * @param {object} opts
  *   isDm, onMove(token, x, y), onSelect(token | null), onDrop(payload, x, y),
- *   onCellClick(x, y), onFogPaint(cells, revealed)
+ *   onCellClick(x, y), onFogPaint(cells, revealed), onAim(area), onMoveRefused(token, message)
+ * update() also takes:
+ *   moveInfo(token) -> null (no limit) or {left, factor, reason}: feet of movement left
+ *     this turn, the cost per foot (2 while crawling), or why the token can't move.
+ *   aim: {shape, size, width, self, caster} while choosing where an area spell goes.
+ *   areas: [area] spells just cast, drawn see-through for everyone.
  */
 export function createBoard(host, opts) {
   host.innerHTML = `
@@ -22,7 +28,9 @@ export function createBoard(host, opts) {
         <div class="board-grid"></div>
         <canvas class="board-fog"></canvas>
         <div class="board-tokens"></div>
+        <canvas class="board-fx" aria-hidden="true"></canvas>
         <div class="board-brush" hidden></div>
+        <div class="board-measure" hidden></div>
       </div>
     </div>
     <p class="board-empty" hidden></p>`;
@@ -33,6 +41,8 @@ export function createBoard(host, opts) {
   const fogCanvas = host.querySelector('.board-fog');
   const layer = host.querySelector('.board-tokens');
   const brushEl = host.querySelector('.board-brush');
+  const fxCanvas = host.querySelector('.board-fx');
+  const measureEl = host.querySelector('.board-measure');
   const emptyEl = host.querySelector('.board-empty');
 
   let state = { map: null, tokens: [], background: null, selectedId: null, canMove: () => false, pending: null };
@@ -41,6 +51,7 @@ export function createBoard(host, opts) {
   let brush = 1;
   let drag = null;
   let paint = null;
+  let aimAt = null; // the cursor while aiming an area spell, in squares
 
   const cell = () => Math.round(BASE_CELL * zoom);
 
@@ -70,6 +81,7 @@ export function createBoard(host, opts) {
     board.style.setProperty('--cell', `${c}px`);
     board.dataset.tool = opts.isDm ? tool : 'move';
     board.classList.toggle('placing', !!state.pending);
+    board.classList.toggle('aiming', !!state.aim);
     if (state.background) {
       if (bg.getAttribute('src') !== state.background) bg.src = state.background;
       bg.hidden = false;
@@ -80,6 +92,126 @@ export function createBoard(host, opts) {
     grid.hidden = false;
     drawFog(paint?.fog);
     drawTokens();
+    drawFx();
+  }
+
+  /* ----------------------------------- movement arrow and spell areas */
+  function sizeCanvas(cv) {
+    const m = state.map;
+    const c = cell();
+    const dpr = window.devicePixelRatio || 1;
+    const w = m.cols * c;
+    const h = m.rows * c;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      cv.style.width = `${w}px`;
+      cv.style.height = `${h}px`;
+    }
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    return ctx;
+  }
+
+  /** The area spell being aimed, from where the cursor is. */
+  function aimArea() {
+    if (!state.aim || !aimAt) return null;
+    return areaGeometry(state.aim, state.aim.caster, aimAt);
+  }
+
+  function drawFx() {
+    const m = state.map;
+    if (!m) return;
+    const ctx = sizeCanvas(fxCanvas);
+    const c = cell();
+    for (const a of state.areas || []) if (a.map === m.id || !a.map) paintArea(ctx, a, c, false);
+    const aiming = aimArea();
+    if (aiming) paintArea(ctx, aiming, c, true);
+    measureEl.hidden = true;
+    if (drag?.moved) drawArrow(ctx, c);
+  }
+
+  function paintArea(ctx, a, c, live) {
+    const m = state.map;
+    // Shade the squares the spell covers, then outline its true shape.
+    ctx.fillStyle = live ? 'rgba(255, 140, 60, 0.18)' : 'rgba(255, 140, 60, 0.12)';
+    for (let y = 0; y < m.rows; y++) for (let x = 0; x < m.cols; x++) if (cellInArea(a, x, y)) ctx.fillRect(x * c, y * c, c, c);
+    ctx.beginPath();
+    if (a.shape === 'circle') {
+      ctx.arc(a.x * c, a.y * c, a.r * c, 0, Math.PI * 2);
+    } else if (a.shape === 'cube') {
+      ctx.rect(a.x * c, a.y * c, a.n * c, a.n * c);
+    } else if (a.shape === 'cone') {
+      const ang = Math.atan2(a.dy, a.dx);
+      const half = Math.atan(0.5);
+      ctx.moveTo(a.x * c, a.y * c);
+      ctx.arc(a.x * c, a.y * c, a.len * c, ang - half, ang + half);
+      ctx.closePath();
+    } else if (a.shape === 'line') {
+      const px = -a.dy * (a.w / 2);
+      const py = a.dx * (a.w / 2);
+      const ex = a.x + a.dx * a.len;
+      const ey = a.y + a.dy * a.len;
+      ctx.moveTo((a.x + px) * c, (a.y + py) * c);
+      ctx.lineTo((ex + px) * c, (ey + py) * c);
+      ctx.lineTo((ex - px) * c, (ey - py) * c);
+      ctx.lineTo((a.x - px) * c, (a.y - py) * c);
+      ctx.closePath();
+    }
+    ctx.fillStyle = live ? 'rgba(255, 120, 40, 0.28)' : 'rgba(255, 120, 40, 0.2)';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.setLineDash(live ? [6, 4] : []);
+    ctx.strokeStyle = 'rgba(255, 170, 90, 0.95)';
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  /** Feet between two squares: 5 per square, diagonals too. */
+  const feet = (ax, ay, bx, by) => Math.max(Math.abs(ax - bx), Math.abs(ay - by)) * FEET_PER_SQUARE;
+
+  function drawArrow(ctx, c) {
+    const t = drag.token;
+    const half = t.size / 2;
+    const x1 = (t.x + half) * c;
+    const y1 = (t.y + half) * c;
+    const x2 = (drag.x + half) * c;
+    const y2 = (drag.y + half) * c;
+    if (x1 === x2 && y1 === y2) return;
+    const info = drag.info;
+    const cost = feet(t.x, t.y, drag.x, drag.y) * (info?.factor || 1);
+    const over = !!info && (info.reason || cost > info.left);
+    const colour = over ? '#ff6b6b' : '#ffd27a';
+    ctx.strokeStyle = colour;
+    ctx.fillStyle = colour;
+    ctx.lineWidth = Math.max(3, c / 10);
+    ctx.lineCap = 'round';
+    const ang = Math.atan2(y2 - y1, x2 - x1);
+    const head = Math.max(10, c / 3);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2 - Math.cos(ang) * head * 0.6, y2 - Math.sin(ang) * head * 0.6);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - Math.cos(ang - 0.45) * head, y2 - Math.sin(ang - 0.45) * head);
+    ctx.lineTo(x2 - Math.cos(ang + 0.45) * head, y2 - Math.sin(ang + 0.45) * head);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x1, y1, Math.max(3, c / 10), 0, Math.PI * 2);
+    ctx.fill();
+    // The label: how far, and how much movement is left.
+    let text = `${cost} ft`;
+    if (info?.reason) text += ` · ${info.reason}`;
+    else if (info) text += over ? ` · only ${Math.max(0, info.left)} ft left` : ` · ${info.left - cost} ft left`;
+    if (info?.factor > 1 && !info.reason) text += ' (crawling)';
+    measureEl.hidden = false;
+    measureEl.textContent = text;
+    measureEl.classList.toggle('over', !!over);
+    measureEl.style.left = `${x2}px`;
+    measureEl.style.top = `${y2 - t.size * c / 2 - 6}px`;
   }
 
   function drawFog(override) {
@@ -149,9 +281,10 @@ export function createBoard(host, opts) {
       e.preventDefault();
       return;
     }
+    if (state.aim) return;
     const t = tokenFrom(e);
     if (t && state.canMove(t) && !state.pending) {
-      drag = { token: t, x: t.x, y: t.y, startX: e.clientX, startY: e.clientY, offX: x - t.x, offY: y - t.y, moved: false };
+      drag = { token: t, x: t.x, y: t.y, startX: e.clientX, startY: e.clientY, offX: x - t.x, offY: y - t.y, moved: false, info: state.moveInfo?.(t) || null };
       board.setPointerCapture(e.pointerId);
       e.preventDefault();
     }
@@ -161,6 +294,12 @@ export function createBoard(host, opts) {
     if (!state.map) return;
     const [x, y] = cellAt(e);
     if (opts.isDm && tool !== 'move') showBrush(x, y);
+    if (state.aim) {
+      const r = board.getBoundingClientRect();
+      aimAt = { x: (e.clientX - r.left) / cell(), y: (e.clientY - r.top) / cell() };
+      drawFx();
+      return;
+    }
     if (paint) {
       paintAt(x, y);
       return;
@@ -181,6 +320,7 @@ export function createBoard(host, opts) {
         el.classList.add('dragging');
       }
     }
+    drawFx();
   });
 
   board.addEventListener('pointerleave', () => {
@@ -198,8 +338,21 @@ export function createBoard(host, opts) {
     if (drag) {
       const d = drag;
       drag = null;
-      if (cancelled) return drawTokens();
-      if (d.moved && (d.x !== d.token.x || d.y !== d.token.y)) opts.onMove?.(d.token, d.x, d.y);
+      if (cancelled) {
+        drawTokens();
+        return drawFx();
+      }
+      const moved = d.moved && (d.x !== d.token.x || d.y !== d.token.y);
+      const cost = feet(d.token.x, d.token.y, d.x, d.y) * (d.info?.factor || 1);
+      if (moved && d.info && (d.info.reason || cost > d.info.left)) {
+        // Too far (or not allowed): snap back and say why.
+        drawTokens();
+        drawFx();
+        opts.onMoveRefused?.(d.token, d.info.reason || `That's ${cost} ft. You have ${Math.max(0, d.info.left)} ft of movement left this turn.`);
+        return;
+      }
+      drawFx();
+      if (moved) opts.onMove?.(d.token, d.x, d.y);
       else {
         drawTokens();
         if (!d.moved) opts.onSelect?.(d.token);
@@ -214,6 +367,13 @@ export function createBoard(host, opts) {
     if (!state.map) return;
     if (opts.isDm && tool !== 'move' && !state.pending) return;
     const [x, y] = cellAt(e);
+    if (state.aim) {
+      const r = board.getBoundingClientRect();
+      aimAt = { x: (e.clientX - r.left) / cell(), y: (e.clientY - r.top) / cell() };
+      const a = aimArea();
+      if (a) opts.onAim?.(a);
+      return;
+    }
     const t = tokenFrom(e);
     if (state.pending) {
       if (inBounds(x, y)) opts.onCellClick?.(x, y);
@@ -284,6 +444,7 @@ export function createBoard(host, opts) {
   return {
     update(next) {
       state = { ...state, ...next };
+      if (!state.aim) aimAt = null;
       // Don't yank a token out from under someone's finger mid-drag.
       if (drag && !state.tokens.some((t) => t.id === drag.token.id)) drag = null;
       if (paint) return drawTokens();

@@ -2391,6 +2391,38 @@ button.vital:hover {
   pointer-events: none;
 }
 
+/* Movement arrow and spell areas, drawn over the tokens. */
+.board-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.board.aiming {
+  cursor: crosshair;
+}
+
+.board-measure {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(20, 16, 12, 0.9);
+  color: #ffd27a;
+  border: 1px solid #ffd27a;
+}
+
+.board-measure.over {
+  color: #ff8a8a;
+  border-color: #ff6b6b;
+}
+
 .board-brush {
   position: absolute;
   pointer-events: none;
@@ -2695,6 +2727,37 @@ button.vital:hover {
 }
 
 /* ---------- combat bar ---------- */
+.turn-economy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  font-size: 0.82rem;
+}
+
+.econ {
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid #4caf50;
+  color: #8fdc92;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.econ.used {
+  border-color: var(--border);
+  color: var(--muted);
+  background: transparent;
+  text-decoration: line-through;
+}
+
+.turn-economy .sep {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border);
+  margin: 0 0.2rem;
+}
+
 .combat-bar {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -2765,6 +2828,14 @@ button.vital:hover {
 
 .roll-outcome.miss {
   color: var(--muted);
+}
+
+.roll-outcome.damage {
+  color: #ff9a7a;
+}
+
+.roll:has(.roll-outcome.damage) {
+  border-left: 3px solid #b5523b;
 }
 
 .slot-line {

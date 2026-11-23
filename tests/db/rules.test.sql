@@ -59,14 +59,14 @@ insert into public.token_secrets (token_id, campaign_id, hp_current, hp_max, ac,
 /* --------------------------------------------------------------- attacks */
 set request.jwt.claim.sub = 'bbbbbbbb-1111-0000-0000-000000000002';
 do $$ begin
-  perform public.attack((select v from public.r_ids where k = 'ogre'), (select v from public.r_ids where k = 'pia'), 5, '1d8');
+  perform public.attack((select v from public.r_ids where k = 'ogre'), array[(select v from public.r_ids where k = 'pia')], 5, '1d8');
   raise exception 'FAILED: player attacked with the ogre';
 exception when others then
   if sqlerrm like 'FAILED%' then raise; end if;
   raise notice 'ok: players can only attack with their own token';
 end $$;
 do $$ begin
-  perform public.attack((select v from public.r_ids where k = 'pia'), (select v from public.r_ids where k = 'lurker'), 5, '1d8');
+  perform public.attack((select v from public.r_ids where k = 'pia'), array[(select v from public.r_ids where k = 'lurker')], 5, '1d8');
   raise exception 'FAILED: player attacked a hidden enemy';
 exception when others then
   if sqlerrm like 'FAILED%' then raise; end if;
@@ -78,7 +78,7 @@ do $$
 declare r jsonb; hits int := 0; misses int := 0; dealt int := 0; i int;
 begin
   for i in 1 .. 40 loop
-    r := public.attack((select v from public.r_ids where k = 'pia'), (select v from public.r_ids where k = 'ogre'), 30, '1d4', 'Slashing', 'normal', 'Dagger');
+    r := public.attack((select v from public.r_ids where k = 'pia'), array[(select v from public.r_ids where k = 'ogre')], 30, '1d4', 'Slashing', 'normal', 'Dagger');
     if (r ->> 'hit')::boolean then hits := hits + 1; dealt := dealt + (r ->> 'damage')::int; else misses := misses + 1; end if;
     if r ? 'ac' then raise exception 'FAILED: attack result reveals AC'; end if;
     exit when (r ->> 'dead')::boolean;
@@ -104,14 +104,14 @@ do $$
 declare r jsonb; i int;
 begin
   for i in 1 .. 10 loop
-    r := public.attack((select v from public.r_ids where k = 'ogre'), (select v from public.r_ids where k = 'imp'), 30, '10', 'Fire');
+    r := public.attack((select v from public.r_ids where k = 'ogre'), array[(select v from public.r_ids where k = 'imp')], 30, '10', 'Fire');
     if (r ->> 'hit')::boolean then
       perform public.t_eq((r ->> 'damage')::int, 0, 'fire immunity cancels fire damage');
       exit;
     end if;
   end loop;
   for i in 1 .. 10 loop
-    r := public.attack((select v from public.r_ids where k = 'ogre'), (select v from public.r_ids where k = 'imp'), 30, '10', 'cold');
+    r := public.attack((select v from public.r_ids where k = 'ogre'), array[(select v from public.r_ids where k = 'imp')], 30, '10', 'cold');
     if (r ->> 'hit')::boolean and not (r ->> 'crit')::boolean then
       perform public.t_eq((r ->> 'damage')::int, 5, 'cold resistance halves damage');
       exit;
@@ -146,7 +146,7 @@ exception when others then
   raise notice 'ok: players can''t roll death saves for others';
 end $$;
 -- Healing brings Pia back.
-select public.heal((select v from r_ids where k = 'quin'), (select v from r_ids where k = 'pia'), '5', 'Potion');
+select public.heal((select v from r_ids where k = 'quin'), array[(select v from r_ids where k = 'pia')], '5', 'Potion');
 reset role;
 select t_true((select (data -> 'hp' ->> 'current')::int between 5 and 6 and not (data -> 'conditions' ? 'Unconscious')
                from public.characters where name = 'Pia'), 'healing wakes a downed character');

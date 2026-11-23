@@ -426,6 +426,10 @@ export function derive(c, srd) {
   let speed = species?.speed ?? 30;
   if (c.speciesId === 'elf' && c.speciesOptions?.lineage === 'Wood Elf') speed = 35;
   if (body?.strength && scores.str < body.strength) speed -= 10;
+  // Barbarian Fast Movement: +10 ft. unless in Heavy armor.
+  if (cls?.id === 'barbarian' && level >= 5 && body?.category !== 'Heavy') speed += 10;
+  // Monk Unarmored Movement: +10 ft. at level 2, rising to +30 ft., with no armor or shield.
+  if (cls?.id === 'monk' && level >= 2 && !body && !shield) speed += 10 + 5 * [6, 10, 14, 18].filter((l) => level >= l).length;
   const exhaustion = Math.max(0, Math.min(6, Number(c.exhaustion) || 0));
   speed = Math.max(0, speed - 5 * exhaustion);
 

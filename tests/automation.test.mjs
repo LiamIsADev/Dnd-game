@@ -6,8 +6,9 @@ import { readFileSync } from 'node:fs';
 import { newCharacter, derive } from '../src/lib/character/rules.js';
 import {
   spellMechanics, castableSpells, damageTypesFrom, monsterSecrets, characterSecrets,
-  levelForXp, canLevelUp, levelUpInfo, applyLevelUp, XP_FOR_LEVEL, monsterActions,
+  levelForXp, canLevelUp, levelUpInfo, applyLevelUp, XP_FOR_LEVEL, monsterActions, combatStats, classBonusActions, walkSpeed,
 } from '../src/lib/character/automation.js';
+import { areaGeometry, tokensInArea } from '../src/lib/campaign/areas.js';
 
 const load = (n) => JSON.parse(readFileSync(new URL(`../public/data/srd/${n}.json`, import.meta.url)));
 const srd = Object.fromEntries(['classes', 'species', 'backgrounds', 'feats', 'equipment', 'spells'].map((n) => [n, load(n)]));
@@ -137,4 +138,65 @@ test('monster actions: attacks, extra damage and breath weapons', () => {
   const breath = dragon.find((a) => a.kind === 'save');
   assert.deepEqual([breath.save, breath.dc, breath.damage, breath.damageType, breath.half], ['dex', 21, '17d6', 'Fire', true]);
   assert.deepEqual(dragon.find((a) => a.name === 'Rend').extra, [{ dice: '2d4', type: 'Fire' }]);
+});
+
+test('how a spell is cast, its area and how many it can target', () => {
+  assert.equal(spellMechanics(spell('healing-word')).use, 'bonus');
+  assert.equal(spellMechanics(spell('shield')).use, 'reaction');
+  assert.equal(spellMechanics(spell('fireball')).use, 'action');
+  assert.deepEqual(spellMechanics(spell('fireball')).area, { shape: 'circle', size: 20, self: false });
+  assert.equal(spellMechanics(spell('burning-hands')).area.shape, 'cone');
+  assert.deepEqual(spellMechanics(spell('lightning-bolt')).area, { shape: 'line', size: 100, width: 5, self: true });
+  assert.equal(spellMechanics(spell('thunderwave')).area.shape, 'cube');
+  assert.equal(spellMechanics(spell('fire-bolt')).targets, 1, 'single-target spells hit one creature');
+  assert.equal(spellMechanics(spell('sacred-flame')).targets, 1);
+  const mm = spellMechanics(spell('magic-missile'));
+  assert.equal(mm.kind, 'auto', 'Magic Missile always hits');
+  assert.equal(mm.targets, 3);
+  assert.equal(mm.repeat, true);
+  assert.equal(spellMechanics(spell('magic-missile'), { slotLevel: 3 }).targets, 5, 'one more dart per slot level');
+  assert.equal(spellMechanics(spell('scorching-ray')).targets, 3);
+  assert.equal(spellMechanics(spell('eldritch-blast'), { casterLevel: 1 }).targets, 1);
+  assert.equal(spellMechanics(spell('eldritch-blast'), { casterLevel: 11 }).targets, 3);
+  assert.equal(spellMechanics(spell('hold-person'), { slotLevel: 4 }).targets, 3, 'Hold Person: one more Humanoid per slot level');
+  assert.equal(spellMechanics(spell('mass-healing-word')).targets, 6);
+});
+
+test('spell areas on the grid', () => {
+  const tok = (id, x, y, size = 1) => ({ id, x, y, size });
+  // A 20-foot Fireball centred on the corner at (5, 5) catches squares within 4 squares.
+  const fb = areaGeometry({ shape: 'circle', size: 20, self: false }, null, { x: 5.2, y: 4.9 });
+  assert.deepEqual([fb.x, fb.y, fb.r], [5, 5, 4]);
+  const ids = tokensInArea(fb, [tok('a', 5, 5), tok('b', 8, 5), tok('c', 9, 5), tok('d', 1, 1)]).map((t) => t.id);
+  assert.deepEqual(ids, ['a', 'b']);
+  // A 15-foot cone from a caster at (0, 0) pointing right.
+  const caster = tok('me', 0, 0);
+  const cone = areaGeometry({ shape: 'cone', size: 15, self: true }, caster, { x: 5, y: 0.5 });
+  const inCone = tokensInArea(cone, [caster, tok('a', 1, 0), tok('b', 3, 0), tok('c', 4, 0), tok('d', 0, 3)], 'me').map((t) => t.id);
+  assert.deepEqual(inCone, ['a', 'b'], 'the cone reaches 3 squares and leaves out the caster');
+  // A 15-foot Thunderwave cube on the caster's right side.
+  const cube = areaGeometry({ shape: 'cube', size: 15, self: true }, tok('me', 5, 5), { x: 9, y: 5.5 });
+  assert.deepEqual([cube.x, cube.y, cube.n], [6, 4, 3]);
+  // A 100-foot line from (0, 0) to the right is one square wide.
+  const line = areaGeometry({ shape: 'line', size: 100, width: 5, self: true }, caster, { x: 10, y: 0.5 });
+  assert.deepEqual(tokensInArea(line, [tok('a', 7, 0), tok('b', 7, 1)], 'me').map((t) => t.id), ['a']);
+});
+
+test('what a character can do in a turn', () => {
+  const f3 = combatStats(fighter(), srd);
+  assert.equal(f3.speed, 30);
+  assert.equal(f3.attacks, 1);
+  assert.equal(f3.actionSurge, 1);
+  assert.equal(f3.secondWind, 2);
+  assert.equal(combatStats(fighter({ level: 5 }), srd).attacks, 2, 'Extra Attack at level 5');
+  assert.equal(combatStats(fighter({ level: 11 }), srd).attacks, 3);
+  const monk = { ...fighter(), classId: 'monk', inventory: [] };
+  assert.equal(derive({ ...monk, level: 2 }, srd).speed, 40, 'Unarmored Movement +10 ft.');
+  assert.equal(derive({ ...monk, level: 10 }, srd).speed, 50);
+  assert.equal(classBonusActions({ ...monk, level: 1 }, srd).martialArts, true);
+  const barb = { ...fighter(), classId: 'barbarian', inventory: [] };
+  assert.equal(derive({ ...barb, level: 5 }, srd).speed, 40, 'Fast Movement +10 ft.');
+  assert.ok(combatStats({ ...barb, level: 3 }, srd).rage >= 2);
+  assert.equal(classBonusActions({ ...fighter(), classId: 'rogue', level: 2 }, srd).cunning, true);
+  assert.equal(walkSpeed('10 ft., Swim 40 ft.'), 10);
 });
