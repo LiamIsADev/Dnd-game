@@ -8,7 +8,10 @@ import { toast, confirmDialog } from '../lib/ui.js';
 import { roll as localRoll } from '../lib/dice.js';
 import { derive, SKILLS } from '../lib/character/rules.js';
 import { listCharacters } from '../lib/character/store.js';
-import { monsterSecrets, characterSecrets, monsterActions, castableSpells, spellMechanics, CONDITIONS } from '../lib/character/automation.js';
+import {
+  monsterSecrets, characterSecrets, monsterActions, castableSpells, spellMechanics, CONDITIONS, combatStats, classBonusActions, walkSpeed,
+} from '../lib/character/automation.js';
+import { tokensInArea, packArea } from '../lib/campaign/areas.js';
 import { statBlock } from '../components/statblock.js';
 import { createBoard, DRAG_TYPE } from '../components/board.js';
 import { fitFog, setCells, countRevealed } from '../lib/campaign/fog.js';
@@ -50,6 +53,8 @@ export async function renderTable(root, { params, navigate }) {
     live: 'connecting',
     gone: false,
     target: null, // choosing who an attack or spell hits
+    aim: null, // aiming an area spell: {area, label, run}
+    areas: [], // area spells just cast, shown on the map for a while
     lastTurn: null,
   };
   // Handouts already up when the page opens don't pop up again.
@@ -171,6 +176,10 @@ export async function renderTable(root, { params, navigate }) {
       }
     },
     onFogPaint: paintFog,
+    onAim: placeArea,
+    onMoveRefused(t, message) {
+      toast(message, 'error');
+    },
   });
 
   /* -------------------------------------------------------------- drawing */
@@ -205,6 +214,9 @@ export async function renderTable(root, { params, navigate }) {
       activeId: s.campaign.combat_round != null ? s.campaign.combat_turn : null,
       targetIds: new Set(ui.target?.targets || []),
       targeting: !!ui.target,
+      moveInfo,
+      aim: ui.aim ? { ...ui.aim.area, caster: ui.aim.caster } : null,
+      areas: recentAreas(),
       emptyText: isDm ? 'Create a map in the Maps tab.' : "The DM hasn't opened a map yet. Hang tight!",
     });
   }
@@ -235,10 +247,15 @@ export async function renderTable(root, { params, navigate }) {
       <div class="toolbar-group grow"></div>
       ${ui.target
         ? html`<p class="toolbar-note warn">${ui.target.multi
-            ? html`Click each creature in the area (${ui.target.targets.length} chosen), then
-                <button type="button" class="button small" data-act="confirm-targets" ${ui.target.targets.length ? '' : raw('disabled')}>${ui.target.label}</button>`
+            ? html`${targetPrompt(ui.target)}
+                <button type="button" class="button small" data-act="confirm-targets" ${ui.target.targets.length || ui.target.area ? '' : raw('disabled')}>${ui.target.label}</button>
+                ${ui.target.repeat && ui.target.targets.length ? html`<button type="button" class="link-button" data-act="undo-target">Undo last</button>` : ''}`
             : html`Click the target for <strong>${ui.target.label}</strong>.`}
             <button type="button" class="link-button" data-act="cancel-target">Cancel</button></p>`
+        : ''}
+      ${ui.aim
+        ? html`<p class="toolbar-note warn">Aim <strong>${ui.aim.label.replace(/^Cast /, '')}</strong> (${ui.aim.area.size}-foot ${AREA_NAMES[ui.aim.area.shape]}): move over the map and click to place it.
+            <button type="button" class="link-button" data-act="cancel-aim">Cancel</button></p>`
         : ''}
       ${ui.pending ? html`<p class="toolbar-note">Click a square to place <strong>${ui.pending.name}</strong>. <button type="button" class="link-button" data-act="cancel-place">Cancel</button></p>` : ''}
       ${preparing ? html`<p class="toolbar-note warn">Preparing <strong>${m.name}</strong>. Players can't see it. <button type="button" class="button small" data-act="activate-map" data-id="${m.id}">Open for players</button></p>` : ''}
@@ -283,12 +300,98 @@ export async function renderTable(root, { params, navigate }) {
           : html`${mine && mine.initiative == null ? html`<button type="button" class="button small" data-act="my-initiative">Roll initiative</button>` : ''}
               ${current && current.owner_id === me ? html`<button type="button" class="button small" data-act="next-turn">End my turn</button>` : ''}`}
       </div>
+      ${economyBar(current, mine)}
       <ol class="turn-order">
         ${turnOrder().map(
           (t) => html`<li class="${t.id === c.combat_turn ? 'current' : ''} ${t.conditions?.includes('Dead') ? 'dead' : ''} ${t.kind}">
             <span class="init">${t.initiative}</span> ${t.name}${t.hidden ? ' (hidden)' : ''}</li>`,
         )}
       </ol>`);
+  }
+
+  /* What the creature whose turn it is has left, and the things anyone can do on their turn. */
+  const SPEED_ZERO = ['Dead', 'Unconscious', 'Petrified', 'Paralyzed', 'Grappled', 'Restrained'];
+  const turnOf = (t) => t?.turn || {};
+  const speedOf = (t) => (t.conditions || []).some((c) => SPEED_ZERO.includes(c)) ? 0 : Number(t.stats?.speed ?? 30);
+  const movementLeft = (t) => speedOf(t) * (1 + (turnOf(t).dash || 0)) - (turnOf(t).moved || 0);
+  const actionsLeft = (t) => (turnOf(t).actions || 1) - (turnOf(t).actions_used || 0);
+
+  function economyBar(current, mine) {
+    const pill = (label, used, title = '') => html`<span class="econ ${used ? 'used' : ''}" title="${title}">${label}</span>`;
+    const pills = (t) => {
+      const tr = turnOf(t);
+      const acts = actionsLeft(t);
+      return html`
+        ${pill(tr.actions > 1 ? `Actions: ${Math.max(0, acts)} left` : 'Action', acts <= 0)}
+        ${tr.attacks_left > 0 ? pill(`${tr.attacks_left} more attack${tr.attacks_left > 1 ? 's' : ''}`, false, 'Extra Attack: more attacks from the same action') : ''}
+        ${pill('Bonus action', !!tr.bonus)}
+        ${pill('Reaction', !!tr.reaction, 'Comes back at the start of your turn')}
+        ${pill(`Move: ${Math.max(0, movementLeft(t))} of ${speedOf(t) * (1 + (tr.dash || 0))} ft`, movementLeft(t) <= 0)}`;
+    };
+    if (!current) return mine ? html`<div class="turn-economy"><span class="muted">${mine.name}:</span>${pill('Reaction', !!turnOf(mine).reaction)}</div>` : '';
+    const myTurn = !isDm && current.owner_id === me;
+    if (isDm) {
+      return html`<div class="turn-economy"><span class="muted">${current.name}:</span>${pills(current)}</div>`;
+    }
+    if (!myTurn) {
+      return mine ? html`<div class="turn-economy"><span class="muted">${mine.name}:</span>${pill('Reaction', !!turnOf(mine).reaction, 'You can use it on anyone’s turn')}
+        <span class="muted small">You can act and move on your turn.</span></div>` : '';
+    }
+    const ch = myCharacter();
+    const extra = ch ? classBonusActions(ch.data, rules) : {};
+    const tr = turnOf(current);
+    const uses = ch?.data.featureUses || {};
+    const left = (key) => Math.max(0, (current.stats?.[key] || 0) - (Number(uses[key]) || 0));
+    const prone = (current.conditions || []).includes('Prone');
+    const raging = (current.conditions || []).includes('Raging');
+    const btn = (what, label, use = 'action', disabled = false, title = '') =>
+      html`<button type="button" class="chip act" data-act="turn-action" data-what="${what}" data-use="${use}" ${disabled ? raw('disabled') : ''} title="${title}">${label}</button>`;
+    const noAction = actionsLeft(current) <= 0;
+    return html`<div class="turn-economy">${pills(current)}</div>
+      <div class="turn-economy">
+        ${btn('dash', 'Dash', 'action', noAction, 'Doubles your movement this turn')}
+        ${btn('disengage', 'Disengage', 'action', noAction)}
+        ${btn('dodge', 'Dodge', 'action', noAction)}
+        ${btn('hide', 'Hide', 'action', noAction)}
+        ${btn('help', 'Help', 'action', noAction)}
+        ${prone ? btn('stand', `Stand up (${Math.floor(speedOf(current) / 2)} ft)`, 'free', movementLeft(current) < Math.floor(speedOf(current) / 2)) : ''}
+        ${extra.cunning || extra.actionSurge || extra.secondWind || extra.rage ? html`<span class="sep"></span>` : ''}
+        ${extra.cunning
+          ? html`${btn('dash', 'Dash (bonus)', 'bonus', !!tr.bonus, 'Cunning Action')}${btn('disengage', 'Disengage (bonus)', 'bonus', !!tr.bonus, 'Cunning Action')}${btn('hide', 'Hide (bonus)', 'bonus', !!tr.bonus, 'Cunning Action')}`
+          : ''}
+        ${extra.actionSurge ? btn('action_surge', `Action Surge (${left('actionSurge')} left)`, 'free', !left('actionSurge') || !!tr.surged, 'One more action this turn') : ''}
+        ${extra.secondWind ? btn('second_wind', `Second Wind (${left('secondWind')} left)`, 'bonus', !left('secondWind') || !!tr.bonus, 'Bonus action: heal 1d10 + your Fighter level') : ''}
+        ${extra.rage
+          ? raging
+            ? btn('end_rage', 'End Rage', 'free')
+            : btn('rage', `Rage (${left('rage')} left)`, 'bonus', !left('rage') || !!tr.bonus, 'Bonus action: resist Bludgeoning, Piercing and Slashing damage')
+          : ''}
+      </div>`;
+  }
+
+  /** How far a token may still move (null = no limit). Only players are limited, in combat. */
+  function moveInfo(t) {
+    const c = s.campaign;
+    if (isDm || c.combat_round == null || t.map_id !== c.active_map_id) return null;
+    if (c.combat_turn !== t.id) return { left: 0, reason: 'wait for your turn to move' };
+    const held = (t.conditions || []).find((x) => SPEED_ZERO.includes(x));
+    if (held) return { left: 0, reason: `you can't move while ${held.toLowerCase()}` };
+    return { left: movementLeft(t), factor: (t.conditions || []).includes('Prone') ? 2 : 1 };
+  }
+
+  /* Area spells stay on the map for the rest of the turn (or 20 seconds outside combat). */
+  const AREA_NAMES = { circle: 'radius circle', cone: 'cone', line: 'line', cube: 'cube' };
+  function rememberArea(row) {
+    const a = row?.result?.area;
+    if (!a || typeof a !== 'object') return;
+    ui.areas.push({ ...a, turn: s.campaign.combat_round != null ? s.campaign.combat_turn : null, at: Date.now() });
+    ui.areas = ui.areas.slice(-6);
+    drawBoard();
+    setTimeout(() => drawBoard(), 20500);
+  }
+  function recentAreas() {
+    const turn = s.campaign.combat_round != null ? s.campaign.combat_turn : null;
+    return ui.areas.filter((a) => (turn && a.turn === turn) || Date.now() - a.at < 20000);
   }
 
   function checkTurn() {
@@ -323,19 +426,65 @@ export async function renderTable(root, { params, navigate }) {
     return m;
   }
 
+  /**
+   * Choose targets on the map. opts: label, run(ids), and for more than one
+   * target multi: true with max (how many) and repeat (the same creature can
+   * be picked again: rays, darts, beams). targets: already chosen (an area).
+   */
   function startTarget(opts) {
-    ui.target = { ...opts, targets: [] };
+    ui.target = { max: Infinity, ...opts, targets: opts.targets || [] };
+    ui.pending = null;
+    ui.aim = null;
+    drawToolbar();
+    drawBoard();
+    if (!opts.area) toast(opts.multi ? (opts.repeat ? `Click a creature for each of the ${opts.max} ${opts.shots || 'attacks'}.` : 'Click each creature to target.') : `Click who to target with ${opts.label}.`);
+    root.querySelector('.board-host')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function targetPrompt(tg) {
+    const name = (id) => s.tokens.find((t) => t.id === id)?.name || '?';
+    const counts = new Map();
+    for (const id of tg.targets) counts.set(id, (counts.get(id) || 0) + 1);
+    const chosen = [...counts].map(([id, n]) => (n > 1 ? `${name(id)} ×${n}` : name(id))).join(', ');
+    if (tg.area) return html`Everyone in the area is chosen (${tg.targets.length}). Click a creature to leave it out or add it, then`;
+    if (tg.repeat) return html`Click a creature for each of the ${tg.max} ${tg.shots || 'attacks'} (${tg.targets.length} chosen${chosen ? `: ${chosen}` : ''}), then`;
+    const most = Number.isFinite(tg.max) ? ` of up to ${tg.max}` : '';
+    return html`Click each target (${tg.targets.length}${most} chosen${chosen ? `: ${chosen}` : ''}), then`;
+  }
+
+  /** Start aiming an area spell; when it's placed, everyone inside is chosen. */
+  function startAim(opts) {
+    ui.aim = opts;
+    ui.target = null;
     ui.pending = null;
     drawToolbar();
     drawBoard();
-    toast(opts.multi ? 'Click each creature in the area on the map.' : `Click who to target with ${opts.label}.`);
+    toast(`Move over the map to aim ${opts.label.replace(/^Cast /, '')}, then click.`);
     root.querySelector('.board-host')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function placeArea(geom) {
+    const aim = ui.aim;
+    if (!aim) return;
+    const m = viewMap();
+    const visible = s.tokens.filter((t) => t.map_id === m.id && !(t.conditions || []).includes('Dead'));
+    const inside = tokensInArea(geom, visible, aim.casterId).map((t) => t.id);
+    ui.aim = null;
+    startTarget({ label: aim.label, multi: true, area: packArea(geom, m.id), targets: inside, run: (ids, tg) => aim.run(ids, tg.area) });
   }
 
   async function pickTarget(t) {
     const tg = ui.target;
     if (tg.multi) {
-      tg.targets = tg.targets.includes(t.id) ? tg.targets.filter((x) => x !== t.id) : [...tg.targets, t.id];
+      if (tg.repeat) {
+        if (tg.targets.length >= tg.max) return toast(`${tg.label.replace(/^Cast /, '')} has only ${tg.max} ${tg.shots || 'attacks'}. Press the button to cast it, or Undo last.`);
+        tg.targets = [...tg.targets, t.id];
+      } else if (tg.targets.includes(t.id)) {
+        tg.targets = tg.targets.filter((x) => x !== t.id);
+      } else {
+        if (tg.targets.length >= tg.max) return toast(`${tg.label.replace(/^Cast /, '')} can only target ${tg.max} creature${tg.max === 1 ? '' : 's'}.`, 'error');
+        tg.targets = [...tg.targets, t.id];
+      }
       drawToolbar();
       drawBoard();
       return;
@@ -347,15 +496,20 @@ export async function renderTable(root, { params, navigate }) {
   }
 
   async function resolveTarget(tg, ids) {
-    const res = await guard(() => tg.run(ids));
+    const res = await guard(() => tg.run(ids, tg));
     if (!res) return;
     report(res);
-    queueReload(['tokens', 'members']);
+    if (res.area) rememberArea({ result: res });
+    queueReload(['tokens', 'members', 'campaign']);
   }
 
   function report(x) {
-    if (x.kind === 'attack') {
-      toast(x.hit ? `${x.crit ? 'Critical hit! ' : 'Hit! '}${x.target} takes ${x.damage} damage${x.down ? ' and drops!' : '.'}` : `Miss! ${x.attacker} misses ${x.target}.`, x.hit ? 'success' : '');
+    if (x.kind === 'attacks') {
+      const hits = x.results.filter((r) => r.hit);
+      const dmg = hits.reduce((n, r) => n + (r.damage || 0), 0);
+      toast(`${hits.length} of ${x.results.length} hit${dmg ? ` for ${dmg} damage in all` : ''}.`, hits.length ? 'success' : '');
+    } else if (x.kind === 'attack') {
+      toast(x.hit ? `${x.crit ? 'Critical hit! ' : x.auto ? '' : 'Hit! '}${x.target} takes ${x.damage} damage${x.down ? ' and drops!' : '.'}` : `Miss! ${x.attacker} misses ${x.target}.`, x.hit ? 'success' : '');
     } else if (x.kind === 'save') {
       const failed = x.targets.filter((t) => !t.saved).length;
       toast(`${x.targets.length - failed} saved, ${failed} failed.`, 'success');
@@ -368,6 +522,14 @@ export async function renderTable(root, { params, navigate }) {
   async function syncParty() {
     if (!isDm) return;
     for (const t of s.tokens) {
+      // What each creature can do in a turn (speed, Extra Attack, class features, spell slots).
+      let stats = null;
+      if (t.kind === 'pc' && t.character_id && s.characters[t.character_id]) stats = combatStats(s.characters[t.character_id].data, rules);
+      else if (t.monster_id && monsterById(t.monster_id)) stats = { speed: walkSpeed(monsterById(t.monster_id).speed) };
+      if (stats && stableJson(stats) !== stableJson(t.stats || {})) {
+        t.stats = stats;
+        await store.updateToken(t.id, { stats }).catch((err) => console.error(err));
+      }
       if (t.kind !== 'pc' || !t.character_id || !s.characters[t.character_id]) continue;
       const want = characterSecrets(s.characters[t.character_id].data, rules);
       const have = s.secrets[t.id] || {};
@@ -758,7 +920,7 @@ export async function renderTable(root, { params, navigate }) {
           ? html`<div class="roll-buttons">${tok.initiative == null ? html`<button type="button" class="chip act" data-act="my-initiative">Roll initiative ${formatMod(d.initiative - pen)}</button>` : html`<span class="muted small">Initiative ${tok.initiative}</span>`}</div>`
           : html`<div class="roll-buttons">${r('Initiative', d.initiative)}</div>`}
         <h3>Attacks</h3>
-        ${tok ? html`<p class="muted small">Pick an attack, then click your target on the map. Hit or miss, and the damage, are worked out for you.</p>` : ''}
+        ${tok ? html`<p class="muted small">Pick an attack, then click your target on the map. Hit or miss, and the damage, are worked out for you.${s.campaign.combat_round != null ? ' In combat, attacking uses your action (Extra Attack gives you more than one).' : ''}</p>` : ''}
         <div class="roll-buttons">
           ${d.attacks.map((a) =>
             tok
@@ -767,6 +929,7 @@ export async function renderTable(root, { params, navigate }) {
                   <button type="button" class="chip dmg" data-act="roll" data-label="${ch.name}: ${a.name} damage" data-expr="${a.damage}">${a.damage} ${a.damageType}</button>`,
           )}
         </div>
+        ${tok ? bonusAttacks(ch, d) : ''}
         ${d.spell ? spellsPanel(ch, d, tok) : ''}
         <h4>Ability checks</h4>
         <div class="roll-buttons">${Object.keys(ABILITY_NAMES).map((k) => r(ABILITY_NAMES[k], d.mods[k]))}</div>
@@ -775,6 +938,19 @@ export async function renderTable(root, { params, navigate }) {
         <details><summary>Skills</summary><div class="roll-buttons">${Object.keys(SKILLS).map((k) => r(k, d.skills[k].bonus))}</div></details>
         <hr>
         <button type="button" class="link-button small" data-act="change-character">Bring a different character</button>
+      </div>`;
+  }
+
+  /** Bonus action attacks: Martial Arts, or a second Light weapon. */
+  function bonusAttacks(ch, d) {
+    const extra = classBonusActions(ch.data, rules);
+    const unarmed = d.attacks.find((a) => a.uid === 'unarmed');
+    if (!extra.martialArts && !extra.offHand.length) return '';
+    const pen = d.d20Penalty;
+    return html`<h4>Bonus action attacks</h4>
+      <div class="roll-buttons">
+        ${extra.martialArts && unarmed ? html`<button type="button" class="chip act" data-act="attack-weapon" data-uid="unarmed" data-bonus="1" title="Martial Arts">⚔ Unarmed Strike (bonus) ${formatMod(unarmed.toHit - pen)}</button>` : ''}
+        ${extra.offHand.map((a) => html`<button type="button" class="chip act" data-act="attack-weapon" data-uid="${a.uid}" data-bonus="1" title="Light weapon: no ability modifier to the damage">⚔ ${a.name} (off-hand, bonus) · ${offHandDamage(a.damage)}</button>`)}
       </div>`;
   }
 
@@ -819,7 +995,11 @@ export async function renderTable(root, { params, navigate }) {
       <ul class="spell-cast-list">
         ${list.map(({ spell, open }) => {
           const mech = spellMechanics(spell, { slotLevel: open[0] ?? spell.level, casterLevel: d.level, castingMod: d.mods[d.spell.ability] });
-          const what = mech.kind === 'attack' ? `${mech.attackType} spell attack` : mech.kind === 'save' ? `${mech.save.toUpperCase()} save${mech.half ? ', half on success' : ''}` : mech.kind === 'heal' ? `heals ${mech.heal}` : '';
+          const what = [
+            mech.use === 'bonus' ? 'bonus action' : mech.use === 'reaction' ? 'reaction' : '',
+            mech.kind === 'attack' ? `${mech.attackType} spell attack` : mech.kind === 'save' ? `${mech.save.toUpperCase()} save${mech.half ? ', half on success' : ''}` : mech.kind === 'heal' ? `heals ${mech.heal}` : mech.kind === 'auto' ? 'always hits' : '',
+            mech.area ? `${mech.area.size}-ft ${AREA_NAMES[mech.area.shape]}` : mech.repeat ? `${mech.targets} ${mech.shots}` : mech.targets > 1 && mech.kind !== 'other' ? `up to ${mech.targets} targets` : '',
+          ].filter(Boolean).join(', ');
           return html`<li>
             <div><strong>${spell.name}</strong> <span class="muted small">${spellLevelLabel(spell.level)}${what ? ` · ${what}` : ''}${mech.damage ? ` · ${mech.damage} ${mech.damageType}` : ''}${mech.condition ? ` · ${mech.condition}` : ''}</span></div>
             ${open.length
@@ -842,48 +1022,48 @@ export async function renderTable(root, { params, navigate }) {
     const d = derive(ch.data, rules);
     const spell = rules.spells.find((x) => x.id === spellId);
     const tok = myToken();
+    const entry = castableSpells(ch.data, rules).find((x) => x.spell.id === spellId);
+    if (slotLevel > 0 && !entry?.open.includes(slotLevel)) {
+      return toast(`You have no level ${slotLevel} spell slots left. They come back when you rest.`, 'error');
+    }
     const mech = spellMechanics(spell, { slotLevel, casterLevel: d.level, castingMod: d.mods[d.spell.ability] });
     const label = `${spell.name}${slotLevel > spell.level ? ` at level ${slotLevel}` : ''}`;
-    const spend = async () => {
-      if (slotLevel > 0) await store.combat.useSlot(ch.id, slotLevel, (Number(ch.data.slotsUsed?.[slotLevel]) || 0) + 1);
-    };
-    if (!tok || mech.kind === 'other') {
+    // The database spends the slot and the action (or bonus action, or reaction) with the roll.
+    const how = { use: mech.use, slot: slotLevel, spell: true };
+    if (!tok) {
+      // Not on the map: just mark the slot used and roll any damage.
       await guard(async () => {
-        await spend();
+        if (slotLevel > 0) await store.combat.useSlot(ch.id, slotLevel, (Number(ch.data.slotsUsed?.[slotLevel]) || 0) + 1);
         if (mech.damage) await store.rollDice(s.id, mech.damage, { label: `${ch.name} casts ${label} (${mech.damageType})` });
       }, `${ch.name} casts ${label}.`);
       return queueReload(['members']);
     }
+    if (mech.kind === 'other') {
+      await guard(async () => {
+        await store.combat.action(tok.id, 'spell', { use: mech.use, slot: slotLevel, label });
+        if (mech.damage) await store.rollDice(s.id, mech.damage, { label: `${ch.name}: ${label} (${mech.damageType})` });
+      }, `${ch.name} casts ${label}.`);
+      return queueReload(['members', 'tokens']);
+    }
     const pen = d.d20Penalty;
-    if (mech.kind === 'attack') {
-      startTarget({
-        label,
-        run: async ([target]) => {
-          const mode = takeMode();
-          const res = await store.combat.attack({ attacker: tok.id, target, bonus: d.spell.attack - pen, damage: mech.damage, damageType: mech.damageType, mode, label: spell.name });
-          await spend();
-          return res;
-        },
-      });
+    const many = mech.repeat || mech.targets > 1;
+    const pick = (run) => startTarget({ label: many ? `Cast ${label}` : label, multi: many, max: mech.targets, repeat: mech.repeat, shots: mech.shots, run });
+    if (mech.kind === 'attack' || mech.kind === 'auto') {
+      pick((targets) =>
+        store.combat.attack({
+          attacker: tok.id, targets, bonus: d.spell.attack - pen, damage: mech.damage, damageType: mech.damageType,
+          mode: mech.kind === 'auto' ? 'normal' : takeMode(), label: spell.name, auto: mech.kind === 'auto', ...how,
+        }));
     } else if (mech.kind === 'save') {
-      startTarget({
-        label: `Cast ${label}`,
-        multi: true,
-        run: async (targets) => {
-          const res = await store.combat.save({ source: tok.id, targets, ability: mech.save, dc: d.spell.saveDc, damage: mech.damage, damageType: mech.damageType, half: mech.half, condition: mech.condition, label: spell.name });
-          await spend();
-          return res;
-        },
-      });
+      const run = (targets, area) =>
+        store.combat.save({
+          source: tok.id, targets, ability: mech.save, dc: d.spell.saveDc, damage: mech.damage, damageType: mech.damageType,
+          half: mech.half, condition: mech.condition, label: spell.name, area, ...how,
+        });
+      if (mech.area) startAim({ label: `Cast ${label}`, area: mech.area, caster: mech.area.self ? tok : null, casterId: tok.id, run });
+      else pick((targets) => run(targets, null));
     } else if (mech.kind === 'heal') {
-      startTarget({
-        label,
-        run: async ([target]) => {
-          const res = await store.combat.heal(tok.id, target, mech.heal, spell.name);
-          await spend();
-          return res;
-        },
-      });
+      pick((targets) => store.combat.heal({ healer: tok.id, targets, amount: mech.heal, label: spell.name, ...how }));
     }
   }
 
@@ -900,11 +1080,11 @@ export async function renderTable(root, { params, navigate }) {
         return html`<li class="roll ${r.private ? 'private' : ''} ${nat === 20 ? 'crit' : nat === 1 ? 'fumble' : ''}">
           <div class="roll-top">
             <span class="roll-who">${r.roller_name}${r.user_id === s.campaign.dm_id ? ' (DM)' : ''}</span>
-            ${['rest', 'xp', 'save'].includes(r.result?.kind) ? '' : html`<span class="roll-total">${r.total}</span>`}
+            ${['rest', 'xp', 'save', 'action'].includes(r.result?.kind) ? '' : html`<span class="roll-total">${r.total}</span>`}
           </div>
           <div class="roll-what">${r.label || r.expr}${r.mode !== 'normal' ? html` <em>with ${r.mode}</em>` : ''}${r.private ? html` <span class="badge">${r.user_id === me ? 'secret' : 'private'}</span>` : ''}</div>
-          ${outcome(r) ? html`<div class="roll-outcome ${r.result?.hit === false ? 'miss' : ''}">${outcome(r)}</div>` : ''}
-          ${['rest', 'xp'].includes(r.result?.kind) ? '' : html`<div class="roll-detail muted small">${raw(strike(describeRoll(r)))}${nat === 20 ? ' · Natural 20!' : nat === 1 ? ' · Natural 1' : ''}</div>`}
+          ${outcome(r) ? html`<div class="roll-outcome ${r.result?.hit === false ? 'miss' : ''} ${r.result?.kind === 'damage' ? 'damage' : ''}">${outcome(r)}</div>` : ''}
+          ${['rest', 'xp', 'action'].includes(r.result?.kind) ? '' : html`<div class="roll-detail muted small">${raw(strike(describeRoll(r)))}${nat === 20 ? ' · Natural 20!' : nat === 1 ? ' · Natural 1' : ''}</div>`}
         </li>`;
       })}`,
     );
@@ -915,8 +1095,15 @@ export async function renderTable(root, { params, navigate }) {
     const x = r.result;
     if (!x) return '';
     if (x.kind === 'attack') {
-      if (!x.hit) return 'Miss';
-      return `${x.crit ? 'Critical hit!' : 'Hit'}${x.damage ? ` · ${x.damage} damage` : ''}${x.dead ? ` · ${x.target} is dead` : x.down ? ` · ${x.target} drops` : ''}`;
+      if (!x.hit) return x.attacker ? `Miss: ${x.attacker} misses ${x.target}` : 'Miss';
+      // Older rows had the damage on the attack line; newer ones put it on its own line.
+      if ('damage' in x) return `${x.crit ? 'Critical hit!' : 'Hit'}${x.damage ? ` · ${x.damage} damage` : ''}${x.dead ? ` · ${x.target} is dead` : x.down ? ` · ${x.target} drops` : ''}`;
+      return `${x.crit ? 'Critical hit!' : 'Hit!'} ${x.attacker} hits ${x.target}`;
+    }
+    if (x.kind === 'damage') {
+      const types = [x.damageType, ...(x.extra || [])].filter(Boolean).join(' and ');
+      const changed = x.rolled != null && x.rolled !== x.damage ? ` (rolled ${x.rolled}; ${x.damage < x.rolled ? 'resisted' : 'vulnerable'})` : '';
+      return `${x.target} takes ${x.damage}${types ? ` ${types}` : ''} damage${x.crit ? ' (critical)' : ''}${changed}${x.dead ? ` · ${x.target} is dead` : x.down ? ` · ${x.target} drops` : ''}`;
     }
     if (x.kind === 'save') {
       return x.targets
@@ -990,7 +1177,7 @@ export async function renderTable(root, { params, navigate }) {
           /* keep average */
         }
       }
-      fields = { kind: 'monster', name: nextName(mon.name), monster_id: mon.id, size: squaresForSize(mon.size), color: '#8b2c2c', hidden: ui.spawnHidden };
+      fields = { kind: 'monster', name: nextName(mon.name), monster_id: mon.id, size: squaresForSize(mon.size), color: '#8b2c2c', hidden: ui.spawnHidden, stats: { speed: walkSpeed(mon.speed) } };
       secret = monsterSecrets(mon, { hp });
     } else if (payload.type === 'pc') {
       const p = member(payload.userId);
@@ -1254,9 +1441,12 @@ export async function renderTable(root, { params, navigate }) {
         const a = d.attacks.find((x) => x.uid === el.dataset.uid);
         const tok = myToken();
         if (!a || !tok) return;
+        const bonus = el.dataset.bonus === '1';
+        // An off-hand Light weapon adds no ability modifier to its damage (unless it's negative).
+        const damage = bonus && a.uid !== 'unarmed' ? offHandDamage(a.damage) : a.damage;
         return startTarget({
-          label: a.name,
-          run: ([target]) => store.combat.attack({ attacker: tok.id, target, bonus: a.toHit - d.d20Penalty, damage: a.damage, damageType: a.damageType, mode: takeMode(), label: a.name }),
+          label: bonus ? `${a.name} (bonus action)` : a.name,
+          run: ([target]) => store.combat.attack({ attacker: tok.id, target, bonus: a.toHit - d.d20Penalty, damage, damageType: a.damageType, mode: takeMode(), label: a.name, use: bonus ? 'bonus' : 'attack' }),
         });
       }
       case 'monster-action': {
@@ -1267,7 +1457,7 @@ export async function renderTable(root, { params, navigate }) {
         if (a.kind === 'attack') {
           return startTarget({
             label: `${t.name}: ${a.name}`,
-            run: ([target]) => store.combat.attack({ attacker: t.id, target, bonus: a.bonus, damage: a.damage, damageType: a.damageType, extra: a.extra, mode: takeMode(), label: a.name }),
+            run: ([target]) => store.combat.attack({ attacker: t.id, target, bonus: a.bonus, damage: a.damage, damageType: a.damageType, extra: a.extra, mode: takeMode(), label: a.name, use: 'attack' }),
           });
         }
         return startTarget({
@@ -1282,7 +1472,7 @@ export async function renderTable(root, { params, navigate }) {
       }
       case 'confirm-targets': {
         const tg = ui.target;
-        if (!tg?.targets.length) return;
+        if (!tg?.targets.length && !tg?.area) return;
         ui.target = null;
         drawToolbar();
         drawBoard();
@@ -1292,6 +1482,23 @@ export async function renderTable(root, { params, navigate }) {
         ui.target = null;
         drawToolbar();
         return drawBoard();
+      case 'undo-target':
+        if (ui.target) ui.target.targets = ui.target.targets.slice(0, -1);
+        drawToolbar();
+        return drawBoard();
+      case 'cancel-aim':
+        ui.aim = null;
+        drawToolbar();
+        return drawBoard();
+      case 'turn-action': {
+        const t = isDm ? s.tokens.find((x) => x.id === s.campaign.combat_turn) : myToken();
+        if (!t) return;
+        const what = el.dataset.what;
+        const res = await guard(() => store.combat.action(t.id, what, { use: el.dataset.use === 'free' ? 'action' : el.dataset.use }));
+        if (res?.kind === 'heal') toast(`${t.name} regains ${res.amount} hit points.`, 'success');
+        else if (res && what === 'dash') toast(`Dash: ${speedOf(t)} more feet of movement this turn.`, 'success');
+        return reloadNow(['tokens', 'members']);
+      }
       case 'toggle-condition': {
         const t = selected();
         const name = el.dataset.name;
@@ -1583,10 +1790,11 @@ export async function renderTable(root, { params, navigate }) {
     onChange: queueReload,
     onRoll(row) {
       addRoll(row);
+      rememberArea(row);
       if (row.user_id !== me) {
         const kind = row.result?.kind;
         const text = `${row.roller_name}: ${row.label || row.expr}`;
-        toast(['rest', 'xp', 'save'].includes(kind) ? text : `${text} = ${row.total}`);
+        toast(['rest', 'xp', 'save', 'action'].includes(kind) ? text : `${text} = ${row.total}`);
       }
     },
     onStatus(status) {
@@ -1613,6 +1821,18 @@ export async function renderTable(root, { params, navigate }) {
     clearInterval(poll);
     document.querySelector('dialog.handout-dialog')?.remove();
   };
+}
+
+/** "1d6+3" -> "1d6": an off-hand attack adds no positive ability modifier. */
+function offHandDamage(dmg) {
+  return String(dmg).replace(/\+\d+$/, '');
+}
+
+/** JSON with sorted keys, to compare objects that came back from the database. */
+function stableJson(v) {
+  if (Array.isArray(v)) return `[${v.map(stableJson).join(',')}]`;
+  if (v && typeof v === 'object') return `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${stableJson(v[k])}`).join(',')}}`;
+  return JSON.stringify(v);
 }
 
 function escAttr(s) {
