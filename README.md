@@ -107,6 +107,14 @@ Run `0005_turns.sql` in the Supabase SQL Editor (after `0004_rules.sql`) to turn
 
 `tests/db/turns.test.sql` checks the turn rules.
 
+## Table modes
+
+Run `0006_exploration.sql` in the Supabase SQL Editor (after `0005_turns.sql`) to turn this on. The DM picks a mode at the top of the map:
+
+- **Free Roam:** players move as far as they like.
+- **Exploration:** players can move up to 150 ft each exploration round (the DM can change the number). Everyone moves in any order; when the story is ready to move on, the DM presses **Next round** and everyone gets their movement back. The DM sees how far each player has left, and is never limited.
+- **Combat:** initiative and turns, as above. Exploration stays on underneath, so ending combat goes back to it.
+
 ## Character files
 
 **Export file** on a character sheet (or in the Characters list) downloads a `.character.json` file. **Import from file** on the Characters page adds it to your library as a new character. This is how a character moves between campaigns or accounts. Only files exported from this site can be imported.

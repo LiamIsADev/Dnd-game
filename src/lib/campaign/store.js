@@ -281,7 +281,7 @@ async function rpc(fn, args) {
   const { data, error } = await supabase.rpc(fn, args);
   if (error) {
     if (/Could not find the function/i.test(error.message)) {
-      throw new Error('Combat rules are missing or out of date. Run the newest files in supabase/migrations (0004_rules.sql, then 0005_turns.sql) in the Supabase SQL editor.');
+      throw new Error('Combat rules are missing or out of date. Run the newest files in supabase/migrations (0004_rules.sql, 0005_turns.sql, then 0006_exploration.sql) in the Supabase SQL editor.');
     }
     // Rule messages from the database are written for players; show them as they are.
     if (error.code === 'P0001') throw new Error(error.message);
@@ -293,6 +293,10 @@ async function rpc(fn, args) {
 export const combat = {
   start: (cid) => rpc('combat_start', { cid }),
   end: (cid) => rpc('combat_end', { cid }),
+  /** Exploration mode: players move up to `feet` each round; the DM starts the next round. */
+  exploreStart: (cid, feet = 150) => rpc('explore_start', { cid, feet }),
+  exploreNext: (cid) => rpc('explore_next', { cid }),
+  exploreEnd: (cid) => rpc('explore_end', { cid }),
   next: (cid) => rpc('combat_next', { cid }),
   initiative: (token, bonus, mode = 'normal') => rpc('roll_initiative', { token, bonus, mode }),
   /** One or more attacks (targets can repeat: each ray or beam is its own attack). */
