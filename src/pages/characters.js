@@ -23,6 +23,7 @@ export function characterSummary(row, srd) {
 
 export async function renderCharacters(root, { navigate }) {
   root.innerHTML = String(html`
+    <div class="art-page art-ember">
     <section class="page">
       <div class="section-head">
         <h1 class="page-title">Characters</h1>
@@ -34,7 +35,8 @@ export async function renderCharacters(root, { navigate }) {
       </div>
       <p class="muted">Export a character to a file to keep a backup, or to bring it into another campaign or account.</p>
       <div id="list" class="library"><p class="loading">Loading…</p></div>
-    </section>`);
+    </section>
+    </div>`);
 
   const list = root.querySelector('#list');
   let rows = [];
