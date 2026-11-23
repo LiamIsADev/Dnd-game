@@ -1,8 +1,6 @@
 import { html } from '../lib/dom.js';
 import { getAuth } from '../lib/auth.js';
-import { loadSrd, loadCharacterRules } from '../lib/srd.js';
-import { listCharacters } from '../lib/character/store.js';
-import { characterSummary } from './characters.js';
+import { loadSrd } from '../lib/srd.js';
 import { joinForm, wireJoin } from './campaigns.js';
 
 export async function renderHome(root, ctx) {
@@ -29,33 +27,9 @@ async function renderDashboard(root, navigate) {
         </a>
         <div class="home-join">${joinForm()}</div>
       </div>
-    </section>
-    <section class="page">
-      <div class="section-head">
-        <h2>Your characters</h2>
-        <a class="button" href="#/characters/new">Create a character</a>
-      </div>
-      <div id="recent" class="character-grid"><p class="loading">Loading…</p></div>
     </section>`);
 
   wireJoin(root, navigate);
-  const recent = root.querySelector('#recent');
-  try {
-    const [rows, srd] = await Promise.all([listCharacters(), loadCharacterRules()]);
-    if (!rows.length) {
-      recent.innerHTML = String(html`<div class="empty card">
-        <p>You don't have any characters yet.</p>
-        <a class="button" href="#/characters/new">Create your first character</a>
-      </div>`);
-      return;
-    }
-    recent.innerHTML = String(
-      html`${rows.slice(0, 3).map((r) => characterSummary(r, srd))}
-        ${rows.length > 3 ? html`<a class="character-card more" href="#/characters">See all ${rows.length} characters →</a>` : ''}`,
-    );
-  } catch (err) {
-    recent.innerHTML = String(html`<p class="message error">${err.message}</p>`);
-  }
 }
 
 /* Signed out: a short introduction. */
