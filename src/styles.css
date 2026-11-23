@@ -2930,3 +2930,63 @@ button.vital:hover {
 .page.narrow .card > h2:first-child {
   margin-top: 0;
 }
+
+/* ---------- pages with background art (Figma "Ember skies") ---------- */
+.art-page {
+  --art-fade: 21, 18, 15;
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100vh - 52px - 74px);
+}
+
+.art-page::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 55.6%;
+  background: var(--art-image) center / cover no-repeat;
+  z-index: -2;
+}
+
+.art-page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(var(--art-fade), 1) 0%, rgba(var(--art-fade), 1) 45%, rgba(var(--art-fade), 0.45) 62%, rgba(var(--art-fade), 0.3) 100%),
+    linear-gradient(180deg, rgba(var(--art-fade), 0.3) 0%, rgba(var(--art-fade), 0) 60%, rgba(var(--art-fade), 0.95) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.art-ember {
+  --art-image: url('/images/characters-bg.jpg');
+}
+
+.art-page .page {
+  margin: 0 0 0 clamp(0px, 7.2vw, 104px);
+}
+
+.art-page .page-title {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+.art-page .library-row {
+  background: rgba(33, 28, 23, 0.82);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 800px) {
+  .art-page::before {
+    width: 100%;
+    background-position: center top;
+  }
+
+  .art-page::after {
+    background: linear-gradient(180deg, rgba(var(--art-fade), 0.55) 0%, rgba(var(--art-fade), 0.8) 45%, rgb(var(--art-fade)) 100%);
+  }
+
+  .art-page .page {
+    margin: 0 auto;
+  }
+}
