@@ -3,6 +3,27 @@
 import { html, raw, rulesMarkdown, debounce } from '../lib/dom.js';
 import { loadSrd, spellLevelLabel } from '../lib/srd.js';
 import { statBlock } from '../components/statblock.js';
+import { getAuth } from '../lib/auth.js';
+import { homebrewRows } from '../lib/homebrew/store.js';
+import { mergeHomebrew } from '../lib/homebrew/merge.js';
+
+// Signed in, the rules include the homebrew you can see (yours and your campaigns').
+let hbPromise = null;
+let hbUser = null;
+function myHomebrew() {
+  const user = getAuth().session?.user?.id || null;
+  if (!user) return Promise.resolve([]);
+  if (hbUser !== user || !hbPromise) {
+    hbUser = user;
+    hbPromise = homebrewRows();
+    setTimeout(() => (hbPromise = null), 30000); // pick up new homebrew after a while
+  }
+  return hbPromise;
+}
+const withHb = async (name, pick = (x) => x) => {
+  const [base, rows] = await Promise.all([loadSrd(name), myHomebrew()]);
+  return pick(mergeHomebrew({ [name]: base }, rows)[name]);
+};
 
 const md = (text) => raw(rulesMarkdown(text));
 
@@ -19,7 +40,7 @@ const CATEGORIES = [
   {
     id: 'spells',
     label: 'Spells',
-    load: () => loadSrd('spells'),
+    load: () => withHb('spells'),
     sub: (s) => `${spellLevelLabel(s.level)} ${s.school}${s.ritual ? ' · Ritual' : ''}${s.concentration ? ' · Concentration' : ''}${bookTag(s)}`,
     search: (s) => [s.name, s.school, ...s.classes, s.sourceName].join(' '),
     filters: [
@@ -44,7 +65,7 @@ const CATEGORIES = [
   {
     id: 'monsters',
     label: 'Monsters',
-    load: () => loadSrd('monsters'),
+    load: () => withHb('monsters'),
     sub: (m) => `CR ${m.cr?.rating ?? '?'} · ${m.size.join('/')} ${m.type}${m.mythicTrait ? ' · Mythic' : m.legendaryActions?.length ? ' · Legendary' : ''}${bookTag(m)}`,
     search: (m) => [m.name, m.type, m.group, m.sourceName].join(' '),
     filters: [
@@ -58,7 +79,7 @@ const CATEGORIES = [
   {
     id: 'magic-items',
     label: 'Magic Items',
-    load: () => loadSrd('magic-items'),
+    load: () => withHb('magic-items'),
     sub: (i) => `${i.category} · ${i.rarity.join(' / ')}${i.attunement ? ' · Attunement' : ''}${bookTag(i)}`,
     search: (i) => [i.name, i.category, ...i.rarity, i.sourceName].join(' '),
     filters: [
@@ -71,8 +92,8 @@ const CATEGORIES = [
   {
     id: 'classes',
     label: 'Classes',
-    load: () => loadSrd('classes'),
-    sub: (c) => `d${c.hitDie} · ${c.primaryAbility}`,
+    load: () => withHb('classes'),
+    sub: (c) => `d${c.hitDie} · ${c.primaryAbility}${bookTag(c)}`,
     search: (c) => c.name,
     detail: (c) => html`
       <h2>${c.name}</h2>
@@ -93,23 +114,23 @@ const CATEGORIES = [
   {
     id: 'species',
     label: 'Species',
-    load: () => loadSrd('species'),
-    sub: (s) => `${s.creatureType} · Speed ${s.speed} ft.`,
+    load: () => withHb('species'),
+    sub: (s) => `${s.creatureType} · Speed ${s.speed} ft.${bookTag(s)}`,
     search: (s) => s.name,
     detail: (s) => html`<h2>${s.name}</h2>${md(s.description)}`,
   },
   {
     id: 'backgrounds',
     label: 'Backgrounds',
-    load: () => loadSrd('backgrounds'),
-    sub: (b) => b.skillProficiencies.join(', '),
+    load: () => withHb('backgrounds'),
+    sub: (b) => b.skillProficiencies.join(', ') + bookTag(b),
     search: (b) => b.name,
     detail: (b) => html`<h2>${b.name}</h2>${md(b.description)}`,
   },
   {
     id: 'feats',
     label: 'Feats',
-    load: () => loadSrd('feats'),
+    load: () => withHb('feats'),
     sub: (f) => f.category + (f.prerequisite ? ` · ${f.prerequisite}` : '') + bookTag(f),
     search: (f) => [f.name, f.category, f.sourceName].join(' '),
     filters: [{ id: 'category', label: 'Type', options: (items) => [...new Set(items.map((f) => f.category))].map((c) => [c, c]), test: (f, v) => f.category === v }, BOOK_FILTER],
@@ -118,7 +139,7 @@ const CATEGORIES = [
   {
     id: 'weapons',
     label: 'Weapons',
-    load: async () => (await loadSrd('equipment')).weapons,
+    load: () => withHb('equipment', (e) => e.weapons),
     sub: (w) => `${w.category} ${w.kind} · ${w.damageText}${w.magic ? ` · Magic, ${w.magic.rarity}` : ''}${bookTag(w)}`,
     search: (w) => [w.name, w.category, w.kind, ...w.properties, w.sourceName, w.baseName].join(' '),
     filters: [
@@ -126,7 +147,7 @@ const CATEGORIES = [
       { id: 'category', label: 'Category', options: () => [['Simple', 'Simple'], ['Martial', 'Martial']], test: (w, v) => w.category === v },
       BOOK_FILTER,
     ],
-    detail: (w) => html`<h2>${w.name}</h2><p class="meta">${w.category} ${w.kind} weapon${w.magic ? ` (magic ${w.baseName}, ${w.magic.rarity}${w.magic.attunement ? ', requires attunement' : ''})` : ''}${bookTag(w)}</p>
+    detail: (w) => html`<h2>${w.name}</h2><p class="meta">${w.category} ${w.kind} weapon${w.magic ? ` (magic${w.baseName ? ` ${w.baseName}` : ""}, ${w.magic.rarity}${w.magic.attunement ? ', requires attunement' : ''})` : ''}${bookTag(w)}</p>
       <dl class="facts"><dt>Damage</dt><dd>${w.damageText}</dd><dt>Properties</dt><dd>${w.properties.join(', ') || '—'}</dd>
       ${w.bonus ? html`<dt>Magic bonus</dt><dd>+${w.bonus} to attack and damage rolls</dd>` : ''}
       <dt>Mastery</dt><dd>${w.mastery || '—'}</dd><dt>Weight</dt><dd>${w.weight || '—'}</dd><dt>Cost</dt><dd>${w.cost || '—'}</dd></dl>
@@ -135,8 +156,8 @@ const CATEGORIES = [
   {
     id: 'armor',
     label: 'Armor',
-    load: async () => (await loadSrd('equipment')).armor,
-    sub: (a) => `${a.category} · AC ${a.armorClass}`,
+    load: () => withHb('equipment', (e) => e.armor),
+    sub: (a) => `${a.category} · AC ${a.armorClass}${bookTag(a)}`,
     search: (a) => [a.name, a.category].join(' '),
     detail: (a) => html`<h2>${a.name}</h2><p class="meta">${a.category}</p>
       <dl class="facts"><dt>Armor Class</dt><dd>${a.armorClass}</dd><dt>Strength</dt><dd>${a.strength ?? '—'}</dd>
@@ -169,6 +190,11 @@ const CATEGORIES = [
     detail: (c) => html`<h2>${c.title}</h2>${md(c.markdown)}`,
   },
 ];
+
+/** The rules browser's write-up of one entry (used for homebrew previews). */
+export function rulesDetail(catId, item) {
+  return CATEGORIES.find((c) => c.id === catId).detail(item);
+}
 
 export async function renderRules(root, { params, navigate }) {
   const [catId, itemId] = params;

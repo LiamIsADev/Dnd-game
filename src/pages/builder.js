@@ -2,7 +2,7 @@
 // Works on a plain character object (see lib/character/rules.js newCharacter)
 // and saves it to the player's character library at the end.
 import { html, raw, rulesMarkdown } from '../lib/dom.js';
-import { loadCharacterRules, spellLevelLabel, subclassLabel } from '../lib/srd.js';
+import { spellLevelLabel, subclassLabel } from '../lib/srd.js';
 import {
   ABILITIES,
   ABILITY_LABELS,
@@ -25,6 +25,7 @@ import {
   fixedSkills,
   abilityScores,
 } from '../lib/character/rules.js';
+import { loadCharacterRulesWithHomebrew } from '../lib/homebrew/store.js';
 import { getCharacter, createCharacter, saveCharacter, normalize } from '../lib/character/store.js';
 import { roll } from '../lib/dice.js';
 import { toast, confirmDialog } from '../lib/ui.js';
@@ -46,7 +47,7 @@ const STEPS = [
 export async function renderBuilder(root, { params, navigate }) {
   const editId = params[0] || null;
   root.innerHTML = '<p class="loading">Loading the rules…</p>';
-  const srd = await loadCharacterRules();
+  const srd = await loadCharacterRulesWithHomebrew();
 
   let c;
   let editingName = '';

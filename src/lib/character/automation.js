@@ -31,6 +31,7 @@ function addDice(expr, die, extra) {
  */
 export function spellMechanics(spell, { slotLevel = spell?.level || 0, casterLevel = 1, castingMod = 0 } = {}) {
   if (!spell) return { kind: 'other' };
+  if (spell.mechanics?.kind) return homebrewMechanics(spell, { slotLevel, casterLevel, castingMod });
   const text = spell.description || '';
   const out = { kind: 'other' };
   const attack = text.match(/make (?:a|one) (ranged|melee) spell attack/i);
@@ -78,6 +79,42 @@ export function spellMechanics(spell, { slotLevel = spell?.level || 0, casterLev
   out.use = actionFor(spell.castingTime);
   out.area = spellArea(text);
   Object.assign(out, spellTargets(spell, text, { slotLevel, casterLevel, area: out.area }));
+  return out;
+}
+
+/**
+ * Homebrew spells say what they do in a form instead of in rules text.
+ * upcast is the dice added per slot level above the spell's level (or, for a
+ * cantrip, at character levels 5, 11 and 17).
+ */
+function homebrewMechanics(spell, { slotLevel, casterLevel, castingMod }) {
+  const m = spell.mechanics;
+  const out = { kind: m.kind };
+  if (m.kind === 'attack') out.attackType = m.attackType || 'ranged';
+  if (m.kind === 'save') {
+    out.save = m.save || 'dex';
+    out.half = !!m.half;
+  }
+  if (m.condition && CONDITIONS.includes(m.condition)) out.condition = m.condition;
+  if (m.kind === 'heal') {
+    out.heal = m.heal || '1d8';
+    out.addMod = !!m.addMod;
+  } else if (m.damage) {
+    out.damage = m.damage;
+    out.damageType = m.damageType || 'Force';
+  }
+  const steps = spell.level === 0 ? [5, 11, 17].filter((l) => casterLevel >= l).length : Math.max(0, slotLevel - spell.level);
+  if (m.upcast && /^\d+d\d+$/.test(m.upcast) && steps) {
+    if (out.kind === 'heal') out.heal = addDice(out.heal, m.upcast, steps);
+    else if (out.damage) out.damage = addDice(out.damage, m.upcast, steps);
+  }
+  if (out.kind === 'heal' && out.addMod && castingMod) out.heal += castingMod > 0 ? `+${castingMod}` : `${castingMod}`;
+  out.use = actionFor(spell.castingTime);
+  out.area = m.areaShape
+    ? { shape: m.areaShape, size: Number(m.areaSize) || 15, ...(m.areaShape === 'line' ? { width: 5 } : {}), self: m.areaShape === 'cone' || m.areaShape === 'line' || !!m.areaSelf }
+    : null;
+  out.targets = out.area ? Infinity : Math.max(1, Number(m.targets) || 1);
+  out.repeat = false;
   return out;
 }
 

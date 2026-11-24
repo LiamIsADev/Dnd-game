@@ -12,5 +12,5 @@ run tests/db/supabase-shim.sql
 for f in supabase/migrations/*.sql; do run "$f"; done
 # Run them all a second time: they must be safe to re-run.
 for f in supabase/migrations/*.sql; do run "$f"; done
-for f in tests/db/security.test.sql tests/db/rules.test.sql tests/db/turns.test.sql; do run "$f"; done
+for f in tests/db/security.test.sql tests/db/rules.test.sql tests/db/turns.test.sql tests/db/homebrew.test.sql; do run "$f"; done
 echo "Database tests passed."

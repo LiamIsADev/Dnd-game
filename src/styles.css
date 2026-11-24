@@ -3085,3 +3085,157 @@ pre.license {
   max-height: 24rem;
   overflow: auto;
 }
+
+/* ===================================================== step 7: homebrew */
+.hb-new {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0 1.5rem;
+}
+
+.hb-filter {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+}
+
+.hb-filter select {
+  width: auto;
+}
+
+.hb-row {
+  padding: 0.6rem 0.75rem;
+}
+
+.hb-name {
+  flex: 1;
+  min-width: 220px;
+  color: inherit;
+  text-decoration: none;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.hb-name .tag {
+  justify-self: start;
+}
+
+.small-select {
+  width: auto;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.hb-copy {
+  margin: 0 0 1rem;
+  padding: 1rem;
+}
+
+.hb-copy label {
+  display: grid;
+  gap: 0.2rem;
+  margin-bottom: 0.4rem;
+}
+
+.hb-copy .row input {
+  flex: 1;
+}
+
+.hb-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.hb-side {
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+}
+
+.hb-side h2 {
+  margin-top: 0;
+}
+
+.hb-form {
+  margin: 0;
+  display: block;
+}
+
+.hb-section h2,
+.hb-list h3 {
+  margin: 1.25rem 0 0.5rem;
+}
+
+.hb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.6rem 0.75rem;
+  align-items: end;
+}
+
+.hb-grid > label,
+.hb-section label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.hb-grid > label.inline {
+  display: flex;
+  align-self: center;
+}
+
+.hb-grid .wide,
+.hb-form > .wide {
+  grid-column: 1 / -1;
+}
+
+.hb-item {
+  margin: 0 0 0.75rem;
+}
+
+.hb-item-head {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.hb-item-head .danger-text {
+  margin-left: auto;
+}
+
+.danger-text {
+  color: var(--danger);
+}
+
+.hb-preview {
+  padding: 1rem;
+}
+
+.hb-preview h2 {
+  margin-top: 0;
+}
+
+.hb-add {
+  margin: 1rem 0;
+  padding: 1rem;
+}
+
+.hb-add .row select {
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .hb-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hb-side {
+    position: static;
+    max-height: none;
+  }
+}

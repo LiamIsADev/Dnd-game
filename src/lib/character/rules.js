@@ -239,7 +239,9 @@ const THIRD_CASTER = {
  */
 export function spellcasting(cls, level, subclass = null) {
   if (!cls) return null;
-  if (!SPELLCASTING_ABILITY[cls.id]) {
+  // Homebrew classes say how they cast; their level table has the columns.
+  const own = cls.spellcasting?.ability ? cls.spellcasting : null;
+  if (!own && !SPELLCASTING_ABILITY[cls.id]) {
     const sc = subclass?.spellcasting;
     if (!sc || level < 3) return null;
     const l = Math.min(20, level);
@@ -259,13 +261,13 @@ export function spellcasting(cls, level, subclass = null) {
   const slots = spellSlots(cls, level);
   const levels = Object.keys(slots).map(Number);
   return {
-    ability: SPELLCASTING_ABILITY[cls.id],
+    ability: own?.ability || SPELLCASTING_ABILITY[cls.id],
     cantrips: Number(row['Cantrips']) || 0,
     prepared: Number(row['Prepared Spells']) || 0,
     slots,
     maxSpellLevel: levels.length ? Math.max(...levels) : 0,
-    pact: cls.id === 'warlock',
-    list: cls.name,
+    pact: own ? own.type === 'pact' : cls.id === 'warlock',
+    list: own?.list || cls.name,
   };
 }
 
@@ -525,8 +527,8 @@ export function derive(c, srd) {
     const dex = body.addsDex ? (body.maxDex != null ? Math.min(mods.dex, body.maxDex) : mods.dex) : 0;
     ac = body.baseAc + dex;
     acSource = body.name;
-  } else if (cls?.id === 'barbarian') {
-    ac = 10 + mods.dex + mods.con;
+  } else if (cls?.id === 'barbarian' || (cls?.unarmoredDefense && !shield)) {
+    ac = 10 + mods.dex + mods[cls.unarmoredDefense || 'con'];
     acSource = 'Unarmored Defense';
   } else if (cls?.id === 'monk' && !shield) {
     ac = 10 + mods.dex + mods.wis;

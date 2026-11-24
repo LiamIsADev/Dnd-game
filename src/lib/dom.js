@@ -12,12 +12,33 @@ export function esc(value) {
     .replace(/'/g, '&#39;');
 }
 
-/**
- * Render Markdown to HTML. Only use this for the bundled SRD rules text,
- * which we ship ourselves. Never pass user-written text through it.
- */
+// Markdown is also used for homebrew, which other players write, so raw HTML
+// is cut down to a few plain tags (the SRD's tables) with no attributes except
+// colspan, and links can only go to http(s) or in-site (#) addresses.
+const SAFE_TAGS = new Set(['table', 'thead', 'tbody', 'tr', 'td', 'th', 'br', 'hr', 'em', 'strong', 'b', 'i', 'ul', 'ol', 'li', 'p', 'sup', 'sub']);
+export function cleanHtml(s) {
+  return String(s ?? '').replace(/<(\/?)([a-zA-Z][a-zA-Z0-9]*)([^<>]*)>|</g, (m, slash, name, attrs) => {
+    const tag = name?.toLowerCase();
+    if (!tag || !SAFE_TAGS.has(tag)) return m.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const span = !slash && /^(td|th)$/.test(tag) ? attrs.match(/colspan="?(\d{1,2})"?/i) : null;
+    return `<${slash}${tag}${span ? ` colspan="${span[1]}"` : ''}>`;
+  });
+}
+const safeUrl = (href) => (/^(https?:|#|\/|mailto:)/i.test(String(href || '').trim()) ? href : '#');
+marked.use({
+  renderer: {
+    html(token) {
+      return cleanHtml(token.text ?? token.raw);
+    },
+  },
+  walkTokens(token) {
+    if (token.type === 'link' || token.type === 'image') token.href = safeUrl(token.href);
+  },
+});
+
+/** Render Markdown to HTML (rules text and homebrew). */
 export function rulesMarkdown(md) {
-  return marked.parse(md || '');
+  return marked.parse(String(md || ''));
 }
 
 /** Tiny tagged-template helper: html`<p>${x}</p>` escapes x unless it's a raw() value. */

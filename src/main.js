@@ -11,6 +11,7 @@ import { renderBuilder } from './pages/builder.js';
 import { renderSheet } from './pages/sheet.js';
 import { renderCampaigns, renderJoin } from './pages/campaigns.js';
 import { renderTable } from './pages/table.js';
+import { renderHomebrew } from './pages/homebrew.js';
 
 const app = document.getElementById('app');
 const siteNav = document.getElementById('site-nav');
@@ -28,6 +29,7 @@ const routes = [
   { pattern: /^\/campaigns$/, nav: 'campaigns', render: renderCampaigns, requiresAuth: true },
   { pattern: /^\/campaigns\/([^/]+)$/, nav: 'campaigns', render: renderTable, requiresAuth: true, wide: true },
   { pattern: /^\/join\/([^/]+)$/, nav: 'campaigns', render: renderJoin, requiresAuth: true },
+  { pattern: /^\/homebrew(?:\/([^/]+))?(?:\/([^/]+))?$/, nav: 'homebrew', render: renderHomebrew, requiresAuth: true },
   { pattern: /^\/rules(?:\/([^/]+))?(?:\/([^/]+))?$/, nav: 'rules', render: renderRules },
   { pattern: /^\/credits$/, nav: 'credits', render: renderCredits },
 ];
@@ -82,6 +84,7 @@ function renderAuthNav({ session }) {
     ? `<a href="#/" data-nav="home">Home</a>
        <a href="#/characters" data-nav="characters">Characters</a>
        <a href="#/campaigns" data-nav="campaigns">Campaigns</a>
+       <a href="#/homebrew" data-nav="homebrew">Homebrew</a>
        <a href="#/rules" data-nav="rules">Rules</a>
        <a href="#/account" data-nav="account">Account settings</a>
        <button type="button" class="link-button" id="sign-out">Sign out</button>`
