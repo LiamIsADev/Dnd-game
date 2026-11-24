@@ -121,3 +121,10 @@ test('species, backgrounds and magic items', () => {
   assert.deepEqual(bag.rarity, ['Uncommon']);
   for (const item of data['magic-items']) assert.ok(item.rarity.length, `${item.name} rarity`);
 });
+
+test('supabase/setup-all.sql has every migration in it', async () => {
+  const { buildSetupSql } = await import('../scripts/build-setup-sql.mjs');
+  const { readFileSync } = await import('node:fs');
+  const onDisk = readFileSync(new URL('../supabase/setup-all.sql', import.meta.url), 'utf8');
+  assert.equal(onDisk, buildSetupSql(), 'run: node scripts/build-setup-sql.mjs');
+});

@@ -11,10 +11,10 @@ const COLUMNS = 'id, owner_id, kind, name, data, created_at, updated_at';
 function check(error) {
   if (!error) return;
   if (/relation .*homebrew.* does not exist|Could not find the (table|function)/i.test(error.message)) {
-    throw new Error('The homebrew tables are missing. Run supabase/migrations/0007_homebrew.sql in the Supabase SQL editor.');
+    throw new Error('The homebrew tables are missing. Run supabase/setup-all.sql in the Supabase SQL editor (it is safe to run again).');
   }
   if (/permission denied for (table|function)/i.test(error.message)) {
-    throw new Error('The database is blocking homebrew. Re-run supabase/migrations/0007_homebrew.sql in the Supabase SQL editor.');
+    throw new Error('The database is blocking homebrew. Run supabase/setup-all.sql in the Supabase SQL editor (it is safe to run again).');
   }
   throw new Error(error.message);
 }

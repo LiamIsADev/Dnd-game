@@ -171,7 +171,7 @@ begin
   perform public.t_eq((r -> 'targets' -> 0 ->> 'damage')::int, 8, 'failed save takes full damage');
   perform public.t_eq((r -> 'targets' -> 1 ->> 'damage')::int, 0, 'immunity still applies to saves');
   r := public.saving_throw((select v from public.r_ids where k = 'quin'),
-         array[(select v from public.r_ids where k = 'ogre')], 'dex', 1, '8', 'Cold', true, '', 'Ice');
+         array[(select v from public.r_ids where k = 'ogre')], 'dex', -20, '8', 'Cold', true, '', 'Ice'); -- can't fail, even on a 1 with a Dex penalty
   perform public.t_eq((r -> 'targets' -> 0 ->> 'damage')::int, 4, 'successful save takes half');
 end $$;
 select t_true((select 'Prone' = any(conditions) from public.tokens where id = (select v from r_ids where k = 'ogre')), 'failed save adds the condition');
