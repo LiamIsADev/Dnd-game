@@ -11,7 +11,11 @@ import {
   STANDARD_ARRAY,
   POINT_BUY_BUDGET,
   POINT_BUY_COST,
-  SPECIES_CHOICES,
+  speciesChoices,
+  chosenSubspecies,
+  speciesSkillChoice,
+  backgroundFeat,
+  backgroundSkills,
   newCharacter,
   derive,
   validate,
@@ -214,17 +218,33 @@ export async function renderBuilder(root, { params, navigate }) {
 
   function stepBackground() {
     const b = bg();
-    const keys = backgroundAbilityKeys(b);
+    const keys = backgroundAbilityKeys(b, c);
     const bonus = c.backgroundBonus;
+    const feat = backgroundFeat(b, c);
+    const originFeats = srd.feats.filter((f) => f.category === 'Origin Feat');
     return String(html`
       <h2>Choose a background</h2>
       <p class="muted">Your background is what your character did before adventuring. It gives ability score increases, an Origin feat, two skills, a tool and some equipment.</p>
-      ${choiceGrid(srd.backgrounds, c.backgroundId, 'backgroundId', (x) => `${x.skillProficiencies.join(', ')} · ${x.feat}`)}
+      ${choiceGrid(srd.backgrounds, c.backgroundId, 'backgroundId', (x) => [[...x.skillProficiencies, ...(x.skillChoice ? [`${x.skillChoice.count} of your choice`] : [])].join(', '), x.feat || 'Any Origin feat', x.sourceName && x.sourceName !== 'SRD' ? x.sourceName : ''].filter(Boolean).join(' · '))}
       ${b
         ? html`
           <div class="chosen">
-            <h3>${b.name}</h3>
-            <fieldset>
+            <h3>${b.name}${b.sourceName ? html` <small class="muted">${b.sourceName}</small>` : ''}</h3>
+            ${b.chooseAbilities
+              ? html`<fieldset>
+                  <legend>Choose three abilities to increase <strong>${keys.length} / 3</strong></legend>
+                  ${b.suggestedAbilities?.length ? html`<p class="hint">The book suggests ${b.suggestedAbilities.join(' and ')}.</p>` : ''}
+                  <div class="check-grid">${ABILITIES.map((a) => {
+                    const on = keys.includes(a);
+                    return html`<label class="check"><input type="checkbox" data-pick="backgroundBonus.abilities" data-max="3" value="${a}" ${raw(on ? 'checked' : '')} ${raw(!on && keys.length >= 3 ? 'disabled' : '')} /> <span>${ABILITY_LABELS[a]}</span></label>`;
+                  })}</div>
+                </fieldset>`
+              : ''}
+            ${b.chooseFeat
+              ? html`<label>Origin feat <select data-set="backgroundBonus.feat"><option value="">Choose…</option>${originFeats.map((f) => html`<option value="${f.name}" ${raw(feat === f.name ? 'selected' : '')}>${f.name}${f.source && f.source !== 'srd' && f.sourceName ? ` (${f.sourceName})` : ''}</option>`)}</select></label>`
+              : ''}
+            ${b.skillChoice ? skillPicker('backgroundBonus.skills', b.skillChoice, bonus.skills, b.skillProficiencies, 'Background skill') : ''}
+            <fieldset ${raw(b.chooseAbilities && keys.length < 3 ? 'disabled' : '')}>
               <legend>Ability score increases (${keys.map((k) => ABILITY_LABELS[k]).join(', ')})</legend>
               <label class="inline"><input type="radio" name="bonus-mode" data-set="backgroundBonus.mode" value="2-1" ${raw(bonus.mode !== '1-1-1' ? 'checked' : '')} /> +2 to one and +1 to another</label>
               <label class="inline"><input type="radio" name="bonus-mode" data-set="backgroundBonus.mode" value="1-1-1" ${raw(bonus.mode === '1-1-1' ? 'checked' : '')} /> +1 to all three</label>
@@ -236,14 +256,28 @@ export async function renderBuilder(root, { params, navigate }) {
                 : ''}
             </fieldset>
             <dl class="facts">
-              <dt>Origin feat</dt><dd>${b.feat}</dd>
-              <dt>Skills</dt><dd>${b.skillProficiencies.join(', ')}</dd>
+              <dt>Origin feat</dt><dd>${feat || 'Choose one above'}</dd>
+              <dt>Skills</dt><dd>${backgroundSkills(b, c).join(', ') || '—'}${b.skillChoice && backgroundSkills(b, c).length < b.skillProficiencies.length + b.skillChoice.count ? ' (choose more above)' : ''}</dd>
               <dt>Tool</dt><dd>${b.toolProficiency || '—'}</dd>
               <dt>Equipment</dt><dd>${b.equipment}</dd>
             </dl>
-            ${featDetails(b.feat)}
+            ${featDetails(feat)}
+            ${b.rules2014 ? html`<details><summary>Full background text</summary>${md(b.description)}</details>` : ''}
           </div>`
         : ''}`);
+  }
+
+  /** Checkboxes for "choose N skills" (stored as an array at path). */
+  function skillPicker(path, choice, current, already, label) {
+    const picked = (current || []).filter((x) => choice.options.includes(x));
+    const taken = new Set([...(already || [])]);
+    return html`<fieldset>
+      <legend>${label}${choice.count > 1 ? "s" : ""}: choose ${choice.count} <strong>(${picked.length} chosen)</strong></legend>
+      <div class="check-grid">${choice.options.filter((x) => !taken.has(x)).map((x) => {
+        const on = picked.includes(x);
+        return html`<label class="check"><input type="checkbox" data-pick="${path}" data-max="${choice.count}" value="${x}" ${raw(on ? 'checked' : '')} ${raw(!on && picked.length >= choice.count ? 'disabled' : '')} /> <span>${x}</span></label>`;
+      })}</div>
+    </fieldset>`;
   }
 
   function featDetails(label) {
@@ -253,22 +287,28 @@ export async function renderBuilder(root, { params, navigate }) {
 
   function stepSpecies() {
     const s = species();
-    const choices = SPECIES_CHOICES[c.speciesId] || [];
+    const choices = speciesChoices(s);
+    const subsp = chosenSubspecies(s, c);
+    const skillChoice = speciesSkillChoice(s, c);
     const originFeats = srd.feats.filter((f) => f.category === 'Origin Feat');
     return String(html`
       <h2>Choose a species</h2>
       <p class="muted">Your species gives your size, speed and special traits.</p>
-      ${choiceGrid(srd.species, c.speciesId, 'speciesId', (x) => `Speed ${x.speed} ft. · ${x.traits.map((t) => t.name).slice(0, 3).join(', ')}`)}
+      ${choiceGrid(srd.species, c.speciesId, 'speciesId', (x) => [`Speed ${x.speed} ft.`, x.traits.map((t) => t.name).filter((n) => !/^(Age|Alignment|Size|Speed|Languages)$/i.test(n)).slice(0, 3).join(', '), x.sourceName && x.sourceName !== 'SRD' ? x.sourceName : ''].filter(Boolean).join(' · '))}
       ${s
         ? html`
           <div class="chosen">
-            <h3>${s.name}</h3>
+            <h3>${s.name}${s.sourceName ? html` <small class="muted">${s.sourceName}</small>` : ''}</h3>
             ${choices.length
               ? html`<div class="row wrap">${choices.map((ch) => {
                   const opts = ch.options === 'origin-feats' ? originFeats.map((f) => [f.name, f.name]) : ch.options;
-                  return html`<label>${ch.label}<select data-set="speciesOptions.${ch.key}"><option value="">Choose…</option>${opts.map(([v, l]) => html`<option value="${v}" ${raw(c.speciesOptions[ch.key] === v ? 'selected' : '')}>${l}</option>`)}</select></label>`;
+                  return html`<label>${ch.label}${ch.optional ? ' (optional)' : ''}<select data-set="speciesOptions.${ch.key}"><option value="">Choose…</option>${opts.map(([v, l]) => html`<option value="${v}" ${raw(c.speciesOptions[ch.key] === v ? 'selected' : '')}>${l}</option>`)}</select></label>`;
                 })}</div>`
               : ''}
+            ${subsp?.description || subsp?.traits?.length
+              ? html`<div class="callout"><h4>${subsp.name}${subsp.sourceName ? html` <small class="muted">${subsp.sourceName}</small>` : ''}</h4>${md(subsp.description || '')}${subsp.traits.map((t) => html`<p><strong><em>${t.name}.</em></strong> ${md(t.text)}</p>`)}</div>`
+              : ''}
+            ${skillChoice ? skillPicker('speciesOptions.skills', skillChoice, c.speciesOptions.skills, [...(s.skills || []), ...(subsp?.skills || []), ...backgroundSkills(bg(), c)], 'Species skill') : ''}
             ${md(s.description)}
             ${c.speciesId === 'human' && c.speciesOptions.feat ? featDetails(c.speciesOptions.feat) : ''}
           </div>`
@@ -380,7 +420,7 @@ export async function renderBuilder(root, { params, navigate }) {
   }
 
   function fixedSource(skill) {
-    if (bg()?.skillProficiencies.includes(skill)) return 'background';
+    if (backgroundSkills(bg(), c).includes(skill)) return 'background';
     return 'species';
   }
 
@@ -523,15 +563,25 @@ export async function renderBuilder(root, { params, navigate }) {
       }
     }
     if (path === 'backgroundId') {
-      c.backgroundBonus = { mode: c.backgroundBonus.mode || '2-1', plus2: null, plus1: null };
-      if (c.backgroundBonus.mode === '1-1-1') c.backgroundBonus.plus1s = backgroundAbilityKeys(bg());
+      c.backgroundBonus = { mode: c.backgroundBonus.mode || '2-1', plus2: null, plus1: null, abilities: [], feat: null, skills: [] };
+      if (c.backgroundBonus.mode === '1-1-1') c.backgroundBonus.plus1s = backgroundAbilityKeys(bg(), c);
       c.equipmentChoice.background = 'A';
       dropDuplicateSkills();
     }
     if (path === 'backgroundBonus.mode') {
-      if (c.backgroundBonus.mode === '1-1-1') c.backgroundBonus.plus1s = backgroundAbilityKeys(bg());
+      if (c.backgroundBonus.mode === '1-1-1') c.backgroundBonus.plus1s = backgroundAbilityKeys(bg(), c);
       else c.backgroundBonus.plus1s = [];
     }
+    if (path === 'backgroundBonus.abilities') {
+      // Keep the +2/+1 picks inside the three chosen abilities.
+      const keys = backgroundAbilityKeys(bg(), c);
+      const b = c.backgroundBonus;
+      if (!keys.includes(b.plus2)) b.plus2 = null;
+      if (!keys.includes(b.plus1)) b.plus1 = null;
+      if (b.mode === '1-1-1') b.plus1s = keys;
+    }
+    if (path === 'backgroundBonus.skills') dropDuplicateSkills();
+    if (path === 'speciesOptions.lineage') c.speciesOptions.skills = [];
     if (path === 'backgroundBonus.plus2' && c.backgroundBonus.plus1 === c.backgroundBonus.plus2) c.backgroundBonus.plus1 = null;
     if (path === 'speciesId') c.speciesOptions = {};
     if (path.startsWith('speciesOptions') || path === 'speciesId') dropDuplicateSkills();
@@ -602,6 +652,18 @@ export async function renderBuilder(root, { params, navigate }) {
 
   root.addEventListener('change', (e) => {
     const t = e.target;
+    if (t.dataset.pick) {
+      const keys = t.dataset.pick.split('.');
+      let o = c;
+      for (const k of keys.slice(0, -1)) o = o[k] ??= {};
+      const last = keys.at(-1);
+      const cur = Array.isArray(o[last]) ? o[last] : [];
+      const next = t.checked ? [...new Set([...cur, t.value])] : cur.filter((x) => x !== t.value);
+      o[last] = next.slice(0, Number(t.dataset.max) || next.length);
+      afterChange(t.dataset.pick);
+      draw({ keepScroll: true });
+      return;
+    }
     if (t.dataset.skill) {
       const s = t.dataset.skill;
       c.classSkills = t.checked ? [...new Set([...c.classSkills, s])] : c.classSkills.filter((x) => x !== s);

@@ -183,9 +183,57 @@ export function abilityScores(c) {
   return out;
 }
 
-/** Background ability names ("Intelligence") -> keys ("int"). */
-export function backgroundAbilityKeys(background) {
+/**
+ * The three abilities a background can increase ("Intelligence" -> "int").
+ * Backgrounds from 2014-style books let the player pick any three (stored in
+ * backgroundBonus.abilities), as the 2024 rules allow for older backgrounds.
+ */
+export function backgroundAbilityKeys(background, c = null) {
+  if (background?.chooseAbilities) return (c?.backgroundBonus?.abilities || []).filter((k) => ABILITIES.includes(k)).slice(0, 3);
   return (background?.abilityScores || []).map((n) => ABILITY_BY_NAME[n]).filter(Boolean);
+}
+
+/** The Origin feat a background gives (picked by the player for older backgrounds). */
+export function backgroundFeat(background, c) {
+  if (!background) return null;
+  return background.chooseFeat ? c?.backgroundBonus?.feat || null : background.feat;
+}
+
+/** A background's skills: its fixed ones plus any the player picked. */
+export function backgroundSkills(background, c) {
+  if (!background) return [];
+  const picked = background.skillChoice ? (c?.backgroundBonus?.skills || []).filter((s) => background.skillChoice.options.includes(s)).slice(0, background.skillChoice.count) : [];
+  return [...(background.skillProficiencies || []), ...picked];
+}
+
+/** The choices a species asks for (built-in ones, or the species' own list). */
+export function speciesChoices(species) {
+  if (!species) return [];
+  return SPECIES_CHOICES[species.id] || species.choices || [];
+}
+
+/** The subrace / heritage / variant a character picked, if the species has them. */
+export function chosenSubspecies(species, c) {
+  return species?.subspecies?.find((x) => x.name === c?.speciesOptions?.lineage) || null;
+}
+
+/** The skill choice a species (and its chosen subspecies) offers: { count, options } or null. */
+export function speciesSkillChoice(species, c) {
+  const sub = chosenSubspecies(species, c);
+  const parts = [species?.skillChoice, sub?.skillChoice].filter(Boolean);
+  if (!parts.length) return null;
+  return { count: parts.reduce((n, p) => n + p.count, 0), options: [...new Set(parts.flatMap((p) => p.options))] };
+}
+
+/** Skills a species gives: its fixed ones, its subspecies' and any the player picked. */
+export function speciesSkills(species, c) {
+  if (!species) return [];
+  const sub = chosenSubspecies(species, c);
+  const choice = speciesSkillChoice(species, c);
+  const picked = choice ? (c?.speciesOptions?.skills || []).filter((s) => choice.options.includes(s)).slice(0, choice.count) : [];
+  const out = [...(species.skills || []), ...(sub?.skills || []), ...picked];
+  if (['elf', 'human'].includes(species.id) && c?.speciesOptions?.skill) out.push(c.speciesOptions.skill);
+  return [...new Set(out)];
 }
 
 /** Read the class level-table row for a level as { column: value }. */
@@ -476,8 +524,8 @@ export function derive(c, srd) {
   const saveProfs = new Set((cls?.savingThrows || []).map((n) => ABILITY_BY_NAME[n]).filter(Boolean));
   const saves = Object.fromEntries(ABILITIES.map((a) => [a, { proficient: saveProfs.has(a), bonus: mods[a] + (saveProfs.has(a) ? pb : 0) }]));
 
-  const skillProfs = new Set([...(background?.skillProficiencies || []), ...(c.classSkills || [])]);
-  if (['elf', 'human'].includes(c.speciesId) && c.speciesOptions?.skill) skillProfs.add(c.speciesOptions.skill);
+  const skillProfs = new Set([...backgroundSkills(background, c), ...(c.classSkills || [])]);
+  for (const sk of speciesSkills(species, c)) skillProfs.add(sk);
   const expertise = new Set(c.expertise || []);
   const skills = Object.fromEntries(
     Object.entries(SKILLS).map(([name, ab]) => {
@@ -489,7 +537,8 @@ export function derive(c, srd) {
 
   // Feats: background origin feat (+ Human Versatile feat).
   const featNames = [];
-  if (background?.feat) featNames.push(background.feat);
+  const bgFeat = backgroundFeat(background, c);
+  if (bgFeat) featNames.push(bgFeat);
   if (c.speciesId === 'human' && c.speciesOptions?.feat) featNames.push(c.speciesOptions.feat);
   for (const [lvl, choice] of Object.entries(c.levelChoices || {})) {
     if (Number(lvl) <= level && choice?.type === 'feat' && choice.feat) featNames.push(choice.feat);
@@ -543,7 +592,8 @@ export function derive(c, srd) {
   }
   ac += Number(c.acAdjust || 0);
 
-  let speed = species?.speed ?? 30;
+  const subspecies = chosenSubspecies(species, c);
+  let speed = subspecies?.speed ?? species?.speed ?? 30;
   if (c.speciesId === 'elf' && c.speciesOptions?.lineage === 'Wood Elf') speed = 35;
   if (body?.strength && scores.str < body.strength) speed -= 10;
   // Barbarian Fast Movement: +10 ft. unless in Heavy armor.
@@ -633,7 +683,8 @@ export function derive(c, srd) {
     alwaysSpells: always.spells,
     alwaysMissing: always.missing,
     features,
-    speciesTraits: species?.traits || [],
+    subspecies,
+    speciesTraits: [...(species?.traits || []), ...(subspecies?.traits || []).map((t) => ({ ...t, name: `${t.name} (${subspecies.name})` }))],
     classRow: levelRow(cls, level),
   };
 }
@@ -648,16 +699,26 @@ export function validate(c, srd) {
   if (!bg) problems.push({ step: 'background', message: 'Choose a background.' });
   if (bg) {
     const b = c.backgroundBonus || {};
-    const keys = backgroundAbilityKeys(bg);
-    if (b.mode === '1-1-1') {
+    const keys = backgroundAbilityKeys(bg, c);
+    if (bg.chooseAbilities && keys.length !== 3) problems.push({ step: 'background', message: 'Choose the three abilities your background increases.' });
+    else if (b.mode === '1-1-1') {
       if ((b.plus1s || []).length !== 3) problems.push({ step: 'background', message: 'Choose your +1 ability increases.' });
     } else if (!b.plus2 || !b.plus1 || b.plus2 === b.plus1 || !keys.includes(b.plus2) || !keys.includes(b.plus1)) {
       problems.push({ step: 'background', message: 'Choose which abilities get +2 and +1.' });
     }
   }
+  if (bg?.chooseFeat && !backgroundFeat(bg, c)) problems.push({ step: 'background', message: 'Choose your background\'s Origin feat.' });
+  if (bg?.skillChoice && backgroundSkills(bg, c).length !== (bg.skillProficiencies || []).length + bg.skillChoice.count)
+    problems.push({ step: 'background', message: `Choose your background's skill${bg.skillChoice.count > 1 ? 's' : ''}.` });
   if (!c.speciesId) problems.push({ step: 'species', message: 'Choose a species.' });
-  for (const choice of SPECIES_CHOICES[c.speciesId] || []) {
-    if (!c.speciesOptions?.[choice.key]) problems.push({ step: 'species', message: `Choose: ${choice.label}.` });
+  const sp = srd.species.find((x) => x.id === c.speciesId);
+  for (const choice of speciesChoices(sp)) {
+    if (!choice.optional && !c.speciesOptions?.[choice.key]) problems.push({ step: 'species', message: `Choose: ${choice.label}.` });
+  }
+  const spSkills = speciesSkillChoice(sp, c);
+  if (spSkills) {
+    const picked = (c.speciesOptions?.skills || []).filter((x) => spSkills.options.includes(x));
+    if (picked.length < spSkills.count) problems.push({ step: 'species', message: `Choose your species' skill${spSkills.count > 1 ? 's' : ''}.` });
   }
   if (ABILITIES.some((a) => !Number.isFinite(Number(c.baseScores?.[a])) || c.baseScores?.[a] == null))
     problems.push({ step: 'abilities', message: 'Set all six ability scores.' });
@@ -677,9 +738,8 @@ export function validate(c, srd) {
 /** Skills already given by the background/species, so the class step doesn't offer them twice. */
 export function fixedSkills(c, srd) {
   const bg = srd.backgrounds.find((x) => x.id === c.backgroundId);
-  const set = new Set(bg?.skillProficiencies || []);
-  if (['elf', 'human'].includes(c.speciesId) && c.speciesOptions?.skill) set.add(c.speciesOptions.skill);
-  return set;
+  const sp = srd.species.find((x) => x.id === c.speciesId);
+  return new Set([...backgroundSkills(bg, c), ...speciesSkills(sp, c)]);
 }
 
 /* ------------------------------------------------------- play-time changes */

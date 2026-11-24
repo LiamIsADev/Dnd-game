@@ -94,9 +94,11 @@ const CATEGORIES = [
     label: 'Classes',
     load: () => withHb('classes'),
     sub: (c) => `d${c.hitDie} · ${c.primaryAbility}${bookTag(c)}`,
-    search: (c) => c.name,
+    search: (c) => [c.name, c.sourceName].join(' '),
+    filters: [BOOK_FILTER],
     detail: (c) => html`
       <h2>${c.name}</h2>
+      ${c.source && c.source !== 'srd' ? html`<p class="meta">From ${c.sourceName}</p>` : ''}
       ${md(c.description)}
       <table class="traits"><tbody>${Object.entries(c.coreTraits).map(([k, v]) => html`<tr><th scope="row">${k}</th><td>${v}</td></tr>`)}</tbody></table>
       ${c.levelTable
@@ -116,16 +118,21 @@ const CATEGORIES = [
     label: 'Species',
     load: () => withHb('species'),
     sub: (s) => `${s.creatureType} · Speed ${s.speed} ft.${bookTag(s)}`,
-    search: (s) => s.name,
-    detail: (s) => html`<h2>${s.name}</h2>${md(s.description)}`,
+    search: (s) => [s.name, s.sourceName, ...(s.subspecies || []).map((x) => x.name)].join(' '),
+    filters: [BOOK_FILTER],
+    detail: (s) => html`<h2>${s.name}</h2>${s.source && s.source !== 'srd' ? html`<p class="meta">From ${s.sourceName}</p>` : ''}${md(s.description)}
+      ${(s.subspecies || []).filter((x) => x.optional).map(
+        (x) => html`<h3>Optional variant: ${x.name}</h3>${x.sourceName ? html`<p class="meta">From ${x.sourceName}</p>` : ''}${md(x.description || '')}${x.traits.map((t) => html`<p><strong><em>${t.name}.</em></strong> ${md(t.text)}</p>`)}`,
+      )}`,
   },
   {
     id: 'backgrounds',
     label: 'Backgrounds',
     load: () => withHb('backgrounds'),
-    sub: (b) => b.skillProficiencies.join(', ') + bookTag(b),
-    search: (b) => b.name,
-    detail: (b) => html`<h2>${b.name}</h2>${md(b.description)}`,
+    sub: (b) => [...b.skillProficiencies, ...(b.skillChoice ? [`${b.skillChoice.count} of your choice`] : [])].join(', ') + bookTag(b),
+    search: (b) => [b.name, b.sourceName].join(' '),
+    filters: [BOOK_FILTER],
+    detail: (b) => html`<h2>${b.name}</h2>${b.source && b.source !== 'srd' ? html`<p class="meta">From ${b.sourceName}</p>` : ''}${md(b.description)}`,
   },
   {
     id: 'feats',

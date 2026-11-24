@@ -4,6 +4,9 @@
 //   subclasses.json  extra subclasses for the 12 classes, moved to 2024 levels
 //   spells.json      spells that aren't in the SRD 5.2.1
 //   feats.json       feats that aren't in the SRD 5.2.1
+//   species.json     more species (with subraces) and a Halfling variant
+//   backgrounds.json more backgrounds
+//   classes.json     classes that aren't in the SRD, with their subclasses
 //   index.json       sources, licences and the OGL notices
 //
 //   npm run build:open5e
@@ -11,6 +14,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { convertCreature, addLegendaryActions, addMythic } from './open5e/monsters.mjs';
+import { convertSpecies, convertBackground, convertClasses } from './open5e/heroes.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = async (f) => JSON.parse(await readFile(path.join(root, f), 'utf8'));
@@ -35,6 +39,9 @@ const SHORT = {
   bfrd: 'Black Flag',
   'a5e-mm': 'Level Up Monsters',
   vom: 'Vault of Magic',
+  'a5e-ddg': "Level Up: Dungeon Delver's Guide",
+  'a5e-gpg': 'Level Up: Gate Pass Gazette',
+  'srd-2014': 'SRD 5.1',
 };
 // For monsters in several books, the first book listed wins. The 2023 Tome of
 // Beasts is the updated 2016 one.
@@ -362,6 +369,13 @@ export function convertMagicWeapon(m, srdWeapons) {
 /* ---------------------------------------------------------------- main */
 
 export async function buildOpen5e() {
+  const [speciesSrc, backgroundSrc, classSrc, srdSpecies, srdBackgrounds] = await Promise.all([
+    read('open5e-source/species.json'),
+    read('open5e-source/backgrounds.json'),
+    read('open5e-source/classes.json'),
+    read('public/data/srd/species.json'),
+    read('public/data/srd/backgrounds.json'),
+  ]);
   const [documents, subclasses, spells, feats, licenses, creatures, weaponSrc, srdClasses, srdSpells, srdFeats, srdMonsters, srdEquipment, srdItems] = await Promise.all([
     read('open5e-source/documents.json'),
     read('open5e-source/subclasses.json'),
@@ -476,7 +490,27 @@ export async function buildOpen5e() {
   outWeapons.sort((a, b) => a.name.localeCompare(b.name));
   outItems.sort((a, b) => a.name.localeCompare(b.name));
 
-  const usedSources = new Set([...subclasses, ...spells, ...feats, ...creatures, ...weaponSrc.weapons, ...weaponSrc.magicWeapons].map((x) => x.source));
+  // Species, backgrounds and new classes.
+  const shortName = (k) => SHORT[k] || k;
+  const outSpecies = convertSpecies(speciesSrc, srdSpecies, { clean: cleanText, slug, short: shortName });
+  const bgNames = new Set(srdBackgrounds.map((b) => b.name.toLowerCase()));
+  const bgIds = new Set(srdBackgrounds.map((b) => b.id));
+  const seenBg = new Set();
+  const outBackgrounds = [];
+  // Open5e Originals repeats Tome of Heroes' Scoundrel word for word.
+  for (const b of [...backgroundSrc].sort((x, y) => (x.source === 'open5e') - (y.source === 'open5e') || x.name.localeCompare(y.name))) {
+    // Fate-Touched is a DM's add-on that sits on top of a character's real background, not one to pick.
+    if (b.key === 'tdcs_fate-touched') continue;
+    const same = `${b.name}|${b.benefits.map((x) => x.desc).join('|')}`.toLowerCase();
+    if (seenBg.has(same) || seenBg.has(b.name.toLowerCase() + '|dup')) continue;
+    seenBg.add(same);
+    if (b.source !== 'open5e') seenBg.add(b.name.toLowerCase() + '|dup');
+    outBackgrounds.push(convertBackground(b, { clean: cleanText, slug, short: shortName, takenNames: bgNames, takenIds: bgIds }));
+  }
+  outBackgrounds.sort((a, b) => a.name.localeCompare(b.name));
+  const outClasses = convertClasses(classSrc, { clean: cleanText, slug, short: shortName });
+
+  const usedSources = new Set([...speciesSrc, ...backgroundSrc, ...classSrc,...subclasses, ...spells, ...feats, ...creatures, ...weaponSrc.weapons, ...weaponSrc.magicWeapons].map((x) => x.source));
   const sources = documents
     .filter((d) => usedSources.has(d.key))
     .map((d) => ({
@@ -502,6 +536,10 @@ export async function buildOpen5e() {
     magicItems: outItems.length,
     legendaryAdded,
     mythicAdded,
+    species: outSpecies.added.length,
+    backgrounds: outBackgrounds.length,
+    classes: outClasses.length,
+    classSubclasses: outClasses.reduce((n, c) => n + c.subclasses.length, 0),
   };
   await Promise.all([
     write('subclasses', byClass),
@@ -510,12 +548,16 @@ export async function buildOpen5e() {
     write('monsters', { added: outMonsters, srdAdds }),
     write('equipment', { weapons: outWeapons }),
     write('magic-items', outItems),
+    write('species', outSpecies),
+    write('backgrounds', outBackgrounds),
+    write('classes', outClasses),
     write('index', {
       attribution:
         'This site also includes Open Game Content from the books listed below, taken from the Open5e API (https://open5e.com). ' +
         'Material under the Open Game License 1.0a is used under its terms; the full licence and the Section 15 notices follow. ' +
         'Material under the Creative Commons Attribution 4.0 International License (https://creativecommons.org/licenses/by/4.0/) ' +
         'is credited to its authors below. The text was reformatted for this site, 2014 subclass features were moved to the 2024 class levels, ' +
+        'species and backgrounds from 2014-era books follow the 2024 rules for older options (the background gives the ability score increases and an Origin feat of your choice), ' +
         'and major monsters without them were given legendary actions (CR 12+) and mythic actions (CR 17+) built from their own stat blocks.',
       sources,
       section15: [
@@ -536,6 +578,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log('Subclasses:', counts.subclasses);
     console.log(`Spells: ${counts.spells} (skipped ${skipped} already in the SRD). Feats: ${counts.feats}.`);
     console.log(`Weapons: ${counts.weapons} (magic items: ${counts.magicItems}).`);
+    console.log(`Species: ${counts.species}. Backgrounds: ${counts.backgrounds}. Classes: ${counts.classes} (${counts.classSubclasses} subclasses).`);
     console.log(`Monsters: ${counts.monsters}. Legendary actions added: ${counts.legendaryAdded}. Mythic: ${counts.mythicAdded}.`);
   });
 }

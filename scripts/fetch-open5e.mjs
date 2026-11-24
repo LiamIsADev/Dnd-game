@@ -11,6 +11,9 @@
 //   Kobold Press Compilation (Kobold Press), Tal'Dorei Campaign Setting
 //   (Green Ronin), Level Up Advanced 5th Edition Adventurer's Guide
 //   (EN Publishing), Spells That Don't Suck (somanyrobots) and Open5e Originals.
+// Plus the monster books listed below, Level Up's Dungeon Delver's Guide and
+// Gate Pass Gazette (backgrounds), Black Flag (the Mechanist class) and the
+// 2014 SRD 5.1 (Half-Elf and Half-Orc).
 import { writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -41,7 +44,14 @@ async function getAll(url) {
 }
 
 const keep = (doc) => SOURCES.includes(doc);
-const keepDoc = (doc) => keep(doc) || MONSTER_SOURCES.includes(doc) || doc === 'vom';
+// Backgrounds also come from two smaller Level Up books.
+export const BACKGROUND_SOURCES = [...SOURCES, 'a5e-ddg', 'a5e-gpg'];
+// Classes that aren't in the SRD: Level Up's Marshal and Black Flag's Mechanist.
+export const NEW_CLASSES = ['a5e_marshal', 'bfrd_mechanist'];
+// From the 2014 SRD 5.1 (CC BY 4.0): the two species the 2024 SRD dropped.
+const SRD_2014_SPECIES = ['Half-Elf', 'Half-Orc'];
+const keepDoc = (doc) => keep(doc) || MONSTER_SOURCES.includes(doc) || BACKGROUND_SOURCES.includes(doc) || ['vom', 'srd-2014'].includes(doc);
+const keyOf = (x) => (typeof x === 'string' ? x.replace(/\/$/, '').split('/').pop() : x?.key || null);
 
 async function main() {
   await mkdir(outDir, { recursive: true });
@@ -73,6 +83,55 @@ async function main() {
       features: c.features.map((f) => ({ name: f.name, desc: f.desc, levels: f.gained_at.map((g) => g.level) })),
       v1Desc: v1Arch.get(c.name.toLowerCase()) || null,
     }));
+
+  // New classes, with every feature and the level-table columns.
+  const newClasses = classes
+    .filter((c) => NEW_CLASSES.includes(c.key) || NEW_CLASSES.includes(keyOf(c.subclass_of)))
+    .map((c) => ({
+      key: c.key,
+      source: c.document.key,
+      name: c.name,
+      subclassOf: keyOf(c.subclass_of),
+      desc: c.desc,
+      hitDie: c.hit_dice,
+      saves: (c.saving_throws || []).map((x) => x.name),
+      casterType: c.caster_type,
+      features: c.features.map((f) => ({
+        key: f.key,
+        name: f.name,
+        desc: f.desc,
+        type: f.feature_type,
+        levels: f.gained_at.map((g) => g.level),
+        table: (f.data_for_class_table || []).map((t) => [t.level, t.column_value]),
+      })),
+    }));
+
+  // Species: Tome of Heroes, Open5e Originals and the 2014 SRD's Half-Elf and
+  // Half-Orc. Subspecies (subraces, heritages, chassis) point at their parent.
+  const v1Races = await getAll(`${API}/v1/races/?format=json&limit=100`);
+  const species = (await getAll(`${API}/v2/species/?format=json&limit=200`))
+    .filter((s) => keep(s.document.key) || (s.document.key === 'srd-2014' && SRD_2014_SPECIES.includes(s.name)))
+    .map((s) => {
+      const out = {
+        key: s.key,
+        source: s.document.key,
+        name: s.name,
+        desc: s.desc,
+        isSub: !!s.is_subspecies,
+        parent: keyOf(s.subspecies_of),
+        traits: s.traits.map((t) => ({ name: t.name, desc: t.desc })),
+      };
+      // Shade has no traits in the v2 API; the v1 write-up has them.
+      if (!out.traits.length) {
+        const v1 = v1Races.find((r) => r.name === s.name);
+        if (v1) out.v1 = { speed: v1.speed, size: v1.size_raw, text: [v1.age, v1.alignment, v1.size, v1.speed_desc, v1.languages, v1.vision, v1.traits].filter(Boolean).join('\n\n') };
+      }
+      return out;
+    });
+
+  const backgrounds = (await getAll(`${API}/v2/backgrounds/?format=json&limit=200`))
+    .filter((b) => BACKGROUND_SOURCES.includes(b.document.key))
+    .map((b) => ({ key: b.key, source: b.document.key, name: b.name, desc: b.desc, benefits: b.benefits.map((x) => ({ name: x.name, type: x.type, desc: x.desc })) }));
 
   const v1Spells = await getAll(`${API}/v1/spells/?format=json&limit=500`);
   const v1Classes4 = new Map(
@@ -208,8 +267,11 @@ async function main() {
     write('licenses', licenses),
     write('creatures', creatures),
     write('weapons', { weapons, magicWeapons }),
+    write('classes', newClasses),
+    write('species', species),
+    write('backgrounds', backgrounds),
   ]);
-  console.log(`\nSaved ${documents.length} sources, ${subclasses.length} subclasses, ${spells.length} spells, ${feats.length} feats.`);
+  console.log(`\nSaved ${documents.length} sources, ${subclasses.length} subclasses, ${spells.length} spells, ${feats.length} feats, ${newClasses.length} classes and subclasses, ${species.length} species, ${backgrounds.length} backgrounds.`);
 }
 
 main().catch((e) => {
