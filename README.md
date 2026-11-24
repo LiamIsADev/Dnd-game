@@ -30,6 +30,8 @@ Other commands:
 | `npm run preview`   | Serves the built site locally                                        |
 | `npm test`          | Checks the rules conversion, character math, dice and import/export  |
 | `npm run build:srd` | Regenerates `public/data/srd/*.json` from the Markdown in `srd-source/` |
+| `npm run build:open5e` | Regenerates `public/data/open5e/*.json` from the saved Open5e data in `open5e-source/` |
+| `npm run fetch:open5e` | Downloads fresh Open5e data into `open5e-source/` (only needed to update it) |
 
 ## One-time Supabase setup
 
@@ -123,6 +125,16 @@ Run `0006_exploration.sql` in the Supabase SQL Editor (after `0005_turns.sql`) t
 
 The rules come from the **System Reference Document 5.2.1** (the 2024 Fifth Edition rules) by Wizards of the Coast LLC, licensed under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/legalcode). The Markdown version is from [downfallx/dnd-5e-srd-markdown](https://github.com/downfallx/dnd-5e-srd-markdown) (commit `1b4b99d`). See [`srd-source/LICENSE`](srd-source/LICENSE).
 
-Only SRD content can be included in the site. Material that exists only in the published books (other subclasses, spells, monsters and so on) is copyrighted and must not be added here.
+### More subclasses, spells and feats (Open5e)
+
+On top of the SRD, the site has 97 extra subclasses for the 12 classes, 982 spells and 73 feats from open-licensed third-party books, taken from the [Open5e API](https://open5e.com): Kobold Press's *Tome of Heroes*, *Deep Magic*, *Deep Magic Extended*, *Warlock Zine* and compilation, Green Ronin's *Tal'Dorei Campaign Setting*, EN Publishing's *Level Up Advanced 5th Edition Adventurer's Guide*, *Spells That Don't Suck* and Open5e's own originals. They're published under the Open Game License 1.0a or CC BY 4.0; the Credits page lists every book, the Section 15 notices and the full OGL text.
+
+- Most of these subclasses were written for the 2014 rules. Their features are moved to the 2024 class levels (everything starts at level 3; 2014 Cleric level 8 features come at 10, or at 7 for Divine Strike and Potent Spellcasting, which Blessed Strikes covers). Each moved feature says where it was originally.
+- Domain, Oath, Circle and Patron spell tables become always-prepared spells. 2014 Warlock tables list spell levels, so those come at Warlock levels 3, 3, 5, 7 and 9 as in 2024. A few tables name spells that exist only in the published Player's Handbook (for example *crown of madness*); the sheet names them so the DM can pick a stand-in.
+- Arcane Warrior, Eldritch Trickster, Soulspy and Underfoot give a Fighter or Rogue spellcasting, a third of a full caster's slots.
+- Feats that raise an ability score ask which one when you take them at level up (this also works for the SRD feats such as Grappler).
+- Some spells don't say which classes can use them. The builder can show them with a checkbox, for the DM to allow.
+
+Only SRD and open-licensed content can be included in the site. Material that exists only in the published Wizards of the Coast books is copyrighted and must not be added here.
 
 Dungeons & Dragons and D&D are trademarks of Wizards of the Coast LLC. This project is not affiliated with or endorsed by Wizards of the Coast.

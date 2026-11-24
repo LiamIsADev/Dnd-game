@@ -319,7 +319,8 @@ export async function renderSheet(root, { params }) {
   function spellsTab(d) {
     const s = d.spell;
     const byId = (sid) => srd.spells.find((x) => x.id === sid);
-    const known = [...c.spells.cantrips, ...c.spells.prepared].map(byId).filter(Boolean);
+    const chosen = [...c.spells.cantrips, ...c.spells.prepared].map(byId).filter(Boolean);
+    const known = [...chosen, ...d.alwaysSpells.filter((x) => !chosen.includes(x))];
     const levels = [...new Set(known.map((x) => x.level))].sort((a, b) => a - b);
     return String(html`
       <div class="spell-head">
@@ -340,8 +341,8 @@ export async function renderSheet(root, { params }) {
       ${levels.map(
         (lvl) => html`<h3>${lvl === 0 ? 'Cantrips' : spellLevelLabel(lvl)}</h3>
           ${known.filter((x) => x.level === lvl).map(
-            (x) => html`<details class="spell"><summary><strong>${x.name}</strong> <small class="muted">${x.castingTime} · ${x.range}${x.concentration ? ' · Concentration' : ''}${x.ritual ? ' · Ritual' : ''}</small></summary>
-              <p class="muted">${spellLevelLabel(x.level)} ${x.school} · Components: ${x.components.raw} · Duration: ${x.duration}</p>
+            (x) => html`<details class="spell"><summary><strong>${x.name}</strong> <small class="muted">${x.castingTime} · ${x.range}${x.concentration ? ' · Concentration' : ''}${x.ritual ? ' · Ritual' : ''}${d.alwaysSpells.includes(x) ? ' · Always prepared' : ''}</small></summary>
+              <p class="muted">${spellLevelLabel(x.level)} ${x.school} · Components: ${x.components.raw} · Duration: ${x.duration}${x.source && x.source !== 'srd' ? ` · ${x.sourceName}` : ''}</p>
               ${md(x.description)}
               ${x.higherLevels ? html`<p><strong><em>Using a Higher-Level Spell Slot.</em></strong> ${x.higherLevels}</p>` : ''}
               ${x.cantripUpgrade ? html`<p><strong><em>Cantrip Upgrade.</em></strong> ${x.cantripUpgrade}</p>` : ''}
@@ -349,6 +350,7 @@ export async function renderSheet(root, { params }) {
           )}`,
       )}
       ${!known.length ? html`<p class="muted">No spells chosen yet.</p>` : ''}
+      ${d.alwaysMissing.length ? html`<p class="hint">Your subclass also lists ${d.alwaysMissing.join(', ')}, which ${d.alwaysMissing.length === 1 ? "isn't" : "aren't"} in this site's open-licensed rules. Ask your DM for a stand-in.</p>` : ''}
       <p><a href="#/characters/${id}/edit">Change spells in the builder</a></p>`);
   }
 
