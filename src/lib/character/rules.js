@@ -173,7 +173,8 @@ export function abilityScores(c) {
     }
     // Ability Score Improvements from levelling up (can't go above 20).
     for (const [lvl, choice] of Object.entries(c.levelChoices || {})) {
-      if (Number(lvl) <= (Number(c.level) || 1) && choice?.type === 'asi') s += Number(choice.plus?.[a] || 0);
+      // A feat's +1 (e.g. Grappler: Strength or Dexterity) is stored the same way.
+      if (Number(lvl) <= (Number(c.level) || 1) && (choice?.type === 'asi' || choice?.type === 'feat')) s += Number(choice.plus?.[a] || 0);
     }
     s = Math.min(s, 20);
     s += Number(c.scoreAdjust?.[a] ?? 0) || 0;
@@ -221,8 +222,39 @@ export function spellSlots(cls, level) {
   return slots;
 }
 
-export function spellcasting(cls, level) {
-  if (!cls || !SPELLCASTING_ABILITY[cls.id]) return null;
+// Subclasses that let a Fighter or Rogue cast spells (e.g. Eldritch Trickster)
+// use a third of a full caster's slots. Index = class level; levels 1-2 cast nothing.
+const THIRD_CASTER = {
+  prepared: [0, 0, 0, 3, 4, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 11, 11, 12, 13],
+  slots: [
+    [], [], [], [2], [3], [3], [3], [4, 2], [4, 2], [4, 2], [4, 3], [4, 3], [4, 3],
+    [4, 3, 2], [4, 3, 2], [4, 3, 2], [4, 3, 3], [4, 3, 3], [4, 3, 3], [4, 3, 3, 1], [4, 3, 3, 1],
+  ],
+};
+
+/**
+ * What a character can cast at a level. subclass is optional: a few
+ * subclasses grant spellcasting to a class that has none.
+ * list is the class whose spell list they choose from.
+ */
+export function spellcasting(cls, level, subclass = null) {
+  if (!cls) return null;
+  if (!SPELLCASTING_ABILITY[cls.id]) {
+    const sc = subclass?.spellcasting;
+    if (!sc || level < 3) return null;
+    const l = Math.min(20, level);
+    const slots = Object.fromEntries(THIRD_CASTER.slots[l].map((n, i) => [i + 1, n]));
+    return {
+      ability: sc.ability,
+      cantrips: sc.cantrips + (l >= 10 ? 1 : 0),
+      prepared: THIRD_CASTER.prepared[l],
+      slots,
+      maxSpellLevel: THIRD_CASTER.slots[l].length,
+      pact: false,
+      list: sc.list,
+      fromSubclass: subclass.name,
+    };
+  }
   const row = levelRow(cls, level);
   const slots = spellSlots(cls, level);
   const levels = Object.keys(slots).map(Number);
@@ -233,7 +265,93 @@ export function spellcasting(cls, level) {
     slots,
     maxSpellLevel: levels.length ? Math.max(...levels) : 0,
     pact: cls.id === 'warlock',
+    list: cls.name,
   };
+}
+
+const spellKey = (name) =>
+  String(name)
+    .toLowerCase()
+    .replace(/[’']/g, '')
+    .replace(/[^a-z0-9]+/g, '');
+
+/** Rows of every table in a feature's text (Markdown pipes or HTML), as arrays of cells. */
+export function featureTables(text) {
+  const tables = [];
+  const src = String(text || '');
+  for (const m of src.matchAll(/<table>([\s\S]*?)<\/table>/g)) {
+    const rows = [...m[1].matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map((r) =>
+      [...r[1].matchAll(/<t[hd]>([\s\S]*?)<\/t[hd]>/g)].map((c) => c[1].replace(/<[^>]+>/g, '').trim()),
+    );
+    tables.push(rows);
+  }
+  let cur = null;
+  for (const line of src.split('\n')) {
+    const t = line.trim();
+    if (t.startsWith('|')) {
+      if (/^\|\s*:?-{3,}/.test(t)) continue;
+      (cur ||= []).push(t.replace(/^\||\|$/g, '').split('|').map((c) => c.trim()));
+    } else if (cur) {
+      tables.push(cur);
+      cur = null;
+    }
+  }
+  if (cur) tables.push(cur);
+  return tables;
+}
+
+/**
+ * The spells a subclass always has prepared (Domain, Oath, Circle and Patron
+ * spells), read from its "... Spells" table, up to the character's level.
+ * 2014-style tables list spell levels (1st-5th); those come at the 2024 class
+ * levels 3, 3, 5, 7 and 9. Subclasses whose table depends on a choice (several
+ * spell columns, or one table per land) are left to the player.
+ * @returns {{ spells: object[], missing: string[] }}
+ */
+export function subclassSpells(subclass, level, spells) {
+  const out = { spells: [], missing: [] };
+  if (!subclass) return out;
+  const byKey = new Map(spells.map((s) => [spellKey(s.name), s]));
+  for (const f of subclass.features || []) {
+    if (f.level > level || !/spells|spell list|magic$/i.test(f.name)) continue;
+    // "Level | Spells" tables. With extra columns (Animal Lords: one per
+    // affinity) only the first spell column is always prepared.
+    const tables = featureTables(f.description).filter((t) => t.length > 1 && /level/i.test(t[0][0]) && /spells?$/i.test(t[0][1] || ''));
+    if (tables.length !== 1) continue;
+    const [head, ...rows] = tables[0];
+    const bySpellLevel = /spell level/i.test(head[0]);
+    for (const [lv, cell = ''] of rows) {
+      const n = parseInt(lv, 10);
+      if (!n) continue;
+      const at = Math.max(3, bySpellLevel ? (n <= 2 ? 3 : 2 * n - 1) : n);
+      if (at > level) continue;
+      for (const raw of cell.split(/,(?![^(]*\))/)) {
+        // "find familiar (snakes only)": the note stays in the feature text.
+        const name = raw.replace(/[*_]/g, '').replace(/\s*\([^)]*\)\s*$/, '').trim();
+        if (!name) continue;
+        const sp = byKey.get(spellKey(name));
+        if (sp) {
+          if (!out.spells.includes(sp)) out.spells.push(sp);
+        } else out.missing.push(name);
+      }
+    }
+  }
+  for (const name of subclass.spellcasting?.always || []) {
+    const sp = byKey.get(spellKey(name));
+    if (sp && !out.spells.includes(sp)) out.spells.push(sp);
+  }
+  return out;
+}
+
+/**
+ * Ability scores a feat can raise, read from "Increase your Strength or
+ * Dexterity score by 1". Returns { options: ['str', 'dex'], amount: 1 } or null.
+ */
+export function featAbilityIncrease(feat) {
+  const m = String(feat?.description || '').match(/Increase (?:your|one) ((?:[A-Z][a-z]+(?:,\s*| or |, or )?)+?) score(?:s)? by (\d)/);
+  if (!m) return null;
+  const options = [...m[1].matchAll(/Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma/g)].map((x) => ABILITY_BY_NAME[x[0]]);
+  return options.length ? { options, amount: Number(m[2]) } : null;
 }
 
 /** Which weapons a class is proficient with, from text like "Simple weapons and Martial weapons that have the Light property". */
@@ -472,10 +590,12 @@ export function derive(c, srd) {
     mastery: null,
   });
 
-  const casting = spellcasting(cls, level);
+  const casting = spellcasting(cls, level, subclass);
   const spell = casting
     ? { ...casting, saveDc: 8 + pb + mods[casting.ability], attack: pb + mods[casting.ability] }
     : null;
+  // Subclass spells that are always prepared and don't count against the limit.
+  const always = casting ? subclassSpells(subclass, level, srd.spells || []) : { spells: [], missing: [] };
 
   const features = [
     ...(cls?.features || []).filter((f) => f.level <= level).map((f) => ({ ...f, source: cls.name })),
@@ -506,6 +626,8 @@ export function derive(c, srd) {
     d20Penalty: 2 * exhaustion,
     attacks,
     spell,
+    alwaysSpells: always.spells,
+    alwaysMissing: always.missing,
     features,
     speciesTraits: species?.traits || [],
     classRow: levelRow(cls, level),
@@ -539,7 +661,7 @@ export function validate(c, srd) {
     problems.push({ step: 'abilities', message: `Point buy is over ${POINT_BUY_BUDGET} points.` });
   if (cls?.skillChoices?.count && (c.classSkills || []).length !== cls.skillChoices.count)
     problems.push({ step: 'skills', message: `Choose ${cls.skillChoices.count} class skills.` });
-  const casting = spellcasting(cls, Number(c.level) || 1);
+  const casting = spellcasting(cls, Number(c.level) || 1, cls?.subclasses.find((s) => s.id === c.subclassId));
   if (casting) {
     if ((c.spells?.cantrips || []).length > casting.cantrips) problems.push({ step: 'spells', message: `Too many cantrips (max ${casting.cantrips}).` });
     if ((c.spells?.prepared || []).length > casting.prepared) problems.push({ step: 'spells', message: `Too many prepared spells (max ${casting.prepared}).` });

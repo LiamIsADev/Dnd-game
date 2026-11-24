@@ -3077,3 +3077,11 @@ button.vital:hover {
     margin: 0 auto;
   }
 }
+
+/* Licence text on the credits page. */
+pre.license {
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+  max-height: 24rem;
+  overflow: auto;
+}

@@ -7,6 +7,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "build:srd": "node scripts/build-srd.mjs",
+    "fetch:open5e": "node scripts/fetch-open5e.mjs",
+    "build:open5e": "node scripts/build-open5e.mjs",
     "test": "node --test tests/*.test.mjs"
   },
   "repository": {

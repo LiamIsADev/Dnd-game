@@ -2,7 +2,7 @@
 // does (attack, save, healing, damage at the slot level), what the database
 // needs to know about each creature (AC, HP, saves, resistances), XP, and
 // what changes when a character levels up.
-import { ABILITIES, derive, levelRow, spellcasting, mod, abilityScores } from './rules.js';
+import { ABILITIES, derive, levelRow, spellcasting, mod, abilityScores, featAbilityIncrease } from './rules.js';
 
 const ABILITY_BY_WORD = { strength: 'str', dexterity: 'dex', constitution: 'con', intelligence: 'int', wisdom: 'wis', charisma: 'cha' };
 
@@ -58,14 +58,14 @@ export function spellMechanics(spell, { slotLevel = spell?.level || 0, casterLev
   }
 
   // Casting with a higher-level slot.
-  const upcast = (spell.higherLevels || '').match(/(?:damage|healing) increases by (\d+d\d+) for each spell slot level above (\d)/i);
+  const upcast = (spell.higherLevels || '').match(/(?:damage|healing) increases by (\d+d\d+) for each (?:spell )?slot level above (\d)/i);
   if (upcast && slotLevel > Number(upcast[2])) {
     const extra = slotLevel - Number(upcast[2]);
     if (out.kind === 'heal') out.heal = addDice(out.heal, upcast[1], extra);
     else if (out.damage) out.damage = addDice(out.damage, upcast[1], extra);
   }
   // Cantrips get stronger at character levels 5, 11 and 17.
-  const cantrip = (spell.cantripUpgrade || '').match(/damage increases by (\d+d\d+) when you reach level/i);
+  const cantrip = (spell.cantripUpgrade || '').match(/damage increases by (\d+d\d+) when you reach (?:level|5th)/i);
   if (spell.level === 0 && cantrip && out.damage) {
     const steps = [5, 11, 17].filter((l) => casterLevel >= l).length;
     out.damage = addDice(out.damage, cantrip[1], steps);
@@ -153,9 +153,8 @@ export function castableSpells(c, srd) {
   const byId = (id) => srd.spells.find((s) => s.id === id);
   const slots = d.spell.slots || {};
   const used = c.slotsUsed || {};
-  return [...(c.spells?.cantrips || []), ...(c.spells?.prepared || [])]
-    .map(byId)
-    .filter(Boolean)
+  const chosen = [...(c.spells?.cantrips || []), ...(c.spells?.prepared || [])].map(byId).filter(Boolean);
+  return [...chosen, ...d.alwaysSpells.filter((s) => !chosen.includes(s))]
     .map((spell) => {
       const levels =
         spell.level === 0
@@ -275,8 +274,9 @@ export function levelUpInfo(c, srd) {
     ...(cls.subclasses.find((s) => s.id === c.subclassId)?.features || []).filter((f) => f.level === level),
   ];
   const hitDie = cls.hitDie || 8;
-  const before = spellcasting(cls, d.level);
-  const after = spellcasting(cls, level);
+  const sub = cls.subclasses.find((s) => s.id === c.subclassId) || null;
+  const before = spellcasting(cls, d.level, sub);
+  const after = spellcasting(cls, level, sub);
   const conMod = mod(abilityScores(c).con);
   return {
     level,
@@ -312,7 +312,12 @@ export function applyLevelUp(c, srd, choice = {}) {
   if (typeof choice.hp === 'number') next.hpRolls[info.level] = Math.max(1, Math.min(info.hitDie, Math.round(choice.hp)));
   if (info.needsSubclass && choice.subclassId) next.subclassId = choice.subclassId;
   if (info.asi || info.epicBoon) {
-    if (choice.feat) next.levelChoices[info.level] = { type: 'feat', feat: choice.feat };
+    if (choice.feat) {
+      // Most feats also raise one ability score by 1; the player picks which.
+      const inc = featAbilityIncrease(srd.feats.find((f) => f.name === choice.feat));
+      const pick = inc && (inc.options.includes(choice.featAbility) ? choice.featAbility : inc.options[0]);
+      next.levelChoices[info.level] = { type: 'feat', feat: choice.feat, ...(pick ? { plus: { [pick]: inc.amount } } : {}) };
+    }
     else if (choice.asi) {
       const plus = {};
       let total = 0;

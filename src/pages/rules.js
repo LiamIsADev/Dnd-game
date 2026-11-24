@@ -6,20 +6,30 @@ import { statBlock } from '../components/statblock.js';
 
 const md = (text) => raw(rulesMarkdown(text));
 
+// Where an entry comes from: the SRD, or one of the Open5e books.
+const bookTag = (x) => (x.source && x.source !== 'srd' ? ` · ${x.sourceName}` : '');
+const BOOK_FILTER = {
+  id: 'book',
+  label: 'Book',
+  options: (items) => [...new Set(items.map((x) => x.sourceName || 'SRD'))].sort().map((b) => [b, b]),
+  test: (x, v) => (x.sourceName || 'SRD') === v,
+};
+
 const CATEGORIES = [
   {
     id: 'spells',
     label: 'Spells',
     load: () => loadSrd('spells'),
-    sub: (s) => `${spellLevelLabel(s.level)} ${s.school}${s.ritual ? ' · Ritual' : ''}${s.concentration ? ' · Concentration' : ''}`,
-    search: (s) => [s.name, s.school, ...s.classes].join(' '),
+    sub: (s) => `${spellLevelLabel(s.level)} ${s.school}${s.ritual ? ' · Ritual' : ''}${s.concentration ? ' · Concentration' : ''}${bookTag(s)}`,
+    search: (s) => [s.name, s.school, ...s.classes, s.sourceName].join(' '),
     filters: [
       { id: 'level', label: 'Level', options: (items) => [...new Set(items.map((s) => s.level))].sort((a, b) => a - b).map((l) => [String(l), l === 0 ? 'Cantrip' : `Level ${l}`]), test: (s, v) => String(s.level) === v },
       { id: 'class', label: 'Class', options: (items) => [...new Set(items.flatMap((s) => s.classes))].sort().map((c) => [c, c]), test: (s, v) => s.classes.includes(v) },
+      BOOK_FILTER,
     ],
     detail: (s) => html`
       <h2>${s.name}</h2>
-      <p class="meta">${spellLevelLabel(s.level)} ${s.school} (${s.classes.join(', ')})</p>
+      <p class="meta">${spellLevelLabel(s.level)} ${s.school} (${s.classes.join(', ') || 'no class listed; ask your DM'})${bookTag(s)}</p>
       <dl class="facts">
         <dt>Casting Time</dt><dd>${s.castingTime}</dd>
         <dt>Range</dt><dd>${s.range}</dd>
@@ -72,7 +82,7 @@ const CATEGORIES = [
       <h3>Class Features</h3>
       ${c.features.map((f) => html`<details><summary>Level ${f.level}: ${f.name}</summary>${md(f.description)}</details>`)}
       ${c.subclasses.map(
-        (s) => html`<h3>Subclass: ${s.name}</h3>${s.tagline ? html`<p class="meta">${s.tagline}</p>` : ''}${md(s.description)}
+        (s) => html`<h3>Subclass: ${s.name}</h3>${s.tagline ? html`<p class="meta">${s.tagline}</p>` : ''}${s.source && s.source !== 'srd' ? html`<p class="meta">From ${s.sourceName}</p>` : ''}${md(s.description)}
           ${s.features.map((f) => html`<details><summary>Level ${f.level}: ${f.name}</summary>${md(f.description)}</details>`)}`,
       )}
       ${c.extras.map((x) => html`<details><summary>${x.title}</summary>${md(x.markdown)}</details>`)}`,
@@ -97,10 +107,10 @@ const CATEGORIES = [
     id: 'feats',
     label: 'Feats',
     load: () => loadSrd('feats'),
-    sub: (f) => f.category + (f.prerequisite ? ` · ${f.prerequisite}` : ''),
-    search: (f) => [f.name, f.category].join(' '),
-    filters: [{ id: 'category', label: 'Type', options: (items) => [...new Set(items.map((f) => f.category))].map((c) => [c, c]), test: (f, v) => f.category === v }],
-    detail: (f) => html`<h2>${f.name}</h2><p class="meta">${f.category}${f.prerequisite ? ` (Prerequisite: ${f.prerequisite})` : ''}</p>${md(f.description)}`,
+    sub: (f) => f.category + (f.prerequisite ? ` · ${f.prerequisite}` : '') + bookTag(f),
+    search: (f) => [f.name, f.category, f.sourceName].join(' '),
+    filters: [{ id: 'category', label: 'Type', options: (items) => [...new Set(items.map((f) => f.category))].map((c) => [c, c]), test: (f, v) => f.category === v }, BOOK_FILTER],
+    detail: (f) => html`<h2>${f.name}</h2><p class="meta">${f.category}${f.prerequisite ? ` (Prerequisite: ${f.prerequisite})` : ''}${bookTag(f)}</p>${md(f.description)}`,
   },
   {
     id: 'weapons',

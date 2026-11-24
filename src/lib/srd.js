@@ -16,20 +16,47 @@ export const DATASETS = [
   'chapters',
 ];
 
+// Extra open-licensed content from Open5e (scripts/build-open5e.mjs), merged
+// into the SRD lists: more subclasses, spells and feats.
+const EXTRA = { classes: 'subclasses', spells: 'spells', feats: 'feats' };
+
+function fetchJson(path, label) {
+  return fetch(`${(import.meta.env?.BASE_URL ?? '/')}data/${path}`).then((r) => {
+    if (!r.ok) throw new Error(`Could not load ${label} (${r.status})`);
+    return r.json();
+  });
+}
+
+/** Add the Open5e content to an SRD list. SRD entries are marked source 'srd'. */
+export function mergeExtra(name, base, extra) {
+  if (!extra) return base;
+  if (name === 'classes') {
+    return base.map((c) => ({
+      ...c,
+      subclasses: [...c.subclasses.map((s) => ({ source: 'srd', sourceName: 'SRD', ...s })), ...(extra[c.id] || [])],
+    }));
+  }
+  return [...base.map((x) => ({ source: 'srd', sourceName: 'SRD', ...x })), ...extra].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export function loadSrd(name) {
   if (!DATASETS.includes(name) && name !== 'index') return Promise.reject(new Error(`Unknown dataset: ${name}`));
   if (!cache.has(name)) {
-    const url = `${import.meta.env.BASE_URL}data/srd/${name}.json`;
-    cache.set(
-      name,
-      fetch(url).then((r) => {
-        if (!r.ok) throw new Error(`Could not load ${name} (${r.status})`);
-        return r.json();
-      }),
-    );
+    const base = fetchJson(`srd/${name}.json`, name);
+    // The extra content is optional: the site still works without it.
+    const extra = EXTRA[name] ? fetchJson(`open5e/${EXTRA[name]}.json`, name).catch(() => null) : null;
+    cache.set(name, extra ? Promise.all([base, extra]).then(([b, x]) => mergeExtra(name, b, x)) : base);
     cache.get(name).catch(() => cache.delete(name));
   }
   return cache.get(name);
+}
+
+/** Sources, licences and notices for the Open5e content (credits page). */
+export function loadOpen5eIndex() {
+  if (!cache.has('open5e-index')) {
+    cache.set('open5e-index', fetchJson('open5e/index.json', 'credits').catch(() => null));
+  }
+  return cache.get('open5e-index');
 }
 
 export const ABILITY_NAMES = {
@@ -58,4 +85,9 @@ export async function loadCharacterRules() {
     ['classes', 'species', 'backgrounds', 'feats', 'equipment', 'spells'].map(loadSrd),
   );
   return { classes, species, backgrounds, feats, equipment, spells };
+}
+
+/** "Path of Thorns (Tome of Heroes)"; SRD subclasses keep their plain name. */
+export function subclassLabel(s) {
+  return s.source && s.source !== 'srd' ? `${s.name} (${s.sourceName})` : s.name;
 }

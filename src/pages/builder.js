@@ -2,7 +2,7 @@
 // Works on a plain character object (see lib/character/rules.js newCharacter)
 // and saves it to the player's character library at the end.
 import { html, raw, rulesMarkdown } from '../lib/dom.js';
-import { loadCharacterRules, spellLevelLabel } from '../lib/srd.js';
+import { loadCharacterRules, spellLevelLabel, subclassLabel } from '../lib/srd.js';
 import {
   ABILITIES,
   ABILITY_LABELS,
@@ -67,10 +67,12 @@ export async function renderBuilder(root, { params, navigate }) {
   }
   let step = 'class';
   let spellSearch = '';
+  let spellAnyClass = false;
   let saving = false;
 
-  const steps = () => STEPS.filter((s) => !s.casterOnly || spellcasting(cls(), c.level));
+  const steps = () => STEPS.filter((s) => !s.casterOnly || spellcasting(cls(), c.level, sub()));
   const cls = () => srd.classes.find((x) => x.id === c.classId);
+  const sub = () => cls()?.subclasses.find((s) => s.id === c.subclassId) || null;
   const bg = () => srd.backgrounds.find((x) => x.id === c.backgroundId);
   const species = () => srd.species.find((x) => x.id === c.speciesId);
 
@@ -192,13 +194,18 @@ export async function renderBuilder(root, { params, navigate }) {
                 ? html`<label>Subclass
                     <select data-set="subclassId">
                       <option value="">Choose…</option>
-                      ${k.subclasses.map((s) => html`<option value="${s.id}" ${raw(c.subclassId === s.id ? 'selected' : '')}>${s.name}</option>`)}
+                      ${k.subclasses.map((s) => html`<option value="${s.id}" ${raw(c.subclassId === s.id ? 'selected' : '')}>${subclassLabel(s)}</option>`)}
                     </select></label>`
                 : html`<p class="hint">You choose a subclass at level 3.</p>`}
             </div>
             <table class="traits"><tbody>${Object.entries(k.coreTraits).map(([a, b]) => html`<tr><th scope="row">${a}</th><td>${b}</td></tr>`)}</tbody></table>
             <h4>Features up to level ${c.level}</h4>
             ${k.features.filter((f) => f.level <= c.level).map((f) => html`<details><summary>Level ${f.level}: ${f.name}</summary>${md(f.description)}</details>`)}
+            ${sub() && c.level >= 3
+              ? html`<h4>${sub().name} <small class="muted">${sub().sourceName}</small></h4>
+                ${md(sub().description)}
+                ${sub().features.filter((f) => f.level <= c.level).map((f) => html`<details><summary>Level ${f.level}: ${f.name}</summary>${md(f.description)}</details>`)}`
+              : ''}
             ${c.level > 1 ? html`<p class="hint">Starting above level 1? Hit points and proficiency are worked out for you. Enter any Ability Score Improvements or feats from levels 4, 8, 12, 16 and 19 as adjustments on the Ability Scores step.</p>` : ''}
           </div>`
         : ''}`);
@@ -415,20 +422,27 @@ export async function renderBuilder(root, { params, navigate }) {
 
   function stepSpells() {
     const k = cls();
-    const casting = spellcasting(k, c.level);
+    const casting = spellcasting(k, c.level, sub());
     if (!casting) return String(html`<h2>Spells</h2><p>Your class doesn't cast spells.</p>`);
     const q = spellSearch.toLowerCase();
-    const classSpells = srd.spells.filter((s) => s.classes.includes(k.name));
+    // The class list (or the subclass's, e.g. an Eldritch Trickster uses the
+    // Wizard's), any extra lists the subclass adds, and optionally the spells
+    // from other books that don't say which classes get them.
+    const lists = [casting.list, ...(sub()?.extraSpellLists || [])];
+    const always = derive(c, srd).alwaysSpells;
+    const classSpells = srd.spells.filter(
+      (s) => !always.includes(s) && (s.classes.some((x) => lists.includes(x)) || (spellAnyClass && !s.classes.length)),
+    );
     const cantrips = classSpells.filter((s) => s.level === 0);
     const leveled = classSpells.filter((s) => s.level > 0 && s.level <= casting.maxSpellLevel);
-    const match = (s) => !q || s.name.toLowerCase().includes(q) || s.school.toLowerCase().includes(q);
+    const match = (s) => !q || [s.name, s.school, s.sourceName || ''].some((x) => x.toLowerCase().includes(q));
     const list = (spells, kind, max) => {
       const chosen = c.spells[kind];
       return html`<div class="spell-pick">${spells.filter(match).map((s) => {
         const on = chosen.includes(s.id);
         return html`<div class="spell-row ${on ? 'on' : ''}">
           <label><input type="checkbox" data-spell="${s.id}" data-kind="${kind}" ${raw(on ? 'checked' : '')} ${raw(!on && chosen.length >= max ? 'disabled' : '')} />
-          <span><strong>${s.name}</strong> <small class="muted">${spellLevelLabel(s.level)} ${s.school}${s.concentration ? ' · C' : ''}${s.ritual ? ' · R' : ''}</small></span></label>
+          <span><strong>${s.name}</strong> <small class="muted">${spellLevelLabel(s.level)} ${s.school}${s.concentration ? ' · C' : ''}${s.ritual ? ' · R' : ''}${s.source && s.source !== 'srd' ? ` · ${s.sourceName}` : ''}</small></span></label>
           <details><summary>Details</summary><p class="muted">${s.castingTime} · ${s.range} · ${s.duration}</p>${md(s.description)}</details>
         </div>`;
       })}</div>`;
@@ -436,7 +450,13 @@ export async function renderBuilder(root, { params, navigate }) {
     return String(html`
       <h2>Spells</h2>
       <p class="muted">${k.name}s cast spells with ${ABILITY_LABELS[casting.ability]}. At level ${c.level} you know ${casting.cantrips} cantrip${casting.cantrips === 1 ? '' : 's'} and prepare ${casting.prepared} spell${casting.prepared === 1 ? '' : 's'} of up to ${spellLevelLabel(casting.maxSpellLevel).toLowerCase()}. You can change prepared spells later on the sheet.</p>
-      <input type="search" id="spell-search" placeholder="Search spells…" value="${spellSearch}" aria-label="Search spells" />
+      ${casting.fromSubclass ? html`<p class="hint">Your ${casting.fromSubclass} spells come from the ${casting.list} spell list.</p>` : ''}
+      ${always.length
+        ? html`<h3>Always prepared <small class="muted">from your subclass; they don't count against your limit</small></h3>
+            <p>${always.map((s, i) => html`${i ? ', ' : ''}<strong>${s.name}</strong>`)}</p>`
+        : ''}
+      <input type="search" id="spell-search" placeholder="Search spells or books…" value="${spellSearch}" aria-label="Search spells" />
+      <label class="check"><input type="checkbox" id="spell-any" ${raw(spellAnyClass ? 'checked' : '')}> Also show spells from other books that don't list a class (ask your DM)</label>
       ${casting.cantrips
         ? html`<h3>Cantrips <small class="muted">${c.spells.cantrips.length} / ${casting.cantrips}</small></h3>${list(cantrips, 'cantrips', casting.cantrips)}`
         : ''}
@@ -494,8 +514,8 @@ export async function renderBuilder(root, { params, navigate }) {
     }
     if (path === 'level') {
       const k = cls();
-      const casting = spellcasting(k, c.level);
       if (c.level < 3) c.subclassId = null;
+      const casting = spellcasting(k, c.level, sub());
       if (casting) {
         c.spells.cantrips = c.spells.cantrips.slice(0, casting.cantrips);
         c.spells.prepared = c.spells.prepared.slice(0, casting.prepared);
@@ -594,6 +614,11 @@ export async function renderBuilder(root, { params, navigate }) {
       const cur = c.expertise || [];
       c.expertise = t.checked ? [...new Set([...cur, s])] : cur.filter((x) => x !== s);
       persistDraft();
+      draw({ keepScroll: true });
+      return;
+    }
+    if (t.id === 'spell-any') {
+      spellAnyClass = t.checked;
       draw({ keepScroll: true });
       return;
     }

@@ -1,0 +1,102 @@
+[
+ {
+  "key": "a5e-ag",
+  "name": "Adventurer's Guide",
+  "publisher": "EN Publishing",
+  "author": "EN Publishing",
+  "year": "2021",
+  "licenses": [
+   "cc-by-40",
+   "ogl-10a"
+  ],
+  "permalink": "https://a5esrd.com/a5esrd"
+ },
+ {
+  "key": "deepm",
+  "name": "Deep Magic for 5th Edition",
+  "publisher": "Kobold Press",
+  "author": "Dan Dillon, Chris Harris, and Jeff Lee",
+  "year": "2020",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/kpstore/product/deep-magic-for-5th-edition-hardcover/"
+ },
+ {
+  "key": "deepmx",
+  "name": "Deep Magic Extended",
+  "publisher": "Kobold Press",
+  "author": "Not sure.",
+  "year": "2024",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/deepmagic"
+ },
+ {
+  "key": "kp",
+  "name": "Kobold Press Compilation",
+  "publisher": "Kobold Press",
+  "author": "Various",
+  "year": "2024",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/"
+ },
+ {
+  "key": "open5e",
+  "name": "Open5e Originals",
+  "publisher": "Open5e",
+  "author": "Ean Moody, Various",
+  "year": "2024",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://open5e.com/"
+ },
+ {
+  "key": "spells-that-dont-suck",
+  "name": "Spells That Don't Suck",
+  "publisher": "Somanyrobots",
+  "author": "Ben Somers / somanyrobots, Omega Ankh",
+  "year": "2025",
+  "licenses": [
+   "cc-by-40"
+  ],
+  "permalink": "https://www.somanyrobots.com/s/Spells-That-Dont-Suck-compressed.pdf"
+ },
+ {
+  "key": "tdcs",
+  "name": "Tal'dorei Campaign Setting",
+  "publisher": "Green Ronin Publishing",
+  "author": "Matthew Mercer, James Haeck",
+  "year": "2017",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://en.wikipedia.org/wiki/Critical_Role%3A_Tal'Dorei_Campaign_Setting"
+ },
+ {
+  "key": "toh",
+  "name": "Tome of Heroes",
+  "publisher": "Kobold Press",
+  "author": "Kelly Pawlik, Ben Mcfarland, and Briand Suskind",
+  "year": "2022",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/kpstore/product/tome-of-heroes-for-5th-edition/"
+ },
+ {
+  "key": "wz",
+  "name": "Warlock Zine",
+  "publisher": "Kobold Press",
+  "author": "Woflgang Baur, others.",
+  "year": "2017",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/kpstore/product-category/all-products/warlock-5th-edition-dnd/"
+ }
+]

@@ -1,7 +1,8 @@
 // The "Level up" dialog: shows what the next level brings and asks for the
 // choices the rules leave to the player (HP, subclass, ability scores or a feat).
 import { html, raw, rulesMarkdown } from '../lib/dom.js';
-import { ABILITIES, ABILITY_LABELS } from '../lib/character/rules.js';
+import { ABILITIES, ABILITY_LABELS, featAbilityIncrease } from '../lib/character/rules.js';
+import { subclassLabel } from '../lib/srd.js';
 import { levelUpInfo, applyLevelUp } from '../lib/character/automation.js';
 import { rollDie } from '../lib/dice.js';
 
@@ -29,7 +30,7 @@ export function levelUpDialog(c, srd) {
 
         ${info.needsSubclass
           ? html`<label>Choose your subclass
-              <select name="subclass" required>${info.subclasses.map((s) => html`<option value="${s.id}">${s.name}</option>`)}</select></label>`
+              <select name="subclass" required>${info.subclasses.map((s) => html`<option value="${s.id}">${subclassLabel(s)}</option>`)}</select></label>`
           : ''}
 
         ${info.asi || info.epicBoon
@@ -41,7 +42,8 @@ export function levelUpDialog(c, srd) {
               <div class="row asi-pick">
                 <label>First <select name="asi1">${ABILITIES.map((a) => html`<option value="${a}">${ABILITY_LABELS[a]}</option>`)}</select></label>
                 <label class="asi2" hidden>Second <select name="asi2">${ABILITIES.map((a, i) => html`<option value="${a}" ${raw(i === 1 ? 'selected' : '')}>${ABILITY_LABELS[a]}</option>`)}</select></label>
-                <label class="feat-pick" hidden>Feat <select name="feat">${feats.map((f) => html`<option value="${f.name}">${f.name}${f.prerequisite ? ` (${f.prerequisite})` : ''}</option>`)}</select></label>
+                <label class="feat-pick" hidden>Feat <select name="feat">${feats.map((f) => html`<option value="${f.name}">${f.name}${f.source && f.source !== 'srd' ? ` [${f.sourceName}]` : ''}${f.prerequisite ? ` (${f.prerequisite})` : ''}</option>`)}</select></label>
+                <label class="feat-ability" hidden>Raise <select name="feat-ability"></select></label>
               </div>
               <p class="muted small">Scores can't go above 20.</p>
             </fieldset>`
@@ -77,7 +79,20 @@ export function levelUpDialog(c, srd) {
         dlg.querySelector('.feat-pick').hidden = k !== 'feat';
         dlg.querySelector('[name=asi1]').closest('label').hidden = k === 'feat';
       }
+      if (e.target.name === 'asi-kind' || e.target.name === 'feat') showFeatAbility();
     });
+
+    // A feat that raises an ability score: ask which one.
+    function showFeatAbility() {
+      const box = dlg.querySelector('.feat-ability');
+      if (!box) return;
+      const on = form.querySelector('[name=asi-kind]:checked')?.value === 'feat';
+      const inc = on ? featAbilityIncrease(feats.find((x) => x.name === form.querySelector('[name=feat]').value)) : null;
+      box.hidden = !inc;
+      box.querySelector('select').innerHTML = inc
+        ? String(html`${inc.options.map((a) => html`<option value="${a}">${ABILITY_LABELS[a]} +${inc.amount}</option>`)}`)
+        : '';
+    }
 
     let result = null;
     form.addEventListener('submit', (e) => {
@@ -85,7 +100,10 @@ export function levelUpDialog(c, srd) {
       const f = new FormData(form);
       const choice = { hp: f.get('hp') === 'roll' ? rolled : 'average', subclassId: f.get('subclass') || undefined };
       const kind = f.get('asi-kind');
-      if (kind === 'feat') choice.feat = f.get('feat');
+      if (kind === 'feat') {
+        choice.feat = f.get('feat');
+        choice.featAbility = f.get('feat-ability') || undefined;
+      }
       else if (kind === 'two') choice.asi = { [f.get('asi1')]: 2 };
       else if (kind === 'split') {
         if (f.get('asi1') === f.get('asi2')) {
