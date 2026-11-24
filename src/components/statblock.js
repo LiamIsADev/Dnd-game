@@ -28,7 +28,7 @@ export function statBlock(m) {
     <article class="statblock">
       <header>
         <h2>${m.name}</h2>
-        <p class="meta">${sizeType}</p>
+        <p class="meta">${sizeType}${m.sourceName && m.source !== 'srd' ? ` · ${m.sourceName}` : ''}</p>
       </header>
       <div class="stats">
         ${line('AC', m.ac)} ${line('Initiative', m.initiative ? `${formatMod(m.initiative.bonus)} (${m.initiative.score})` : '')}
@@ -43,6 +43,7 @@ export function statBlock(m) {
       </div>
       ${section('Traits', m.traits)} ${section('Actions', m.actions)} ${section('Bonus Actions', m.bonusActions)}
       ${section('Reactions', m.reactions)} ${section('Legendary Actions', m.legendaryActions, m.legendaryActionsIntro)}
+      ${m.mythicTrait ? html`${section('Mythic Trait', [m.mythicTrait])}${section('Mythic Actions', m.mythicActions, m.mythicActionsIntro)}` : ''}
     </article>`;
 }
 

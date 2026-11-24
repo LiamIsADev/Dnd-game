@@ -20,6 +20,9 @@ const outDir = path.join(root, 'open5e-source');
 const API = 'https://api.open5e.com';
 
 export const SOURCES = ['toh', 'tdcs', 'open5e', 'a5e-ag', 'deepm', 'deepmx', 'kp', 'wz', 'spells-that-dont-suck'];
+// Monster books (Tome of Beasts 1-3 and its 2023 edition, Creature Codex,
+// Black Flag, Level Up's Monstrous Menagerie, Tal'Dorei).
+export const MONSTER_SOURCES = ['tob-2023', 'tob', 'tob2', 'tob3', 'ccdx', 'tdcs', 'bfrd', 'a5e-mm'];
 // The same sources in the older v1 API, which still has the spell class lists
 // and the full subclass write-ups that the v2 API is missing for a few entries.
 const V1_SOURCES = { toh: 'toh', taldorei: 'tdcs', o5e: 'open5e', a5e: 'a5e-ag', dmag: 'deepm', 'dmag-e': 'deepmx', kp: 'kp', warlock: 'wz' };
@@ -38,11 +41,12 @@ async function getAll(url) {
 }
 
 const keep = (doc) => SOURCES.includes(doc);
+const keepDoc = (doc) => keep(doc) || MONSTER_SOURCES.includes(doc) || doc === 'vom';
 
 async function main() {
   await mkdir(outDir, { recursive: true });
   const documents = (await getAll(`${API}/v2/documents/?format=json&limit=100`))
-    .filter((d) => keep(d.key))
+    .filter((d) => keepDoc(d.key))
     .map((d) => ({
       key: d.key,
       name: d.name,
@@ -110,6 +114,86 @@ async function main() {
       type: f.type,
     }));
 
+  const creatures = (await getAll(`${API}/v2/creatures/?format=json&limit=500`))
+    .filter((c) => MONSTER_SOURCES.includes(c.document.key))
+    .map((c) => ({
+      key: c.key,
+      source: c.document.key,
+      name: c.name,
+      size: c.size?.name,
+      type: c.type?.name,
+      alignment: c.alignment,
+      ac: c.armor_class,
+      acDetail: c.armor_detail,
+      hp: c.hit_points,
+      hitDice: c.hit_dice,
+      speed: c.speed,
+      abilities: c.ability_scores,
+      saves: c.saving_throws_all,
+      saveProfs: c.saving_throws,
+      skills: c.skill_bonuses,
+      initiative: c.initiative_bonus,
+      cr: c.challenge_rating,
+      xp: c.experience_points,
+      pb: c.proficiency_bonus,
+      defenses: c.resistances_and_immunities,
+      senses: {
+        darkvision: c.darkvision_range,
+        blindsight: c.blindsight_range,
+        tremorsense: c.tremorsense_range,
+        truesight: c.truesight_range,
+        passive: c.passive_perception,
+      },
+      languages: c.languages?.as_string,
+      traits: c.traits.map((t) => ({ name: t.name, desc: t.desc })),
+      actions: c.actions
+        .sort((a, b) => (a.order_in_statblock ?? 0) - (b.order_in_statblock ?? 0))
+        .map((a) => ({ name: a.name, desc: a.desc, type: a.action_type, cost: a.legendary_action_cost, uses: a.usage_limits })),
+    }));
+
+  // Weapons: Tome of Heroes' new weapons (v1 API) and Vault of Magic's magic
+  // weapons (each built on an SRD weapon).
+  const weapons = (await getAll(`${API}/v1/weapons/?format=json&limit=100&document__slug=toh`)).map((w) => ({
+    source: 'toh',
+    name: w.name,
+    category: w.category,
+    cost: w.cost,
+    damageDice: w.damage_dice,
+    damageType: w.damage_type,
+    weight: w.weight,
+    properties: (w.properties || []).filter(Boolean),
+  }));
+  const magicWeapons = (await getAll(`${API}/v2/magicitems/?format=json&limit=500&document__key=vom&category__key=weapon`))
+    .filter((m) => m.document.key === 'vom' && m.category?.key === 'weapon')
+    .map((m) => ({
+      source: 'vom',
+      name: m.name,
+      desc: m.desc,
+      rarity: m.rarity?.name,
+      attunement: m.requires_attunement ? m.attunement_detail || true : false,
+      base: m.weapon?.key?.replace(/^srd(-2024)?_/, '') || null,
+    }));
+
+  // Tome of Beasts 3 is missing its actions in the v2 API for about 200
+  // monsters; the v1 API still has them.
+  const v1Tob3 = new Map(
+    (await getAll(`${API}/v1/monsters/?format=json&limit=500&document__slug=tob3`)).map((m) => [m.name.toLowerCase(), m]),
+  );
+  for (const c of creatures) {
+    if (c.actions.length || c.source !== 'tob3') continue;
+    const m = v1Tob3.get(c.name.toLowerCase());
+    if (!m) continue;
+    const list = (items, type) => (Array.isArray(items) ? items : []).map((a) => ({ name: a.name, desc: a.desc, type, cost: null, uses: null }));
+    c.actions = [
+      ...list(m.actions, 'ACTION'),
+      ...list(m.bonus_actions, 'BONUS_ACTION'),
+      ...list(m.reactions, 'REACTION'),
+      ...list(m.legendary_actions, 'LEGENDARY_ACTION'),
+    ];
+    if (!c.traits.length) c.traits = (Array.isArray(m.special_abilities) ? m.special_abilities : []).map((t) => ({ name: t.name, desc: t.desc }));
+    if (m.legendary_desc) c.legendaryIntro = m.legendary_desc;
+  }
+
   // The licence texts (the OGL has to travel with the content).
   const licenses = (await getAll(`${API}/v2/licenses/?format=json`))
     .filter((l) => ['ogl-10a', 'cc-by-40'].includes(l.key))
@@ -122,6 +206,8 @@ async function main() {
     write('spells', spells),
     write('feats', feats),
     write('licenses', licenses),
+    write('creatures', creatures),
+    write('weapons', { weapons, magicWeapons }),
   ]);
   console.log(`\nSaved ${documents.length} sources, ${subclasses.length} subclasses, ${spells.length} spells, ${feats.length} feats.`);
 }

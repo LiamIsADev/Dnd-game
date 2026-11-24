@@ -135,6 +135,12 @@ On top of the SRD, the site has 97 extra subclasses for the 12 classes, 982 spel
 - Feats that raise an ability score ask which one when you take them at level up (this also works for the SRD feats such as Grappler).
 - Some spells don't say which classes can use them. The builder can show them with a checkbox, for the DM to allow.
 
+**Monsters.** 1,960 more monsters from *Tome of Beasts* 1-3 (the 2023 edition where a monster is in both), *Creature Codex*, *Black Flag*, Level Up's *Monstrous Menagerie* and *Tal'Dorei*, one of each: a monster already in the SRD or an earlier book is skipped, even when its name is written the other way round ("Dragon, Ancient Red"). Their attacks and saving throws are read from the text so the table can roll them.
+- Major monsters (CR 12 and up) that have no legendary actions get a standard set built from their own stat block: one attack, a move, and their strongest saving-throw ability for 2 uses.
+- The biggest bosses (CR 17 and up, SRD ones included) get a mythic trait: the first time they drop to 0 HP they get back up with half their HP, and unlock mythic actions (a double attack, their big ability again, shrugging off a condition, a frightening presence, and a shove). These additions are marked "Added by this site" so the DM can ignore them.
+
+**Weapons.** 29 new weapons from *Tome of Heroes* (firearms, double weapons and more) and 220 magic weapons from *Vault of Magic*. Magic weapons are built on their SRD weapon, appear on the character sheet like any weapon, and their +1/+2/+3 counts in attacks. Open5e only has these open-licensed weapons; there are no others to add.
+
 Only SRD and open-licensed content can be included in the site. Material that exists only in the published Wizards of the Coast books is copyrighted and must not be added here.
 
 Dungeons & Dragons and D&D are trademarks of Wizards of the Coast LLC. This project is not affiliated with or endorsed by Wizards of the Coast.

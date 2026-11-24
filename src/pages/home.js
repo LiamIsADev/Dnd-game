@@ -1,6 +1,6 @@
 import { html } from '../lib/dom.js';
 import { getAuth } from '../lib/auth.js';
-import { loadSrd } from '../lib/srd.js';
+import { loadSrd, loadOpen5eIndex } from '../lib/srd.js';
 import { joinForm, wireJoin } from './campaigns.js';
 
 export async function renderHome(root, ctx) {
@@ -48,7 +48,15 @@ async function renderWelcome(root) {
     </section>`);
 
   try {
-    const c = (await loadSrd('index')).counts;
+    const c = { ...(await loadSrd('index')).counts };
+    // Include the Open5e additions in the totals.
+    const extra = await loadOpen5eIndex();
+    if (extra?.counts) {
+      c.spells += extra.counts.spells || 0;
+      c.monsters += extra.counts.monsters || 0;
+      c.feats += extra.counts.feats || 0;
+      c['magic-items'] += extra.counts.magicItems || 0;
+    }
     const tiles = [
       ['Spells', c.spells, 'spells'],
       ['Monsters & animals', c.monsters, 'monsters'],

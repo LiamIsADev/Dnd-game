@@ -343,7 +343,7 @@ export function applyLevelUp(c, srd, choice = {}) {
  * "if" something happened (e.g. with Advantage) is left for the DM.
  */
 export function monsterActions(mon) {
-  const all = [...(mon.actions || []), ...(mon.bonusActions || []), ...(mon.legendaryActions || [])];
+  const all = [...(mon.actions || []), ...(mon.bonusActions || []), ...(mon.legendaryActions || []), ...(mon.mythicActions || [])];
   const out = [];
   for (const a of all) {
     const text = a.text || '';
@@ -376,8 +376,9 @@ export function monsterActions(mon) {
         dc: a.save.dc,
         damage: dmg ? clean(dmg.dice) : '',
         damageType: dmg?.type || '',
-        half: /_Success:_\s*Half damage/i.test(text),
-        condition: cond && CONDITIONS.includes(cap(cond[1])) ? cap(cond[1]) : '',
+        // Imported monsters carry these already; SRD ones are read from the text.
+        half: a.save.half ?? /_Success:_\s*Half damage/i.test(text),
+        condition: a.save.condition ?? (cond && CONDITIONS.includes(cap(cond[1])) ? cap(cond[1]) : ''),
       });
     }
   }
