@@ -10,7 +10,7 @@ psql -q -v ON_ERROR_STOP=1 -d postgres -c "drop database if exists $DB" -c "crea
 run() { psql -q -v ON_ERROR_STOP=1 -d "$DB" -f "$1"; }
 run tests/db/supabase-shim.sql
 for f in supabase/migrations/*.sql; do run "$f"; done
-# Run them all a second time: they must be safe to re-run.
-for f in supabase/migrations/*.sql; do run "$f"; done
+# Run them all again, as the one-file setup: it must be safe to re-run.
+run supabase/setup-all.sql
 for f in tests/db/security.test.sql tests/db/rules.test.sql tests/db/turns.test.sql tests/db/homebrew.test.sql; do run "$f"; done
 echo "Database tests passed."

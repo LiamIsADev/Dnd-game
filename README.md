@@ -39,7 +39,7 @@ The Supabase project URL and publishable key are in `src/lib/config.js`. They ar
 
 In the [Supabase dashboard](https://supabase.com/dashboard) for the project:
 
-1. **Create the database tables.** Open **SQL Editor → New query**, paste the contents of each file in [`supabase/migrations/`](supabase/migrations/) in number order (`0001_profiles.sql`, then `0002_characters.sql`, and so on), and click **Run** for each. They're safe to run again.
+1. **Create the database tables.** Open **SQL Editor → New query**, paste all of [`supabase/setup-all.sql`](supabase/setup-all.sql) and click **Run**. Do the same after every update: it's safe to run again, and it brings everything up to date. (It's every file in [`supabase/migrations/`](supabase/migrations/) joined together; `node scripts/build-setup-sql.mjs` rebuilds it after adding a migration.)
 2. **Allow the site's address for sign-in links.** Open **Authentication → URL Configuration**:
    - Set **Site URL** to where the site is hosted (use `http://localhost:5173` until it's online).
    - Under **Redirect URLs**, add `http://localhost:5173/**` (and later the hosted address followed by `/**`).
@@ -64,7 +64,8 @@ src/styles.css             All styles (dark and light themes)
 public/data/srd/           Rules data as JSON (generated, committed)
 scripts/build-srd.mjs      Converts srd-source/*.md into public/data/srd/*.json
 srd-source/                SRD 5.2.1 Markdown, copied from downfallx/dnd-5e-srd-markdown
-supabase/migrations/       SQL to run in Supabase, in order
+supabase/setup-all.sql     All the SQL in one file: paste it into Supabase after each update
+supabase/migrations/       The same SQL, one file per step
 tests/                     Automated checks (node --test)
 tests/db/                  Database security and rules tests against a local PostgreSQL (bash tests/db/run.sh)
 ```

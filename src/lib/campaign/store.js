@@ -6,14 +6,15 @@ import { supabase } from '../supabase.js';
 import { normalize } from '../character/store.js';
 
 const BUCKET = 'campaign-images';
+const SETUP = 'Run supabase/setup-all.sql in the Supabase SQL editor (it is safe to run again).';
 
 function check(error) {
   if (!error) return;
   if (/relation .*(campaign|maps|tokens|handouts|rolls).* does not exist|Could not find the (table|function)/i.test(error.message)) {
-    throw new Error('The campaign tables are missing. Run supabase/migrations/0003_campaigns.sql in the Supabase SQL editor.');
+    throw new Error('The campaign tables are missing. Run supabase/setup-all.sql in the Supabase SQL editor (it is safe to run again).');
   }
   if (/permission denied for (table|function)/i.test(error.message)) {
-    throw new Error('The database is blocking campaign access. Re-run supabase/migrations/0003_campaigns.sql in the Supabase SQL editor.');
+    throw new Error('The database is blocking campaign access. Run supabase/setup-all.sql in the Supabase SQL editor (it is safe to run again).');
   }
   throw new Error(error.message);
 }
@@ -248,7 +249,7 @@ export async function uploadImage(campaignId, file) {
   const path = `${campaignId}/${crypto.randomUUID()}.${ext}`;
   const { error } = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type, upsert: false });
   if (error) {
-    if (/bucket not found/i.test(error.message)) throw new Error('Image storage is missing. Run supabase/migrations/0003_campaigns.sql in the Supabase SQL editor.');
+    if (/bucket not found/i.test(error.message)) throw new Error('Image storage is missing. Run supabase/setup-all.sql in the Supabase SQL editor (it is safe to run again).');
     throw new Error(error.message);
   }
   return path;
@@ -284,7 +285,7 @@ async function rpc(fn, args) {
   const { data, error } = await supabase.rpc(fn, args);
   if (error) {
     if (/Could not find the function/i.test(error.message)) {
-      throw new Error('Combat rules are missing or out of date. Run the newest files in supabase/migrations (0004_rules.sql, 0005_turns.sql, then 0006_exploration.sql) in the Supabase SQL editor.');
+      throw new Error(`The database is missing an update (no "${fn}" function). ${SETUP}`);
     }
     // Rule messages from the database are written for players; show them as they are.
     if (error.code === 'P0001') throw new Error(error.message);
