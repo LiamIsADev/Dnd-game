@@ -1,7 +1,7 @@
 // Digital character sheet. Every change saves automatically, and every number
 // you'd normally roll for can be clicked to roll it.
 import { html, raw, rulesMarkdown, debounce } from '../lib/dom.js';
-import { loadCharacterRules, spellLevelLabel } from '../lib/srd.js';
+import { spellLevelLabel } from '../lib/srd.js';
 import {
   ABILITIES,
   ABILITY_LABELS,
@@ -14,6 +14,7 @@ import {
   shortRest,
   uid,
 } from '../lib/character/rules.js';
+import { loadCharacterRulesWithHomebrew } from '../lib/homebrew/store.js';
 import { getCharacter, saveCharacter, downloadCharacter } from '../lib/character/store.js';
 import { canLevelUp, XP_FOR_LEVEL } from '../lib/character/automation.js';
 import { levelUpDialog } from '../components/levelup.js';
@@ -48,7 +49,7 @@ const TABS = [
 export async function renderSheet(root, { params }) {
   const id = params[0];
   root.innerHTML = '<p class="loading">Loading character…</p>';
-  const [srd, row] = await Promise.all([loadCharacterRules(), getCharacter(id)]);
+  const [srd, row] = await Promise.all([loadCharacterRulesWithHomebrew(), getCharacter(id)]);
   if (!row) {
     root.innerHTML = String(html`<section class="page narrow"><h1>Character not found</h1><p>It may have been deleted. <a href="#/characters">Back to your characters</a></p></section>`);
     return;

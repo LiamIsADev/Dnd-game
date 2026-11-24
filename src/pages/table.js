@@ -17,6 +17,8 @@ import { createBoard, DRAG_TYPE } from '../components/board.js';
 import { fitFog, setCells, countRevealed } from '../lib/campaign/fog.js';
 import { squaresForSize, describeRoll, cleanDice, isValidDice, withMod, TOKEN_COLORS, inviteLink } from '../lib/campaign/util.js';
 import * as store from '../lib/campaign/store.js';
+import { homebrewRows } from '../lib/homebrew/store.js';
+import { mergeHomebrew } from '../lib/homebrew/merge.js';
 
 const PC_COLOR = '#2c5d8b';
 
@@ -34,7 +36,13 @@ export async function renderTable(root, { params, navigate }) {
     return;
   }
   const isDm = s.isDm;
-  const [rules, monsters] = await Promise.all([loadCharacterRules(), isDm ? loadSrd('monsters') : Promise.resolve([])]);
+  // Homebrew switched on in this campaign (plus your own, so your character works).
+  let hbRows = await homebrewRows({ campaignId, userId: me });
+  const [baseRules, baseMonsters] = await Promise.all([loadCharacterRules(), isDm ? loadSrd('monsters') : Promise.resolve([])]);
+  let rules = mergeHomebrew(baseRules, hbRows);
+  // Only switched-on monsters can be spawned (your own unadded ones stay in your library).
+  const campaignRows = (rows) => rows.filter((r) => r.kind !== 'monster' || r.enabledHere);
+  let monsters = isDm ? mergeHomebrew({ monsters: baseMonsters }, campaignRows(hbRows)).monsters : [];
 
   const ui = {
     tab: isDm ? 'enemies' : 'character',
@@ -104,6 +112,7 @@ export async function renderTable(root, { params, navigate }) {
         <div class="table-head-actions">
           <span class="live-dot" role="status" aria-live="polite"></span>
           ${isDm ? html`<button type="button" class="button small secondary" data-act="invite">Invite players</button>` : ''}
+          <a class="button small secondary" href="#/homebrew/campaign/${campaignId}">Homebrew</a>
           <a class="button small secondary" href="#/campaigns">All campaigns</a>
         </div>
       </header>
@@ -635,7 +644,7 @@ export async function renderTable(root, { params, navigate }) {
       <div class="panel">
         <p class="muted small">Drag an enemy onto the map, or press <strong>Place</strong> and click a square.</p>
         <label class="sr-only" for="monster-search">Search enemies</label>
-        <input id="monster-search" type="search" placeholder="Search 330 creatures, e.g. goblin, dragon" value="${ui.search}" data-input="search">
+        <input id="monster-search" type="search" placeholder="Search ${monsters.length.toLocaleString()} creatures, e.g. goblin, dragon, homebrew" value="${ui.search}" data-input="search">
         <label class="check"><input type="checkbox" data-input="spawn-hidden" ${ui.spawnHidden ? raw('checked') : ''}> Hidden from players until I reveal it</label>
         <label class="check"><input type="checkbox" data-input="roll-hp" ${ui.rollHp ? raw('checked') : ''}> Roll hit points instead of using the average</label>
         <ul class="spawn-list">
@@ -1832,6 +1841,11 @@ export async function renderTable(root, { params, navigate }) {
         <p>The campaign was deleted or the DM removed you.</p>
         <p><a class="button" href="#/campaigns">Back to campaigns</a></p></div></section>`);
       return;
+    }
+    if (parts.includes('homebrew')) {
+      hbRows = await homebrewRows({ campaignId, userId: me });
+      rules = mergeHomebrew(baseRules, hbRows);
+      if (isDm) monsters = mergeHomebrew({ monsters: baseMonsters }, campaignRows(hbRows)).monsters;
     }
     if (ui.selectedId && !s.tokens.some((t) => t.id === ui.selectedId)) ui.selectedId = null;
     if (ui.viewMapId && !s.maps.some((m) => m.id === ui.viewMapId)) ui.viewMapId = null;

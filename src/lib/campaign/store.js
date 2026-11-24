@@ -90,6 +90,7 @@ const loaders = {
   async handouts(s) {
     s.handouts = await q(supabase.from('handouts').select('*').eq('campaign_id', s.id).order('created_at'));
   },
+  async homebrew() {},
   async rolls(s) {
     const rows = await q(supabase.from('rolls').select('*').eq('campaign_id', s.id).order('created_at', { ascending: false }).limit(50));
     s.rolls = rows;
@@ -106,6 +107,8 @@ const RELOAD = {
   tokens: ['tokens'],
   token_secrets: ['tokens'],
   handouts: ['handouts'],
+  // The table page reloads its homebrew itself (see renderTable).
+  homebrew: ['homebrew'],
 };
 
 export async function loadTable(id, userId) {

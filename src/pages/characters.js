@@ -1,6 +1,6 @@
 // Character library: every saved character, plus create / import / export.
 import { html } from '../lib/dom.js';
-import { loadCharacterRules } from '../lib/srd.js';
+import { loadCharacterRulesWithHomebrew } from '../lib/homebrew/store.js';
 import { listCharacters, createCharacter, deleteCharacter, downloadCharacter, parseImport } from '../lib/character/store.js';
 import { derive } from '../lib/character/rules.js';
 import { confirmDialog, toast } from '../lib/ui.js';
@@ -44,7 +44,7 @@ export async function renderCharacters(root, { navigate }) {
 
   async function load() {
     try {
-      [rows, srd] = await Promise.all([listCharacters(), loadCharacterRules()]);
+      [rows, srd] = await Promise.all([listCharacters(), loadCharacterRulesWithHomebrew()]);
       draw();
     } catch (err) {
       list.innerHTML = String(html`<p class="message error">${err.message}</p>`);
