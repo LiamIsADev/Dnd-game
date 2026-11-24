@@ -56,6 +56,9 @@ async function renderWelcome(root) {
       c.monsters += extra.counts.monsters || 0;
       c.feats += extra.counts.feats || 0;
       c['magic-items'] += extra.counts.magicItems || 0;
+      c.classes += extra.counts.classes || 0;
+      c.species += extra.counts.species || 0;
+      c.backgrounds = (c.backgrounds || 0) + (extra.counts.backgrounds || 0);
     }
     const tiles = [
       ['Spells', c.spells, 'spells'],
@@ -63,6 +66,7 @@ async function renderWelcome(root) {
       ['Magic items', c['magic-items'], 'magic-items'],
       ['Classes', c.classes, 'classes'],
       ['Species', c.species, 'species'],
+      ['Backgrounds', c.backgrounds, 'backgrounds'],
       ['Feats', c.feats, 'feats'],
     ];
     root.querySelector('#counts').innerHTML = String(

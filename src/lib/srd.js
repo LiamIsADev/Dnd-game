@@ -18,7 +18,16 @@ export const DATASETS = [
 
 // Extra open-licensed content from Open5e (scripts/build-open5e.mjs), merged
 // into the SRD lists: more subclasses, spells and feats.
-const EXTRA = { classes: 'subclasses', spells: 'spells', feats: 'feats', monsters: 'monsters', equipment: 'equipment', 'magic-items': 'magic-items' };
+const EXTRA = {
+  classes: ['subclasses', 'classes'],
+  spells: 'spells',
+  feats: 'feats',
+  monsters: 'monsters',
+  equipment: 'equipment',
+  'magic-items': 'magic-items',
+  species: 'species',
+  backgrounds: 'backgrounds',
+};
 
 function fetchJson(path, label) {
   return fetch(`${(import.meta.env?.BASE_URL ?? '/')}data/${path}`).then((r) => {
@@ -31,10 +40,24 @@ function fetchJson(path, label) {
 export function mergeExtra(name, base, extra) {
   if (!extra) return base;
   if (name === 'classes') {
-    return base.map((c) => ({
-      ...c,
-      subclasses: [...c.subclasses.map((s) => ({ source: 'srd', sourceName: 'SRD', ...s })), ...(extra[c.id] || [])],
-    }));
+    // extra: [subclasses by class id, new classes] (or just the subclasses).
+    const [subs, more] = Array.isArray(extra) ? extra : [extra, null];
+    return [
+      ...base.map((c) => ({
+        ...c,
+        source: 'srd',
+        sourceName: 'SRD',
+        subclasses: [...c.subclasses.map((s) => ({ source: 'srd', sourceName: 'SRD', ...s })), ...((subs || {})[c.id] || [])],
+      })),
+      ...(more || []),
+    ];
+  }
+  if (name === 'species') {
+    // { added: [...], srdAdds: { id: { subspecies, choices } } }
+    const adds = extra.srdAdds || {};
+    return [...base.map((x) => ({ source: 'srd', sourceName: 'SRD', ...x, ...(adds[x.id] || {}) })), ...(extra.added || [])].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
   }
   if (name === 'equipment') {
     return {
@@ -57,7 +80,9 @@ export function loadSrd(name) {
   if (!cache.has(name)) {
     const base = fetchJson(`srd/${name}.json`, name);
     // The extra content is optional: the site still works without it.
-    const extra = EXTRA[name] ? fetchJson(`open5e/${EXTRA[name]}.json`, name).catch(() => null) : null;
+    const files = [].concat(EXTRA[name] || []);
+    const one = (f) => fetchJson(`open5e/${f}.json`, name).catch(() => null);
+    const extra = files.length ? (files.length > 1 ? Promise.all(files.map(one)) : one(files[0])) : null;
     cache.set(name, extra ? Promise.all([base, extra]).then(([b, x]) => mergeExtra(name, b, x)) : base);
     cache.get(name).catch(() => cache.delete(name));
   }
