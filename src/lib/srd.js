@@ -18,7 +18,7 @@ export const DATASETS = [
 
 // Extra open-licensed content from Open5e (scripts/build-open5e.mjs), merged
 // into the SRD lists: more subclasses, spells and feats.
-const EXTRA = { classes: 'subclasses', spells: 'spells', feats: 'feats' };
+const EXTRA = { classes: 'subclasses', spells: 'spells', feats: 'feats', monsters: 'monsters', equipment: 'equipment', 'magic-items': 'magic-items' };
 
 function fetchJson(path, label) {
   return fetch(`${(import.meta.env?.BASE_URL ?? '/')}data/${path}`).then((r) => {
@@ -35,6 +35,19 @@ export function mergeExtra(name, base, extra) {
       ...c,
       subclasses: [...c.subclasses.map((s) => ({ source: 'srd', sourceName: 'SRD', ...s })), ...(extra[c.id] || [])],
     }));
+  }
+  if (name === 'equipment') {
+    return {
+      ...base,
+      weapons: [...base.weapons.map((w) => ({ source: 'srd', sourceName: 'SRD', ...w })), ...(extra.weapons || [])],
+    };
+  }
+  if (name === 'monsters') {
+    // { added: [...], srdAdds: { id: { legendaryActions, mythicTrait, ... } } }
+    const adds = extra.srdAdds || {};
+    return [...base.map((m) => ({ ...m, source: 'srd', sourceName: 'SRD', ...(adds[m.id] || {}) })), ...(extra.added || [])].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
   }
   return [...base.map((x) => ({ source: 'srd', sourceName: 'SRD', ...x })), ...extra].sort((a, b) => a.name.localeCompare(b.name));
 }

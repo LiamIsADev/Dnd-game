@@ -45,11 +45,13 @@ const CATEGORIES = [
     id: 'monsters',
     label: 'Monsters',
     load: () => loadSrd('monsters'),
-    sub: (m) => `CR ${m.cr?.rating ?? '?'} · ${m.size.join('/')} ${m.type}`,
-    search: (m) => [m.name, m.type, m.group].join(' '),
+    sub: (m) => `CR ${m.cr?.rating ?? '?'} · ${m.size.join('/')} ${m.type}${m.mythicTrait ? ' · Mythic' : m.legendaryActions?.length ? ' · Legendary' : ''}${bookTag(m)}`,
+    search: (m) => [m.name, m.type, m.group, m.sourceName].join(' '),
     filters: [
       { id: 'cr', label: 'CR', options: (items) => [...new Map(items.filter((m) => m.cr?.rating).map((m) => [m.cr.rating, m.cr.value])).entries()].sort((a, b) => a[1] - b[1]).map(([r]) => [r, `CR ${r}`]), test: (m, v) => m.cr?.rating === v },
       { id: 'type', label: 'Type', options: (items) => [...new Set(items.map((m) => m.type.split(' (')[0]))].sort().map((t) => [t, t]), test: (m, v) => m.type.split(' (')[0] === v },
+      { id: 'boss', label: 'Legendary', options: () => [['legendary', 'Has legendary actions'], ['mythic', 'Has mythic actions']], test: (m, v) => (v === 'mythic' ? !!m.mythicTrait : !!m.legendaryActions?.length) },
+      BOOK_FILTER,
     ],
     detail: (m) => statBlock(m),
   },
@@ -57,13 +59,14 @@ const CATEGORIES = [
     id: 'magic-items',
     label: 'Magic Items',
     load: () => loadSrd('magic-items'),
-    sub: (i) => `${i.category} · ${i.rarity.join(' / ')}${i.attunement ? ' · Attunement' : ''}`,
-    search: (i) => [i.name, i.category, ...i.rarity].join(' '),
+    sub: (i) => `${i.category} · ${i.rarity.join(' / ')}${i.attunement ? ' · Attunement' : ''}${bookTag(i)}`,
+    search: (i) => [i.name, i.category, ...i.rarity, i.sourceName].join(' '),
     filters: [
       { id: 'rarity', label: 'Rarity', options: () => ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary', 'Artifact', 'Varies'].map((r) => [r, r]), test: (i, v) => i.rarity.includes(v) },
       { id: 'category', label: 'Type', options: (items) => [...new Set(items.map((i) => i.category))].sort().map((c) => [c, c]), test: (i, v) => i.category === v },
+      BOOK_FILTER,
     ],
-    detail: (i) => html`<h2>${i.name}</h2><p class="meta">${i.meta}</p>${md(i.description)}${i.creatureStatBlock ? html`<div class="embedded">${md(i.creatureStatBlock)}</div>` : ''}`,
+    detail: (i) => html`<h2>${i.name}</h2><p class="meta">${i.meta}${bookTag(i)}</p>${md(i.description)}${i.creatureStatBlock ? html`<div class="embedded">${md(i.creatureStatBlock)}</div>` : ''}`,
   },
   {
     id: 'classes',
@@ -116,11 +119,18 @@ const CATEGORIES = [
     id: 'weapons',
     label: 'Weapons',
     load: async () => (await loadSrd('equipment')).weapons,
-    sub: (w) => `${w.category} ${w.kind} · ${w.damageText}`,
-    search: (w) => [w.name, w.category, w.kind, ...w.properties].join(' '),
-    detail: (w) => html`<h2>${w.name}</h2><p class="meta">${w.category} ${w.kind} weapon</p>
+    sub: (w) => `${w.category} ${w.kind} · ${w.damageText}${w.magic ? ` · Magic, ${w.magic.rarity}` : ''}${bookTag(w)}`,
+    search: (w) => [w.name, w.category, w.kind, ...w.properties, w.sourceName, w.baseName].join(' '),
+    filters: [
+      { id: 'magic', label: 'Magic', options: () => [['plain', 'Ordinary weapons'], ['magic', 'Magic weapons']], test: (w, v) => (v === 'magic') === !!w.magic },
+      { id: 'category', label: 'Category', options: () => [['Simple', 'Simple'], ['Martial', 'Martial']], test: (w, v) => w.category === v },
+      BOOK_FILTER,
+    ],
+    detail: (w) => html`<h2>${w.name}</h2><p class="meta">${w.category} ${w.kind} weapon${w.magic ? ` (magic ${w.baseName}, ${w.magic.rarity}${w.magic.attunement ? ', requires attunement' : ''})` : ''}${bookTag(w)}</p>
       <dl class="facts"><dt>Damage</dt><dd>${w.damageText}</dd><dt>Properties</dt><dd>${w.properties.join(', ') || '—'}</dd>
-      <dt>Mastery</dt><dd>${w.mastery}</dd><dt>Weight</dt><dd>${w.weight}</dd><dt>Cost</dt><dd>${w.cost}</dd></dl>`,
+      ${w.bonus ? html`<dt>Magic bonus</dt><dd>+${w.bonus} to attack and damage rolls</dd>` : ''}
+      <dt>Mastery</dt><dd>${w.mastery || '—'}</dd><dt>Weight</dt><dd>${w.weight || '—'}</dd><dt>Cost</dt><dd>${w.cost || '—'}</dd></dl>
+      ${w.description ? md(w.description) : ''}`,
   },
   {
     id: 'armor',

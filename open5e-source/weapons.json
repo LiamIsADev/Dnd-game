@@ -1,0 +1,2194 @@
+{
+ "weapons": [
+  {
+   "source": "toh",
+   "name": "Axespear",
+   "category": "Martial Melee Weapons",
+   "cost": "25 gp",
+   "damageDice": "1d8",
+   "damageType": "slashing",
+   "weight": "8 lb.",
+   "properties": [
+    "double-headed (1d4)",
+    "two-handed"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Barge Pole",
+   "category": "Simple Melee Weapons",
+   "cost": "1 sp",
+   "damageDice": "1d6",
+   "damageType": "bludgeoning",
+   "weight": "5 lb.",
+   "properties": [
+    "reach",
+    "special",
+    "two-handed"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Bladed Scarf",
+   "category": "Martial Melee Weapons",
+   "cost": "100 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "3 lb.",
+   "properties": [
+    "finesse",
+    "reach",
+    "special"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Blunderbuss",
+   "category": "Martial Ranged Weapons",
+   "cost": "75 gp",
+   "damageDice": "2d4",
+   "damageType": "piercing",
+   "weight": "12 lb.",
+   "properties": [
+    "ammunition",
+    "gunpowder",
+    "loading",
+    "special",
+    "two-handed"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Bolas",
+   "category": "Martial Ranged Weapons",
+   "cost": "5 gp",
+   "damageDice": "",
+   "damageType": "",
+   "weight": "2 lb.",
+   "properties": [
+    "special",
+    "thrown (range 5/15)"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Chain Hook",
+   "category": "Martial Melee Weapons",
+   "cost": "15 gp",
+   "damageDice": "1d6",
+   "damageType": "slashing",
+   "weight": "3 lb.",
+   "properties": [
+    "reach",
+    "special",
+    "thrown (range 10/20)"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Chakram",
+   "category": "Martial Melee Weapons",
+   "cost": "15 gp",
+   "damageDice": "1d6",
+   "damageType": "slashing",
+   "weight": "1 lb.",
+   "properties": [
+    "thrown (range 20/60)"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Climbing Adze",
+   "category": "Martial Melee Weapons",
+   "cost": "6 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "3 lb.",
+   "properties": [
+    "light"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Clockwork Crossbow",
+   "category": "Simple Ranged Weapons",
+   "cost": "100 gp",
+   "damageDice": "1d8",
+   "damageType": "piercing",
+   "weight": "8 lb.",
+   "properties": [
+    "ammunition (60/240)",
+    "magazine (6)",
+    "two-handed"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Club Shield",
+   "category": "Martial Melee Weapons",
+   "cost": "25 gp",
+   "damageDice": "1d4",
+   "damageType": "bludgeoning",
+   "weight": "2 lb.",
+   "properties": [
+    "light",
+    "special"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Double Axe",
+   "category": "Martial Melee Weapons",
+   "cost": "50 gp",
+   "damageDice": "1d8",
+   "damageType": "slashing",
+   "weight": "10 lb.",
+   "properties": [
+    "double-headed (1d6)",
+    "heavy",
+    "two-handed"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Dwarven Arquebus",
+   "category": "Martial Ranged Weapons",
+   "cost": "100 gp",
+   "damageDice": "2d6",
+   "damageType": "piercing",
+   "weight": "20 lb.",
+   "properties": [
+    "ammunition (range 25/100)",
+    "gunpowder",
+    "heavy",
+    "loading",
+    "two-handed"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Dwarven Axe",
+   "category": "Martial Melee Weapons",
+   "cost": "15 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "6 lb.",
+   "properties": [
+    "special",
+    "versatile (1d10)"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Dwarven Revolving Musket",
+   "category": "Martial Ranged Weapons",
+   "cost": "200 gp",
+   "damageDice": "1d8",
+   "damageType": "piercing",
+   "weight": "12 lb.",
+   "properties": [
+    "ammunition (range 80/320)",
+    "gunpowder",
+    "magazine (8)",
+    "two-handed"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Elven Dueling Blade",
+   "category": "Martial Melee Weapons",
+   "cost": "50 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "4 lb.",
+   "properties": [
+    "finesse",
+    "two-handed"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Granite Fist",
+   "category": "Simple Melee Weapons",
+   "cost": "25 gp",
+   "damageDice": "1d4",
+   "damageType": "bludgeoning",
+   "weight": "5 lb.",
+   "properties": []
+  },
+  {
+   "source": "toh",
+   "name": "Hand Trebuchet",
+   "category": "Martial Ranged Weapons",
+   "cost": "4 gp",
+   "damageDice": "",
+   "damageType": "",
+   "weight": "3 lb.",
+   "properties": [
+    "ammunition (range 60/240)",
+    "special"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Joining Dirks",
+   "category": "Martial Melee Weapons",
+   "cost": "50 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "2 lb.",
+   "properties": [
+    "finesse",
+    "light",
+    "special"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Khopesh",
+   "category": "Martial Melee Weapons",
+   "cost": "25 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "4 lb.",
+   "properties": [
+    "versatile (1d8)"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Light Pick",
+   "category": "Simple Melee Weapons",
+   "cost": "3 gp",
+   "damageDice": "1d4",
+   "damageType": "piercing",
+   "weight": "2 lb.",
+   "properties": [
+    "light",
+    "thrown (20/60)"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Musket",
+   "category": "Martial Ranged Weapons",
+   "cost": "50 gp",
+   "damageDice": "1d10",
+   "damageType": "piercing",
+   "weight": "10 lb.",
+   "properties": [
+    "ammunition (range 80/320)",
+    "gunpowder",
+    "loading",
+    "two-handed"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Pistol",
+   "category": "Simple Ranged Weapons",
+   "cost": "25 gp",
+   "damageDice": "1d6",
+   "damageType": "piercing",
+   "weight": "5 lb.",
+   "properties": [
+    "ammunition (range 30/120)",
+    "gunpowder",
+    "light",
+    "loading"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Pneumatic War Pick",
+   "category": "Martial Melee Weapons",
+   "cost": "50 gp",
+   "damageDice": "1d4",
+   "damageType": "piercing",
+   "weight": "4 lb.",
+   "properties": [
+    "special"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Shashka",
+   "category": "Martial Melee Weapons",
+   "cost": "20 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "4 lb.",
+   "properties": [
+    "special",
+    "versatile (1d10)"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Shotel",
+   "category": "Martial Melee Weapons",
+   "cost": "50 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "3 lb.",
+   "properties": [
+    "finesse",
+    "special"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Stone Rake",
+   "category": "Simple Melee Weapons",
+   "cost": "5 gp",
+   "damageDice": "1d8",
+   "damageType": "piercing",
+   "weight": "5 lb.",
+   "properties": [
+    "two-handed"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Temple Sword",
+   "category": "Martial Melee Weapons",
+   "cost": "35 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "3 lb.",
+   "properties": [
+    "finesse",
+    "light"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Whipsaw",
+   "category": "Martial Melee Weapons",
+   "cost": "15 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "2 lb.",
+   "properties": [
+    "finesse"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Wormsilk Net",
+   "category": "Martial Ranged Weapons",
+   "cost": "60 gp",
+   "damageDice": "",
+   "damageType": "",
+   "weight": "2 lb.",
+   "properties": [
+    "special",
+    "thrown (range 10/20)"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Wormsilk Whip",
+   "category": "Martial Melee Weapons",
+   "cost": "50 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "3 lb.",
+   "properties": [
+    "finesse",
+    "reach"
+   ]
+  },
+  {
+   "source": "toh",
+   "name": "Wrist Knife",
+   "category": "Martial Melee Weapons",
+   "cost": "4 gp",
+   "damageDice": "1d4",
+   "damageType": "slashing",
+   "weight": "1 lb.",
+   "properties": [
+    "finesse",
+    "light"
+   ]
+  }
+ ],
+ "magicWeapons": [
+  {
+   "source": "vom",
+   "name": "Akaasit Blade",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. This dagger is crafted from the arm blade of a defeated Akaasit (see Tome of Beasts 2). You can use an action to activate a small measure of prescience within the dagger for 1 minute. If you are attacked by a creature you can see within 5 feet of you while this effect is active, you can use your reaction to make one attack with this dagger against the attacker. If your attack hits, the dagger loses its prescience, and its prescience can't be activated again until the next dawn.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Anchor of Striking",
+   "desc": "This small rusty iron anchor feels sturdy in spite of its appearance. You gain a +1 bonus to attack and damage rolls made with this magic war pick. When you roll a 20 on an attack roll made with this weapon, the target is wrapped in ethereal golden chains that extend from the bottom of the anchor. As an action, the chained target can make a DC 15 Strength or Dexterity check, freeing itself from the chains on a success. Alternatively, you can use a bonus action to command the chains to disappear, freeing the target. The chains are constructed of magical force and can't be damaged, though they can be destroyed with a disintegrate spell. While the target is wrapped in these chains, you and the target can't move further than 50 feet from each other.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "war-pick"
+  },
+  {
+   "source": "vom",
+   "name": "Anointing Mace",
+   "desc": "Also called an anointing gada, you gain a +1 bonus to attack and damage rolls made with this magic weapon. In addition, the ornately decorated head of the mace holds a reservoir perforated with small holes. As an action, you can fill the reservoir with a single potion or vial of liquid, such as holy water or alchemist's fire. You can press a button on the haft of the weapon as a bonus action, which opens the holes. If you hit a target with the weapon while the holes are open, the weapon deals damage as normal and the target suffers the effects of the liquid. For example,\nan anointing mace filled with holy water deals an extra 2d6 radiant damage if it hits a fiend or undead. After you press the button and make an attack roll, the liquid is expended, regardless if your attack hits.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "mace"
+  },
+  {
+   "source": "vom",
+   "name": "Asp's Kiss",
+   "desc": "This haladie features two short, slightly curved blades attached to a single hilt with a short, blue-sheened spike on the hand guard. You gain a +2 bonus to attack and damage rolls made with this magic weapon. While attuned to this sword, you have immunity to poison damage, and, when you take the Dash action, the extra movement you gain is double your speed instead of equal to your speed. When you use the Attack action with this sword, you can make one attack with its hand guard spike (treat as a dagger) as a bonus action. You can use an action to cause indigo poison to coat the blades of this sword. The poison remains for 1 minute or until two attacks using the blade of this weapon hit one or more creatures. The target must succeed on a DC 17 Constitution saving throw or take 2d10 poison damage and its hit point maximum is reduced by an amount equal to the poison damage taken. This reduction lasts until the target finishes a long rest. The target dies if this effect reduces its hit point maximum to 0. The sword can't be used this way again until the next dawn. When you kill a creature with this weapon, it sheds a single, blue tear as it takes its last breath.",
+   "rarity": "Legendary",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Black and White Daggers",
+   "desc": "These matched daggers are identical except for the stones set in their pommels. One pommel is chalcedony (opaque white), the other is obsidian (opaque black). You gain a +1 bonus to attack and damage rolls with both magic weapons. The bonus increases to +3 when you use the white dagger to attack a monstrosity, and it increases to +3 when you use the black dagger to attack an undead. When you hit a monstrosity or undead with both daggers in the same turn, that creature takes an extra 1d6 piercing damage from the second attack.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Blackguard's Dagger",
+   "desc": "You have advantage on attack rolls made with this weapon against a target if another enemy of the target is within 5 feet of it, and it has no allies within 5 feet of it.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Blackguard's Handaxe",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you draw this weapon, you can use a bonus action to cast the thaumaturgy spell from it. You can have only one of the spell's effects active at a time when you cast it in this way.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "handaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Blackguard's Shortsword",
+   "desc": "You have advantage on attack rolls made with this weapon against a target if another enemy of the target is within 5 feet of it, and it has no allies within 5 feet of it.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Blade of Petals",
+   "desc": "You gain a +2 bonus to attack and damage rolls made with this magic weapon. This brightly-colored shortsword is kept in a wooden scabbard with eternally blooming flowers. The blade is made of dull green steel, and its pommel is fashioned from hard rosewood. As a bonus action, you can conjure a flowery mist which fills a 20-foot area around you with pleasant-smelling perfume. The scent dissipates after 1 minute. A creature damaged by the blade must succeed on a DC 15 Charisma saving throw or be charmed by you until the end of its next turn. A creature can't be charmed this way more than once every 24 hours.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Blade of the Dervish",
+   "desc": "This magic scimitar is empowered by your movements. For every 10 feet you move before making an attack, you gain a +1 bonus to the attack and damage rolls of that attack, and the scimitar deals an extra 1d6 slashing damage if the attack hits (maximum of +3 and 3d6). In addition, if you use the Dash action and move within 5 feet of a creature, you can attack that creature as a bonus action. On a hit, the target takes an extra 2d6 slashing damage.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Blade of the Temple Guardian",
+   "desc": "This simple but elegant shortsword is a magic weapon. When you are wielding it and use the Flurry of Blows class feature, you can make your bonus attacks with the sword rather than unarmed strikes. If you deal damage to a creature with this weapon and reduce it to 0 hit points, you absorb some of its energy, regaining 1 expended ki point.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodbow",
+   "desc": "This longbow is carved of a light, sturdy wood such as hickory or yew, and it is almost always stained a deep maroon hue, lacquered and aged under layers of sundried blood. The bow is sometimes decorated with reptilian teeth, centaur tails, or other battle trophies. The bow is designed to harm the particular type of creature whose blood most recently soaked the weapon. When you make a ranged attack roll with this magic weapon against a creature of that type, you have a +1 bonus to the attack and damage rolls. If the attack hits, the target must succeed on a DC 15 Wisdom saving throw or become enraged until the end of your next turn. While enraged, the target suffers a random short-term madness.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "longbow"
+  },
+  {
+   "source": "vom",
+   "name": "Blooddrinker Spear",
+   "desc": "Prized by gnolls, the upper haft of this spear is decorated with tiny animal skulls, feathers, and other adornments. You gain a +1 bonus to attack and damage rolls with this magic weapon. When you hit a creature with this spear, you mark that creature for 1 hour. Until the mark ends, you deal an extra 1d6 damage to the target whenever you hit it with the spear, and you have advantage on any Wisdom (Perception) or Wisdom (Survival) check you make to find the target. If the target drops to 0 hit points, the mark ends. This property can't be used on a different creature until you spend a short rest cleaning the previous target's blood from the spear.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "spear"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Battleaxe",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "battleaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Blowgun",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "blowgun"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Crossbow Hand",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "crossbow-hand"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Crossbow Heavy",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "crossbow-heavy"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Crossbow Light",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "crossbow-light"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Dagger",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Dart",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "dart"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Glaive",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "glaive"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Greataxe",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greataxe"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Greatsword",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Halberd",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "halberd"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Handaxe",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "handaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Javelin",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "javelin"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Lance",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "lance"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Longbow",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "longbow"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Longsword",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Morningstar",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "morningstar"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Pike",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "pike"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Rapier",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Scimitar",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Shortbow",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortbow"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Shortsword",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Sickle",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "sickle"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Spear",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "spear"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Trident",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "trident"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Warpick",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "war-pick"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodfuel Whip",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The first time you attack with the weapon on each of your turns, you can spend one or more Hit Dice, up to your maximum Hit Dice. For each Hit Die spent in this way, you roll the die and add your Constitution modifier to it. You lose hit points equal to the total, and the target takes extra necrotic damage equal to the total. You can't use this feature of the weapon if you don't have blood. Hit Dice spent using this weapon's feature can't be used to regain hit points during a short rest. You regain spent Hit Dice as normal.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "whip"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Battleaxe",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "battleaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Blowgun",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "blowgun"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Crossbow Hand",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "crossbow-hand"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Crossbow Heavy",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "crossbow-heavy"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Crossbow Light",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "crossbow-light"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Dagger",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Dart",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "dart"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Glaive",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "glaive"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Greataxe",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greataxe"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Greatsword",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Halberd",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "halberd"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Handaxe",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "handaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Javelin",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "javelin"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Lance",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "lance"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Longbow",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "longbow"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Longsword",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Morningstar",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "morningstar"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Pike",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "pike"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Rapier",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Scimitar",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Shortbow",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortbow"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Shortsword",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Sickle",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "sickle"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Spear",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "spear"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Trident",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "trident"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Warpick",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "war-pick"
+  },
+  {
+   "source": "vom",
+   "name": "Bloodthirsty Whip",
+   "desc": "This magic weapon bears long, branching channels inscribed into its blade or head, and it gives off a coppery scent. When you damage a creature that has blood with this weapon, it loses an additional 2d6 hit points from blood loss.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "whip"
+  },
+  {
+   "source": "vom",
+   "name": "Bludgeon of Nightmares",
+   "desc": "You gain a +2 bonus to attack and damage rolls made with this weapon. The weapon appears to be a mace of disruption, and an identify spell reveals it to be such. The first time you use this weapon to kill a creature that has an Intelligence score of 5 or higher, you begin having nightmares and disturbing visions that disrupt your rest. Each time you complete a long rest, you must make a Wisdom saving throw. The DC equals 10 + the total number of creatures with Intelligence 5 or higher that you've reduced to 0 hit points with this weapon. On a failure, you gain no benefits from that long rest, and you gain one level of exhaustion.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "mace"
+  },
+  {
+   "source": "vom",
+   "name": "Bone Whip",
+   "desc": "This whip is constructed of humanoid vertebrae with their edges magically sharpened and pointed. The bones are joined together into a coiled line by strands of steel wire. The handle is half a femur wrapped in soft leather of tanned humanoid skin. You gain a +1 bonus to attack and damage rolls with this weapon. You can use an action to cause fiendish energy to coat the whip. For 1 minute, you gain 5 temporary hit points the first time you hit a creature on each turn. In addition, when you deal damage to a creature with this weapon, the creature must succeed on a DC 17 Constitution saving throw or its hit point maximum is reduced by an amount equal to the damage dealt. This reduction lasts until the creature finishes a long rest. Once used, this property of the whip can't be used again until the next dawn.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "whip"
+  },
+  {
+   "source": "vom",
+   "name": "Bonebreaker Mace",
+   "desc": "You gain a +1 bonus on attack and damage rolls made with this magic weapon. The bonus increases to +3 when you use it to attack an undead creature. Often given to the grim enforcers of great necropolises, these weapons can reduce the walking dead to splinters with a single strike. When you hit an undead creature with this magic weapon, treat that creature as if it is vulnerable to bludgeoning damage. If it is already vulnerable to bludgeoning damage, your attack deals an additional 1d6 radiant damage.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "mace"
+  },
+  {
+   "source": "vom",
+   "name": "Breaker Lance",
+   "desc": "You gain a +1 bonus to attack and damage rolls with this magic weapon. When you attack an object or structure with this magic lance and hit, maximize your weapon damage dice against the target. The lance has 3 charges. As part of an attack action with the lance, you can expend a charge while striking a barrier created by a spell, such as a wall of fire or wall of force, or an entryway protected by the arcane lock spell. You must make a Strength check against a DC equal to 10 + the spell's level. On a successful check, the spell ends. The lance regains 1d3 expended charges daily at dawn.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "lance"
+  },
+  {
+   "source": "vom",
+   "name": "Buzzing Battleaxe",
+   "desc": "You can use a bonus action to speak this weapon's command word, causing the blade to emit a loud buzzing sound. The buzzing noise is audible out to 100 feet. While the sword is buzzing, it deals an extra 2d6 thunder damage to any target it hits. The buzzing lasts until you use a bonus action to speak the command word again or until you drop or sheathe the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "battleaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Buzzing Greataxe",
+   "desc": "You can use a bonus action to speak this weapon's command word, causing the blade to emit a loud buzzing sound. The buzzing noise is audible out to 100 feet. While the sword is buzzing, it deals an extra 2d6 thunder damage to any target it hits. The buzzing lasts until you use a bonus action to speak the command word again or until you drop or sheathe the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greataxe"
+  },
+  {
+   "source": "vom",
+   "name": "Buzzing Greatsword",
+   "desc": "You can use a bonus action to speak this weapon's command word, causing the blade to emit a loud buzzing sound. The buzzing noise is audible out to 100 feet. While the sword is buzzing, it deals an extra 2d6 thunder damage to any target it hits. The buzzing lasts until you use a bonus action to speak the command word again or until you drop or sheathe the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Buzzing Handaxe",
+   "desc": "You can use a bonus action to speak this weapon's command word, causing the blade to emit a loud buzzing sound. The buzzing noise is audible out to 100 feet. While the sword is buzzing, it deals an extra 2d6 thunder damage to any target it hits. The buzzing lasts until you use a bonus action to speak the command word again or until you drop or sheathe the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "handaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Buzzing Longsword",
+   "desc": "You can use a bonus action to speak this weapon's command word, causing the blade to emit a loud buzzing sound. The buzzing noise is audible out to 100 feet. While the sword is buzzing, it deals an extra 2d6 thunder damage to any target it hits. The buzzing lasts until you use a bonus action to speak the command word again or until you drop or sheathe the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Buzzing Rapier",
+   "desc": "You can use a bonus action to speak this weapon's command word, causing the blade to emit a loud buzzing sound. The buzzing noise is audible out to 100 feet. While the sword is buzzing, it deals an extra 2d6 thunder damage to any target it hits. The buzzing lasts until you use a bonus action to speak the command word again or until you drop or sheathe the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Buzzing Scimitar",
+   "desc": "You can use a bonus action to speak this weapon's command word, causing the blade to emit a loud buzzing sound. The buzzing noise is audible out to 100 feet. While the sword is buzzing, it deals an extra 2d6 thunder damage to any target it hits. The buzzing lasts until you use a bonus action to speak the command word again or until you drop or sheathe the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Buzzing Shortsword",
+   "desc": "You can use a bonus action to speak this weapon's command word, causing the blade to emit a loud buzzing sound. The buzzing noise is audible out to 100 feet. While the sword is buzzing, it deals an extra 2d6 thunder damage to any target it hits. The buzzing lasts until you use a bonus action to speak the command word again or until you drop or sheathe the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Candied Axe",
+   "desc": "This battleaxe bears a golden head spun from crystalized honey. Its wooden handle is carved with reliefs of bees. You gain a +2 bonus to attack and damage rolls made with this magic weapon.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "battleaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Ceremonial Sacrificial Knife",
+   "desc": "Runes dance along the blade of this keen knife. Sacrificial Knife (Common). While attuned to it, you can use this magic, rune-inscribed dagger as a spellcasting focus. Ceremonial Sacrificial Knife (Uncommon). More powerful versions of this blade also exist. While holding the greater version of this dagger, you can use it to perform a sacrificial ritual during a short rest. If you sacrifice a Tiny or Small creature, you regain one expended 1st-level spell slot. If you sacrifice a Medium or larger creature, you regain one expended 2nd-level spell slot.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Chainbreaker Greatsword",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you use this weapon to attack or break chains, manacles, or similar metal objects restraining creatures, you have advantage on the attack roll or ability check. In addition, such items have vulnerability to this sword's weapon damage.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Chainbreaker Longsword",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you use this weapon to attack or break chains, manacles, or similar metal objects restraining creatures, you have advantage on the attack roll or ability check. In addition, such items have vulnerability to this sword's weapon damage.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Chainbreaker Rapier",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you use this weapon to attack or break chains, manacles, or similar metal objects restraining creatures, you have advantage on the attack roll or ability check. In addition, such items have vulnerability to this sword's weapon damage.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Chainbreaker Scimitar",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you use this weapon to attack or break chains, manacles, or similar metal objects restraining creatures, you have advantage on the attack roll or ability check. In addition, such items have vulnerability to this sword's weapon damage.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Chainbreaker Shortsword",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you use this weapon to attack or break chains, manacles, or similar metal objects restraining creatures, you have advantage on the attack roll or ability check. In addition, such items have vulnerability to this sword's weapon damage.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Chieftain's Axe",
+   "desc": "Furs conceal the worn runes lining the haft of this oversized, silver-headed battleaxe. You gain a +2 bonus to attack and damage rolls made with this silvered, magic weapon.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "battleaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Clockwork Mace of Divinity",
+   "desc": "This clockwork mace is composed of several different metals. While attuned to this magic weapon, you have proficiency with it. As a bonus action, you can command the mace to transform into a trident. When you hit with an attack using this weapon's trident form, the target takes an extra 1d6 radiant damage.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "mace"
+  },
+  {
+   "source": "vom",
+   "name": "Constant Dagger",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you roll a 20 on an attack roll made with this weapon, the target loses its resistance to bludgeoning, piercing, and slashing damage until the start of your next turn. If it has immunity to bludgeoning, piercing, and slashing damage, its immunity instead becomes resistance to such damage until the start of your next turn. If the creature doesn't have resistance or immunity to such damage, you roll your damage dice three times, instead of twice.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Consuming Rod",
+   "desc": "This bone mace is crafted from a humanoid femur. One end is carved to resemble a ghoulish face, its mouth open wide and full of sharp fangs. The mace has 8 charges, and it recovers 1d6 + 2 charges daily at dawn. You gain a +1 bonus to attack and damage rolls made with this magic mace. When it hits a creature, the mace's mouth stretches gruesomely wide and bites the target, adding 3 (1d6) piercing damage to the attack. As a reaction, you can expend 1 charge to regain hit points equal to the piercing damage dealt. Alternatively, you can use your reaction to expend 5 charges when you hit a Medium or smaller creature and force the mace to swallow the target. The target must succeed on a DC 15 Dexterity saving throw or be swallowed into an extra-dimensional space within the mace. While swallowed, the target is blinded and restrained, and it has total cover against attacks and other effects outside the mace. The target can still breathe. As an action, you can force the mace to regurgitate the creature, which falls prone in a space within 5 feet of the mace. The mace automatically regurgitates a trapped creature at dawn when it regains charges.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "mace"
+  },
+  {
+   "source": "vom",
+   "name": "Dagger of the Barbed Devil",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. You can use an action to cause sharp, pointed barbs to sprout from this blade. The barbs remain for 1 minute. When you hit a creature while the barbs are active, the creature must succeed on a DC 15 Dexterity saving throw or a barb breaks off into its flesh and the dagger loses its barbs. At the start of each of its turns, a creature with a barb in its flesh must make a DC 15 Constitution saving throw. On a failure, it has disadvantage on attack rolls and ability checks until the start of its next turn as it is wracked with pain. The barb remains until a creature uses its action to remove the barb, dealing 1d4 piercing damage to the barbed creature. Once you cause barbs to sprout from the dagger, you can't do so again until the next dawn.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Dawn Shard Dagger",
+   "desc": "The blade of this magic weapon gleams with a faint golden shine, and the pommel is etched with a sunburst. As a bonus action, you can command the weapon to shed dim light out to 5 feet, to shed bright light out to 20 feet and dim light for an additional 20 feet, or to douse the light. The weapon deals an extra 1d6 radiant damage to any creature it hits. This increases to 2d6 radiant damage if the target is undead or a creature of shadow.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Dawn Shard Greatsword",
+   "desc": "The blade of this magic weapon gleams with a faint golden shine, and the pommel is etched with a sunburst. As a bonus action, you can command the weapon to shed dim light out to 5 feet, to shed bright light out to 20 feet and dim light for an additional 20 feet, or to douse the light. The weapon deals an extra 1d6 radiant damage to any creature it hits. This increases to 2d6 radiant damage if the target is undead or a creature of shadow.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Dawn Shard Longsword",
+   "desc": "The blade of this magic weapon gleams with a faint golden shine, and the pommel is etched with a sunburst. As a bonus action, you can command the weapon to shed dim light out to 5 feet, to shed bright light out to 20 feet and dim light for an additional 20 feet, or to douse the light. The weapon deals an extra 1d6 radiant damage to any creature it hits. This increases to 2d6 radiant damage if the target is undead or a creature of shadow.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Dawn Shard Rapier",
+   "desc": "The blade of this magic weapon gleams with a faint golden shine, and the pommel is etched with a sunburst. As a bonus action, you can command the weapon to shed dim light out to 5 feet, to shed bright light out to 20 feet and dim light for an additional 20 feet, or to douse the light. The weapon deals an extra 1d6 radiant damage to any creature it hits. This increases to 2d6 radiant damage if the target is undead or a creature of shadow.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Dawn Shard Scimitar",
+   "desc": "The blade of this magic weapon gleams with a faint golden shine, and the pommel is etched with a sunburst. As a bonus action, you can command the weapon to shed dim light out to 5 feet, to shed bright light out to 20 feet and dim light for an additional 20 feet, or to douse the light. The weapon deals an extra 1d6 radiant damage to any creature it hits. This increases to 2d6 radiant damage if the target is undead or a creature of shadow.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Dawn Shard Shortsword",
+   "desc": "The blade of this magic weapon gleams with a faint golden shine, and the pommel is etched with a sunburst. As a bonus action, you can command the weapon to shed dim light out to 5 feet, to shed bright light out to 20 feet and dim light for an additional 20 feet, or to douse the light. The weapon deals an extra 1d6 radiant damage to any creature it hits. This increases to 2d6 radiant damage if the target is undead or a creature of shadow.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Dimensional Net",
+   "desc": "Woven from the hair of celestials and fiends, this shimmering iridescent net can subdue and capture otherworldly creatures. You have a +1 bonus to attack rolls with this magic weapon. In addition to the normal effects of a net, this net prevents any Large or smaller aberration, celestial, or fiend hit by it from using any method of extradimensional movement, including teleportation or travel to a different plane of existence. When such a creature is bound in this way, a creature must succeed on a DC 30 Strength (Athletics) check to free the bound creature. The net has immunity to damage dealt by the bound creature, but another creature can deal 20 slashing damage to the net and free the bound creature, ending the effect. The net has AC 15 and 30 hit points. It regains 1 hit point every 5 minutes as long as it has at least 1 hit point. If the net drops to 0 hit points, it is destroyed.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "net"
+  },
+  {
+   "source": "vom",
+   "name": "Dirgeblade",
+   "desc": "This weapon is an exquisitely crafted rapier set in a silver and leather scabbard. The blade glows a faint stormy blue and is encircled by swirling wisps of clouds. You gain a +3 bonus to attack and damage rolls made with this magic weapon. This weapon, when unsheathed, sheds dim blue light in a 20-foot radius. When you hit a creature with it, you can expend 1 Bardic Inspiration to impart a sense of overwhelming grief in the target. A creature affected by this grief must succeed on a DC 15 Wisdom saving throw or fall prone and become incapacitated by sadness until the end of its next turn. Once a month under an open sky, you can use a bonus action to speak this magic sword's command word and cause the sword to sing a sad dirge. This dirge conjures heavy rain (or snow in freezing temperatures) in the region for 2d6 hours. The precipitation falls in an X-mile radius around you, where X is equal to your level.",
+   "rarity": "Legendary",
+   "attunement": true,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Dirk of Daring",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. While holding the dagger, you have advantage on saving throws against being frightened.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Dragonstooth Blade",
+   "desc": "This razor-sharp blade, little more than leather straps around the base of a large tooth, still carries the power of a dragon. This weapon's properties are determined by the type of dragon that once owned this tooth. The GM chooses the dragon type or determines it randomly from the options below. When you hit with an attack using this magic sword, the target takes an extra 1d6 damage of a type determined by the kind of dragon that once owned the tooth. In addition, you have resistance to the type of damage associated with that dragon. | d6 | Damage Type | Dragon Type |\n| --- | ----------- | ------------------- |\n| 1 | Acid | Black or Copper |\n| 2 | Fire | Brass, Gold, or Red |\n| 3 | Poison | Green |\n| 4 | Lightning | Blue or Bronze |\n| 5 | Cold | Silver or White |\n| 6 | Necrotic | Undead |",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Entrenching Mattock",
+   "desc": "You gain a +1 to attack and damage rolls with this magic weapon. This bonus increases to +3 when you use the pick to attack a creature made of earth or stone, such as an earth elemental or stone golem. As a bonus action, you can slam the head of the pick into earth, sand, mud, or rock within 5 feet of you to create a wall of that material up to 30 feet long, 3 feet high, and 1 foot thick along that surface. The wall provides half cover to creatures behind it. The pick can't be used this way again until the next dawn.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "war-pick"
+  },
+  {
+   "source": "vom",
+   "name": "Exsanguinating Blade",
+   "desc": "This double-bladed dagger has an ivory hilt, and its gold pommel is shaped into a woman's head with ruby eyes and a fanged mouth opened in a scream. You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you roll a 20 on an attack roll made with this weapon against a creature that has blood, the dagger gains 1 charge. The dagger can hold 1 charge at a time. You can use a bonus action to expend 1 charge from the dagger to cause one of the following effects: - You or a creature you touch with the blade regains 2d8 hit points. - The next time you hit a creature that has blood with this weapon, it deals an extra 2d8 necrotic damage.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Forgefire Maul",
+   "desc": "The head of this weapon is shaped like an anvil, and engravings of fire and arcane runes decorate it. You can use a bonus action to speak this magic weapon's command word, causing its head to glow red-hot. While red-hot, the weapon deals an extra 1d6 fire damage to any target it hits. The weapon's anvil-like head remains red-hot until you use a bonus action to speak the command word again or until you drop or sheathe the weapon. When you roll a 20 on an attack roll made with this weapon against a target holding or wearing a metal object, such as a metal weapon or metal armor, the target takes an extra 1d4 fire damage and the metal object becomes red-hot for 1 minute. While the object is red-hot and the creature still wears or carries it, the creature takes 1d4 fire damage at the start of each of its turns.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "maul"
+  },
+  {
+   "source": "vom",
+   "name": "Forgefire Warhammer",
+   "desc": "The head of this weapon is shaped like an anvil, and engravings of fire and arcane runes decorate it. You can use a bonus action to speak this magic weapon's command word, causing its head to glow red-hot. While red-hot, the weapon deals an extra 1d6 fire damage to any target it hits. The weapon's anvil-like head remains red-hot until you use a bonus action to speak the command word again or until you drop or sheathe the weapon. When you roll a 20 on an attack roll made with this weapon against a target holding or wearing a metal object, such as a metal weapon or metal armor, the target takes an extra 1d4 fire damage and the metal object becomes red-hot for 1 minute. While the object is red-hot and the creature still wears or carries it, the creature takes 1d4 fire damage at the start of each of its turns.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "warhammer"
+  },
+  {
+   "source": "vom",
+   "name": "Gale Javelin",
+   "desc": "The metallic head of this javelin is embellished with three small wings. When you speak a command word while making a ranged weapon attack with this magic weapon, a swirling vortex of wind follows its path through the air. Draw a line between you and the target of your attack; each creature within 10 feet of this line must make a DC 13 Strength saving throw. On a failed save, the creature is pushed backward 10 feet and falls prone. In addition, if this ranged weapon attack hits, the target must make a DC 13 Strength saving throw. On a failed save, the target is pushed backward 15 feet and falls prone. The javelin's property can't be used again until the next dawn. In the meantime, it can still be used as a magic weapon.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "javelin"
+  },
+  {
+   "source": "vom",
+   "name": "Glazed Battleaxe",
+   "desc": "A pleasant scent emerges from this weapon. While it is on your person, you have advantage on Charisma (Persuasion) checks made to interact with humanoids and fey.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "battleaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Glazed Greataxe",
+   "desc": "A pleasant scent emerges from this weapon. While it is on your person, you have advantage on Charisma (Persuasion) checks made to interact with humanoids and fey.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "greataxe"
+  },
+  {
+   "source": "vom",
+   "name": "Glazed Greatsword",
+   "desc": "A pleasant scent emerges from this weapon. While it is on your person, you have advantage on Charisma (Persuasion) checks made to interact with humanoids and fey.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Glazed Handaxe",
+   "desc": "A pleasant scent emerges from this weapon. While it is on your person, you have advantage on Charisma (Persuasion) checks made to interact with humanoids and fey.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "handaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Glazed Longsword",
+   "desc": "A pleasant scent emerges from this weapon. While it is on your person, you have advantage on Charisma (Persuasion) checks made to interact with humanoids and fey.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Glazed Rapier",
+   "desc": "A pleasant scent emerges from this weapon. While it is on your person, you have advantage on Charisma (Persuasion) checks made to interact with humanoids and fey.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Glazed Scimitar",
+   "desc": "A pleasant scent emerges from this weapon. While it is on your person, you have advantage on Charisma (Persuasion) checks made to interact with humanoids and fey.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Glazed Shortsword",
+   "desc": "A pleasant scent emerges from this weapon. While it is on your person, you have advantage on Charisma (Persuasion) checks made to interact with humanoids and fey.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Gnawing Spear",
+   "desc": "You gain a +1 bonus to attack and damage rolls with this magic weapon. When you roll a 20 on an attack roll made with this spear, its head animates, grows serrated teeth, and lodges itself in the target. While the spear is lodged in the target and you are wielding the spear, the target is grappled by you. At the start of each of your turns, the spear twists and grinds, dealing 2d6 piercing damage to the grappled target. If you release the spear, it remains lodged in the target, dealing damage each round as normal, but the target is no longer grappled by you. While the spear is lodged in a target, you can't make attacks with it. A creature, including the restrained target, can take its action to remove the spear by succeeding on a DC 15 Strength check. The target takes 1d6 piercing damage when the spear is removed. You can use an action to speak the spear's command word, causing it to dislodge itself and fall into an unoccupied space within 5 feet of the target.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "spear"
+  },
+  {
+   "source": "vom",
+   "name": "Golden Bolt",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. This crossbow doesn't have the loading property, and it doesn't require ammunition. Immediately after firing a bolt from this weapon, another golden bolt forms to take its place.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "crossbow-heavy"
+  },
+  {
+   "source": "vom",
+   "name": "Greatsword of Fallen Saints",
+   "desc": "This enchanted blade is infused with the spirits of fallen warriors who carried it in battle long ago. You gain a +1 bonus to attack and damage rolls made with this magic weapon. If you die while attuned to the sword, you gain the effect of the gentle repose spell. This effect lasts until another creature attunes to the sword.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Greatsword of Volsung",
+   "desc": "Legends tell of a dragon whose hide was impenetrable and so robust that only a blow to the heart would kill it. An unnamed hero finally defeated it and tore its heart into two. The dragon’s name was lost, but its legacy remains. This sword is one of two items that were crafted to hold its heart. The black blade is adorned with glittering silver runes, and its guard has a shallow opening at the center with grooves connecting it to the first rune. The sword’s pommel is a large, clear crystal held fast by silver scales. You gain a +2 bonus to attack and damage rolls made with this magic weapon. When you hit a dragon with an attack using this sword, that creature takes an extra 1d6 slashing damage. Runes of Courage. You can’t be frightened while holding or carrying this sword. Fragment of Gram Awakened. You can use a bonus action to awaken a fragment of the spirit of the great wyrm that inhabits this blade. For 24 hours, you gain a +3 bonus to attack and damage rolls with this magic sword, and when you hit a dragon with an attack using this sword, that creature takes an extra 3d6 slashing damage. Once used, this property can’t be used again until 3 days have passed. If you have performed the Dragon Heart Ritual, you can use a bonus action to expend 2 of the sword’s charges to activate this property, and you can use this property as often as you want, as long as you have the charges to do so. Dragon Heart Ritual. If you are also attuned to the locket of dragon vitality (see page 152), you can drain 3 charges from the locket into the sword, turning the crystal pommel a deep red and rendering the locket broken and irreparable. Doing this requires a long rest where you also re-attune with the newly charged sword of volsung. Upon completing the Dragon Heart Ritual, the sword contains all remaining charges from the locket, and you gain the locket’s effects while holding or carrying the sword. When you are reduced to 0 hit points and trigger the locket’s temporary hit points, the sword isn’t destroyed, but you can’t trigger that effect again until 24 hours have passed. The sword regains all expended charges after you slay any dragon. For the purpose of this sword, “dragon” refers to any creature with the dragon type, including drakes and wyverns.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Hammer of Throwing",
+   "desc": "You gain a +1 bonus to attack and damage rolls with this magic weapon. In addition, when you throw the hammer, it returns to your hand at the end of your turn. If you have no hand free, it falls to the ground at your feet.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "light-hammer"
+  },
+  {
+   "source": "vom",
+   "name": "Hexen Blade",
+   "desc": "The colorful surface of this sleek adamantine shortsword exhibits a perpetually shifting, iridescent sheen. You gain a +1 bonus to attack and damage rolls made with this magic weapon. The sword has 5 charges and regains 1d4 + 1 charges daily at dawn. While holding it, you can use an action and expend 1 or more of its charges to cast one of the following spells from it, using spell save DC 15: disguise self (1 charge), hypnotic pattern (3 charges), or mirror image (2 charges).",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Hidden Armament",
+   "desc": "While holding this magic weapon, you can use an action to transform it into a tattoo on the palm of your hand. You can use a bonus action to transform the tattoo back into a weapon.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "net"
+  },
+  {
+   "source": "vom",
+   "name": "Humble Cudgel of Temperance",
+   "desc": "This simple, polished club has a studded iron band around one end. When you attack a poisoned creature with this magic weapon, you have advantage on the attack roll. When you roll a 20 on an attack roll made with this weapon, the target becomes poisoned for 1 minute. If the target was already poisoned, it becomes incapacitated instead. The target can make a DC 13 Constitution saving throw at the end of each of its turns, ending the poisoned or incapacitated condition on itself on a success. Formerly a moneylender with a heart of stone and a small army of brutal thugs, Faustin the Drunkard awoke one day with a punishing hangover that seemed never-ending. He took this as a sign of punishment from the gods, not for his violence and thievery, but for his taste for the grape, in abundance. He decided all problems stemmed from the “demon” alcohol, and he became a cleric. No less brutal than before, he and his thugs targeted public houses, ale makers, and more. In his quest to rid the world of alcohol, he had the humble cudgel of temperance made and blessed with terrifying power. Now long since deceased, his simple, humble-appearing club continues to wreck havoc wherever it turns up.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "club"
+  },
+  {
+   "source": "vom",
+   "name": "Iceblink Greatsword",
+   "desc": "The blade of this weapon is cool to the touch and gives off a yellow-white radiance, shedding bright light in a 10-foot radius and dim light for an additional 10 feet. In temperatures above freezing, vapor wafts off the chilled blade. When you hit with an attack using this magic sword, the target takes an extra 1d6 cold damage.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Iceblink Longsword",
+   "desc": "The blade of this weapon is cool to the touch and gives off a yellow-white radiance, shedding bright light in a 10-foot radius and dim light for an additional 10 feet. In temperatures above freezing, vapor wafts off the chilled blade. When you hit with an attack using this magic sword, the target takes an extra 1d6 cold damage.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Iceblink Rapier",
+   "desc": "The blade of this weapon is cool to the touch and gives off a yellow-white radiance, shedding bright light in a 10-foot radius and dim light for an additional 10 feet. In temperatures above freezing, vapor wafts off the chilled blade. When you hit with an attack using this magic sword, the target takes an extra 1d6 cold damage.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Iceblink Scimitar",
+   "desc": "The blade of this weapon is cool to the touch and gives off a yellow-white radiance, shedding bright light in a 10-foot radius and dim light for an additional 10 feet. In temperatures above freezing, vapor wafts off the chilled blade. When you hit with an attack using this magic sword, the target takes an extra 1d6 cold damage.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Iceblink Shortsword",
+   "desc": "The blade of this weapon is cool to the touch and gives off a yellow-white radiance, shedding bright light in a 10-foot radius and dim light for an additional 10 feet. In temperatures above freezing, vapor wafts off the chilled blade. When you hit with an attack using this magic sword, the target takes an extra 1d6 cold damage.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Impact Club",
+   "desc": "This magic weapon has 3 charges and regains 1d3 expended charges daily at dawn. When you hit a target on your turn, you can take a bonus action to spend 1 charge and attempt to shove the target. The club grants you a +1 bonus on your Strength (Athletics) check to shove the target. If you roll a 20 on your attack roll with the club, you have advantage on your Strength (Athletics) check to shove the target, and you can push the target up to 10 feet away.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "club"
+  },
+  {
+   "source": "vom",
+   "name": "Impaling Lance",
+   "desc": "When you attack a creature with this magic weapon and roll a 20 on the attack roll, you embed the weapon in the target. If the target is Medium or smaller and is within 5 feet of a wall or other solid object when you hit with this weapon, it is also restrained while the weapon is embedded. At the end of the target's turn while the weapon is embedded in it, the target takes damage equal to the weapon's damage, with no additional modifiers. A creature, including the target, can use its action to make a DC 13 Strength check, removing the weapon from the target on a success. You can remove the embedded weapon from the target by speaking the weapon's command word.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "lance"
+  },
+  {
+   "source": "vom",
+   "name": "Impaling Morningstar",
+   "desc": "When you attack a creature with this magic weapon and roll a 20 on the attack roll, you embed the weapon in the target. If the target is Medium or smaller and is within 5 feet of a wall or other solid object when you hit with this weapon, it is also restrained while the weapon is embedded. At the end of the target's turn while the weapon is embedded in it, the target takes damage equal to the weapon's damage, with no additional modifiers. A creature, including the target, can use its action to make a DC 13 Strength check, removing the weapon from the target on a success. You can remove the embedded weapon from the target by speaking the weapon's command word.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "morningstar"
+  },
+  {
+   "source": "vom",
+   "name": "Impaling Pike",
+   "desc": "When you attack a creature with this magic weapon and roll a 20 on the attack roll, you embed the weapon in the target. If the target is Medium or smaller and is within 5 feet of a wall or other solid object when you hit with this weapon, it is also restrained while the weapon is embedded. At the end of the target's turn while the weapon is embedded in it, the target takes damage equal to the weapon's damage, with no additional modifiers. A creature, including the target, can use its action to make a DC 13 Strength check, removing the weapon from the target on a success. You can remove the embedded weapon from the target by speaking the weapon's command word.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "pike"
+  },
+  {
+   "source": "vom",
+   "name": "Impaling Rapier",
+   "desc": "When you attack a creature with this magic weapon and roll a 20 on the attack roll, you embed the weapon in the target. If the target is Medium or smaller and is within 5 feet of a wall or other solid object when you hit with this weapon, it is also restrained while the weapon is embedded. At the end of the target's turn while the weapon is embedded in it, the target takes damage equal to the weapon's damage, with no additional modifiers. A creature, including the target, can use its action to make a DC 13 Strength check, removing the weapon from the target on a success. You can remove the embedded weapon from the target by speaking the weapon's command word.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Impaling Warpick",
+   "desc": "When you attack a creature with this magic weapon and roll a 20 on the attack roll, you embed the weapon in the target. If the target is Medium or smaller and is within 5 feet of a wall or other solid object when you hit with this weapon, it is also restrained while the weapon is embedded. At the end of the target's turn while the weapon is embedded in it, the target takes damage equal to the weapon's damage, with no additional modifiers. A creature, including the target, can use its action to make a DC 13 Strength check, removing the weapon from the target on a success. You can remove the embedded weapon from the target by speaking the weapon's command word.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "war-pick"
+  },
+  {
+   "source": "vom",
+   "name": "Knockabout Billet",
+   "desc": "This stout, oaken cudgel helps you knock your opponents to the ground or away from you. When you hit a creature with this magic weapon, you can shove the target as part of the same attack, using your attack roll in place of a Strength (Athletics) check. The weapon deals damage as normal, regardless of the result of the shove. This property of the club can be used no more than once per hour.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "club"
+  },
+  {
+   "source": "vom",
+   "name": "Kyshaarth's Fang",
+   "desc": "This dagger's blade is composed of black, bone-like material. Tales suggest the weapon is fashioned from a Voidling's (see Tome of Beasts) tendril barb. When you hit with an attack using this magic weapon, the target takes an extra 2d6 necrotic damage. If you are in dim light or darkness, you regain a number of hit points equal to half the necrotic damage dealt.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Labrys of the Raging Bull (Battleaxe)",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. While you wield the axe, you have advantage on Strength (Athletics) checks to shove a creature, and you can shove a creature up to two sizes larger than you.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "battleaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Labrys of the Raging Bull (Greataxe)",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. While you wield the axe, you have advantage on Strength (Athletics) checks to shove a creature, and you can shove a creature up to two sizes larger than you.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "greataxe"
+  },
+  {
+   "source": "vom",
+   "name": "Leaf-Bladed Greatsword",
+   "desc": "This thin, curved blade has a bell guard shaped like a curled, golden leaf. You gain a +1 bonus to attack and damage rolls with this magic weapon. When you hit an aberration or undead creature with it, that target takes an extra 1d8 damage of the weapon's type. You can use an action to cast the barkskin spell on yourself for 1 hour, requiring no concentration. Once used, this property can't be used again until the next dawn.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Leaf-Bladed Longsword",
+   "desc": "This thin, curved blade has a bell guard shaped like a curled, golden leaf. You gain a +1 bonus to attack and damage rolls with this magic weapon. When you hit an aberration or undead creature with it, that target takes an extra 1d8 damage of the weapon's type. You can use an action to cast the barkskin spell on yourself for 1 hour, requiring no concentration. Once used, this property can't be used again until the next dawn.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Leaf-Bladed Rapier",
+   "desc": "This thin, curved blade has a bell guard shaped like a curled, golden leaf. You gain a +1 bonus to attack and damage rolls with this magic weapon. When you hit an aberration or undead creature with it, that target takes an extra 1d8 damage of the weapon's type. You can use an action to cast the barkskin spell on yourself for 1 hour, requiring no concentration. Once used, this property can't be used again until the next dawn.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Leaf-Bladed Scimitar",
+   "desc": "This thin, curved blade has a bell guard shaped like a curled, golden leaf. You gain a +1 bonus to attack and damage rolls with this magic weapon. When you hit an aberration or undead creature with it, that target takes an extra 1d8 damage of the weapon's type. You can use an action to cast the barkskin spell on yourself for 1 hour, requiring no concentration. Once used, this property can't be used again until the next dawn.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Leaf-Bladed Shortsword",
+   "desc": "This thin, curved blade has a bell guard shaped like a curled, golden leaf. You gain a +1 bonus to attack and damage rolls with this magic weapon. When you hit an aberration or undead creature with it, that target takes an extra 1d8 damage of the weapon's type. You can use an action to cast the barkskin spell on yourself for 1 hour, requiring no concentration. Once used, this property can't be used again until the next dawn.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Lockbreaker",
+   "desc": "You can use this stiletto-bladed dagger to open locks by using an action and making a Strength check. The DC is 5 less than the DC to pick the lock (minimum DC 10). On a success, the lock is broken.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Longbow of Accuracy",
+   "desc": "The normal range of this bow is doubled, but its long range remains the same.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "longbow"
+  },
+  {
+   "source": "vom",
+   "name": "Longsword of Fallen Saints",
+   "desc": "This enchanted blade is infused with the spirits of fallen warriors who carried it in battle long ago. You gain a +1 bonus to attack and damage rolls made with this magic weapon. If you die while attuned to the sword, you gain the effect of the gentle repose spell. This effect lasts until another creature attunes to the sword.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Longsword of Volsung",
+   "desc": "Legends tell of a dragon whose hide was impenetrable and so robust that only a blow to the heart would kill it. An unnamed hero finally defeated it and tore its heart into two. The dragon’s name was lost, but its legacy remains. This sword is one of two items that were crafted to hold its heart. The black blade is adorned with glittering silver runes, and its guard has a shallow opening at the center with grooves connecting it to the first rune. The sword’s pommel is a large, clear crystal held fast by silver scales. You gain a +2 bonus to attack and damage rolls made with this magic weapon. When you hit a dragon with an attack using this sword, that creature takes an extra 1d6 slashing damage. Runes of Courage. You can’t be frightened while holding or carrying this sword. Fragment of Gram Awakened. You can use a bonus action to awaken a fragment of the spirit of the great wyrm that inhabits this blade. For 24 hours, you gain a +3 bonus to attack and damage rolls with this magic sword, and when you hit a dragon with an attack using this sword, that creature takes an extra 3d6 slashing damage. Once used, this property can’t be used again until 3 days have passed. If you have performed the Dragon Heart Ritual, you can use a bonus action to expend 2 of the sword’s charges to activate this property, and you can use this property as often as you want, as long as you have the charges to do so. Dragon Heart Ritual. If you are also attuned to the locket of dragon vitality (see page 152), you can drain 3 charges from the locket into the sword, turning the crystal pommel a deep red and rendering the locket broken and irreparable. Doing this requires a long rest where you also re-attune with the newly charged sword of volsung. Upon completing the Dragon Heart Ritual, the sword contains all remaining charges from the locket, and you gain the locket’s effects while holding or carrying the sword. When you are reduced to 0 hit points and trigger the locket’s temporary hit points, the sword isn’t destroyed, but you can’t trigger that effect again until 24 hours have passed. The sword regains all expended charges after you slay any dragon. For the purpose of this sword, “dragon” refers to any creature with the dragon type, including drakes and wyverns.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Manticore's Tail",
+   "desc": "Ten spikes stick out of the head of this magic weapon. While holding the morningstar, you can fire one of the spikes as a ranged attack, using your Strength modifier for the attack and damage rolls. This attack has a normal range of 100 feet and a long range of 200 feet. On a hit, the spike deals 1d8 piercing damage. Once all of the weapon's spikes have been fired, the morningstar deals bludgeoning damage instead of the piercing damage normal for a morningstar until the next dawn, at which time the spikes regrow.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "pike"
+  },
+  {
+   "source": "vom",
+   "name": "Masher Basher",
+   "desc": "A favored weapon of hill giants, this greatclub appears to be little more than a thick tree branch. When you hit a giant with this magic weapon, the giant takes an extra 1d8 bludgeoning damage. When you roll a 20 on an attack roll made with this weapon, the target is stunned until the end of its next turn.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "greatclub"
+  },
+  {
+   "source": "vom",
+   "name": "Moonsteel Dagger",
+   "desc": "The blade of this magic weapon seems to shine from within with a pale, white light. The weapon deals an extra 1d6 radiant damage to any creature it hits. If the creature is a shapechanger or any other creature not in its true form, it becomes frightened until the start of your next turn. At the start of its turn, a creature frightened in this way must succeed on a DC 13 Charisma saving throw or immediately return to its true form. For the purpose of this weapon, “shapechanger” refers to any creature with the Shapechanger trait.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Moonsteel Rapier",
+   "desc": "The blade of this magic weapon seems to shine from within with a pale, white light. The weapon deals an extra 1d6 radiant damage to any creature it hits. If the creature is a shapechanger or any other creature not in its true form, it becomes frightened until the start of your next turn. At the start of its turn, a creature frightened in this way must succeed on a DC 13 Charisma saving throw or immediately return to its true form. For the purpose of this weapon, “shapechanger” refers to any creature with the Shapechanger trait.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Mordant Battleaxe",
+   "desc": "You can use a bonus action to speak this magic weapon's command word, causing the blade to weep a caustic, green acid. While weeping acid, the weapon deals an extra 2d6 acid damage to any target it hits. The weapon continues to weep acid until you use a bonus action to speak the command word again or you sheathe or drop the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "battleaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Mordant Glaive",
+   "desc": "You can use a bonus action to speak this magic weapon's command word, causing the blade to weep a caustic, green acid. While weeping acid, the weapon deals an extra 2d6 acid damage to any target it hits. The weapon continues to weep acid until you use a bonus action to speak the command word again or you sheathe or drop the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "glaive"
+  },
+  {
+   "source": "vom",
+   "name": "Mordant Greataxe",
+   "desc": "You can use a bonus action to speak this magic weapon's command word, causing the blade to weep a caustic, green acid. While weeping acid, the weapon deals an extra 2d6 acid damage to any target it hits. The weapon continues to weep acid until you use a bonus action to speak the command word again or you sheathe or drop the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greataxe"
+  },
+  {
+   "source": "vom",
+   "name": "Mordant Greatsword",
+   "desc": "You can use a bonus action to speak this magic weapon's command word, causing the blade to weep a caustic, green acid. While weeping acid, the weapon deals an extra 2d6 acid damage to any target it hits. The weapon continues to weep acid until you use a bonus action to speak the command word again or you sheathe or drop the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Mordant Halberd",
+   "desc": "You can use a bonus action to speak this magic weapon's command word, causing the blade to weep a caustic, green acid. While weeping acid, the weapon deals an extra 2d6 acid damage to any target it hits. The weapon continues to weep acid until you use a bonus action to speak the command word again or you sheathe or drop the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "halberd"
+  },
+  {
+   "source": "vom",
+   "name": "Mordant Longsword",
+   "desc": "You can use a bonus action to speak this magic weapon's command word, causing the blade to weep a caustic, green acid. While weeping acid, the weapon deals an extra 2d6 acid damage to any target it hits. The weapon continues to weep acid until you use a bonus action to speak the command word again or you sheathe or drop the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Mordant Scimitar",
+   "desc": "You can use a bonus action to speak this magic weapon's command word, causing the blade to weep a caustic, green acid. While weeping acid, the weapon deals an extra 2d6 acid damage to any target it hits. The weapon continues to weep acid until you use a bonus action to speak the command word again or you sheathe or drop the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Mordant Shortsword",
+   "desc": "You can use a bonus action to speak this magic weapon's command word, causing the blade to weep a caustic, green acid. While weeping acid, the weapon deals an extra 2d6 acid damage to any target it hits. The weapon continues to weep acid until you use a bonus action to speak the command word again or you sheathe or drop the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Mordant Sickle",
+   "desc": "You can use a bonus action to speak this magic weapon's command word, causing the blade to weep a caustic, green acid. While weeping acid, the weapon deals an extra 2d6 acid damage to any target it hits. The weapon continues to weep acid until you use a bonus action to speak the command word again or you sheathe or drop the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "sickle"
+  },
+  {
+   "source": "vom",
+   "name": "Mordant Whip",
+   "desc": "You can use a bonus action to speak this magic weapon's command word, causing the blade to weep a caustic, green acid. While weeping acid, the weapon deals an extra 2d6 acid damage to any target it hits. The weapon continues to weep acid until you use a bonus action to speak the command word again or you sheathe or drop the weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "whip"
+  },
+  {
+   "source": "vom",
+   "name": "Mountain Hewer",
+   "desc": "You gain a +2 bonus to attack and damage rolls made with this magic weapon. The massive head of this axe is made from chiseled stone lashed to its haft by thick rope and leather strands. Small chips of stone fall from its edge intermittently, though it shows no sign of damage or wear. You can use your action to speak the command word to cause small stones to float and swirl around the axe, shedding bright light in a 30-foot radius and dim light for an additional 30 feet. The light remains until you use a bonus action to speak the command word again or until you drop or sheathe the axe. As a bonus action, choose a creature you can see. For 1 minute, that creature must succeed on a DC 15 Wisdom saving throw each time it is damaged by the axe or become frightened until the end of your next turn. Creatures of Large size or greater have disadvantage on this save. Once used, this property of the axe can't be used again until the next dawn.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "greataxe"
+  },
+  {
+   "source": "vom",
+   "name": "Mountaineer's Hand Crossbow",
+   "desc": "This crossbow has a weathered look, and scenes of mountains are etched across its stock. An adamantine grappling hook and cable are built into this magic crossbow. While no ammunition is loaded in the crossbow, you can use an action to fire the grappling hook at a surface, structure, precipice, or other similar location that you can see within 60 feet of you. The grappling hook magically attaches to the surface and connects to the crossbow via an adamantine cable. While the grappling hook is attached to a surface and you are holding the crossbow, you can use an action to speak a command word to reel yourself and up to 1,000 pounds of willing creatures and objects connected to you to the surface. Speaking a second command word as a bonus action releases the grappling hook from the surface, reattaching it to the crossbow, and winds the cable back into a tiny pocket dimension inside the crossbow. This cable has AC 12, 20 hit points, and immunity to all damage except acid, lightning, and slashing damage from adamantine weapons. If the cable drops to 0 hit points, the crossbow can't be used in this way again until 24 hours have passed.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "crossbow-hand"
+  },
+  {
+   "source": "vom",
+   "name": "Mountaineer's Heavy Crossbow",
+   "desc": "This crossbow has a weathered look, and scenes of mountains are etched across its stock. An adamantine grappling hook and cable are built into this magic crossbow. While no ammunition is loaded in the crossbow, you can use an action to fire the grappling hook at a surface, structure, precipice, or other similar location that you can see within 60 feet of you. The grappling hook magically attaches to the surface and connects to the crossbow via an adamantine cable. While the grappling hook is attached to a surface and you are holding the crossbow, you can use an action to speak a command word to reel yourself and up to 1,000 pounds of willing creatures and objects connected to you to the surface. Speaking a second command word as a bonus action releases the grappling hook from the surface, reattaching it to the crossbow, and winds the cable back into a tiny pocket dimension inside the crossbow. This cable has AC 12, 20 hit points, and immunity to all damage except acid, lightning, and slashing damage from adamantine weapons. If the cable drops to 0 hit points, the crossbow can't be used in this way again until 24 hours have passed.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "crossbow-heavy"
+  },
+  {
+   "source": "vom",
+   "name": "Mountaineer's Light Crossbow ",
+   "desc": "This crossbow has a weathered look, and scenes of mountains are etched across its stock. An adamantine grappling hook and cable are built into this magic crossbow. While no ammunition is loaded in the crossbow, you can use an action to fire the grappling hook at a surface, structure, precipice, or other similar location that you can see within 60 feet of you. The grappling hook magically attaches to the surface and connects to the crossbow via an adamantine cable. While the grappling hook is attached to a surface and you are holding the crossbow, you can use an action to speak a command word to reel yourself and up to 1,000 pounds of willing creatures and objects connected to you to the surface. Speaking a second command word as a bonus action releases the grappling hook from the surface, reattaching it to the crossbow, and winds the cable back into a tiny pocket dimension inside the crossbow. This cable has AC 12, 20 hit points, and immunity to all damage except acid, lightning, and slashing damage from adamantine weapons. If the cable drops to 0 hit points, the crossbow can't be used in this way again until 24 hours have passed.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "crossbow-light"
+  },
+  {
+   "source": "vom",
+   "name": "Mutineer's Blade",
+   "desc": "This finely balanced scimitar has an elaborate brass hilt. You gain a +2 bonus on attack and damage rolls made with this magic weapon. You can use a bonus action to speak the scimitar's command word, causing the blade to shed bright green light in a 10-foot radius and dim light for an additional 10 feet. The light lasts until you use a bonus action to speak the command word again or until you drop or sheathe the scimitar. When you roll a 20 on an attack roll made with this weapon, the target is overcome with the desire for mutiny. On the target's next turn, it must make one attack against its nearest ally, then the effect ends, whether or not the attack was successful.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Odd Bodkin",
+   "desc": "This dagger has a twisted, jagged blade. You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you hit a creature other than a construct or an undead with this weapon, it loses 1d4 hit points at the start of each of its turns from a jagged wound. Each time you successfully hit the wounded target with this dagger, the damage dealt by the wound increases by 1d4. Any creature can take an action to stanch the wound with a successful DC 11 Wisdom (Medicine) check. The wound also closes if the wounded creature receives magical healing.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Pestilent Spear",
+   "desc": "The head of this spear is deadly sharp, despite the rust and slimy residue on it that always accumulate no matter how well it is cleaned. When you hit a creature with this magic weapon, it must succeed on a DC 13 Constitution saving throw or contract the sewer plague disease.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "spear"
+  },
+  {
+   "source": "vom",
+   "name": "Phidjetz Spinner",
+   "desc": "This dart was crafted by the monk Phidjetz, a martial recluse obsessed with dragons. The spinner consists of a golden central disk with four metal dragon heads protruding symmetrically from its center point: one red, one white, one blue and one black. As an action, you can spin the disk using the pinch grip in its center. You choose a single target within 30 feet and make a ranged attack roll. The spinner then flies at the chosen target. Once airborne, each dragon head emits a blast of elemental energy appropriate to its type. When you hit a creature, determine which dragon head affects it by rolling a d4 on the following chart. | d4 | Effect |\n| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| 1 | Red. The target takes 1d6 fire damage and combustible materials on the target ignite, doing 1d4 fire damage each turn until it is put out. |\n| 2 | White. The target takes 1d6 cold damage and is restrained until the start of your next turn. |\n| 3 | Blue. The target takes 1d6 lightning damage and is paralyzed until the start of your next turn. |\n| 4 | Black. The target takes 1d6 acid damage and is poisoned until the start of your next turn. | After the attack, the spinner flies up to 60 feet and tries to return to your hand. If you have no hand free, it falls to the ground at your feet.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "dart"
+  },
+  {
+   "source": "vom",
+   "name": "Pick of Ice Breaking",
+   "desc": "The metal head of this war pick is covered in tiny arcane runes. You gain a +1 bonus to attack and damage rolls made with this magic weapon. The bonus increases to +3 when you use the war pick to attack a construct, elemental, fey, or other creature made almost entirely of ice or snow. When you roll a 20 on an attack roll made with this weapon against such a creature, the target takes an extra 2d8 piercing damage. When you hit an object made of ice or snow with this weapon, the object doesn't have a damage threshold when determining the damage you deal to it with this weapon.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "war-pick"
+  },
+  {
+   "source": "vom",
+   "name": "Pistol of the Umbral Court",
+   "desc": "This hand crossbow is made from coal-colored wood. Its limb is made from cold steel and boasts engravings of sharp teeth. The barrel is magically oiled and smells faintly of ash. The grip is made from rough leather. You gain a +2 bonus on attack and damage rolls made with this magic weapon. When you hit with an attack with this weapon, you can force the target of your attack to succeed on a DC 15 Strength saving throw or be pushed 5 feet away from you. The target takes damage, as normal, whether it was pushed away or not. As a bonus action, you can increase the distance creatures are pushed to 20 feet for 1 minute. If the creature strikes a solid object before the movement is complete, it takes 1d6 bludgeoning damage for every 10 feet traveled. Once used, this property of the crossbow can't be used again until the next dawn.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "crossbow-hand"
+  },
+  {
+   "source": "vom",
+   "name": "Poison Strand",
+   "desc": "When you hit with an attack using this magic whip, the target takes an extra 2d4 poison damage. If you hold one end of the whip and use an action to speak its command word, the other end magically extends and darts forward to entangle a creature you can see within 20 feet of you. The target must succeed on a DC 17 Dexterity saving throw or become restrained. While restrained, the target takes 2d4 poison damage at the start of each of its turns, and you can use an action to pull the target up to 20 feet toward you. If you would move the target into damaging terrain, such as lava or a pit, it can make a DC 17 Strength saving throw. On a success, the target isn't pulled toward you. You can't use the whip to make attacks while it is restraining a target, and if you release your end of the whip, the target is no longer restrained. The restrained target can use an action to make a DC 17 Strength (Athletics) or Dexterity (Acrobatics) check (target's choice). On a success, the target is no longer restrained by the whip. When the whip has restrained creatures for a total of 1 minute, you can't restrain a creature with the whip again until the next dawn.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "whip"
+  },
+  {
+   "source": "vom",
+   "name": "Rain of Chaos",
+   "desc": "This magic weapon imbues arrows fired from it with random energies. When you hit with an attack using this magic bow, the target takes an extra 1d6 damage. Roll a 1d8. The number rolled determines the damage type of the extra damage. | d8 | Damage Type |\n| --- | ----------- |\n| 1 | Acid |\n| 2 | Cold |\n| 3 | Fire |\n| 4 | Lightning |\n| 5 | Necrotic |\n| 6 | Poison |\n| 7 | Radiant |\n| 8 | Thunder |",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "longbow"
+  },
+  {
+   "source": "vom",
+   "name": "Rapier of Fallen Saints",
+   "desc": "This enchanted blade is infused with the spirits of fallen warriors who carried it in battle long ago. You gain a +1 bonus to attack and damage rolls made with this magic weapon. If you die while attuned to the sword, you gain the effect of the gentle repose spell. This effect lasts until another creature attunes to the sword.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Ravager's Axe",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. Any attack with this axe that hits a structure or an object that isn't being worn or carried is a critical hit. When you roll a 20 on an attack roll made with this axe, the target takes an extra 1d10 cold damage and 1d10 necrotic damage as the axe briefly becomes a rift to the Void.",
+   "rarity": "Very Rare",
+   "attunement": false,
+   "base": "greataxe"
+  },
+  {
+   "source": "vom",
+   "name": "Reef Splitter",
+   "desc": "The head of this warhammer is constructed of undersea volcanic rock and etched with images of roaring flames and boiling water. You gain a +3 bonus to attack and damage rolls made with this magic weapon. When you roll a 20 on an attack roll made with this weapon, the hammer erupts with magma, and the target takes an extra 4d6 fire damage. In addition, if the target is underwater, the water around it begins to boil with the heat of your blow, and each creature other than you within 5 feet of the target takes 2d6 fire damage.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "warhammer"
+  },
+  {
+   "source": "vom",
+   "name": "Riverine Blade",
+   "desc": "The crossguard of this distinctive sword depicts a stylized Garroter Crab (see Tome of Beasts) with claws extended, and the pommel is set with a smooth, spherical, blue-black river rock. You gain a +2 bonus to attack and damage rolls made with this magic weapon. While on a boat or while standing in any depth of water, you have advantage on Dexterity checks and saving throws.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Rowdy's Club",
+   "desc": "This knobbed stick is marked with nicks, scratches, and notches. You gain a +1 bonus to attack and damage rolls made with this magic weapon. While wielding the club, you can use an action to tap it against your open palm, the side of your leg, a surface within reach, or similar. If you do, you have advantage on your next Charisma (Intimidation) check. If you are also wearing a rowdy's ring (see page 87), you can use an action to frighten a creature you can see within 30 feet of you instead. The target must succeed on a DC 13 Wisdom saving throw or be frightened of you until the end of its next turn. Once this special action has been used three times, it can't be used again until the next dawn.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "club"
+  },
+  {
+   "source": "vom",
+   "name": "Ruby Crusher",
+   "desc": "This greatclub is made entirely of fused rubies with a grip wrapped in manticore hide A roaring fire burns behind its smooth facets. You gain a +3 bonus to attack and damage rolls made with this magic weapon. You can use a bonus action to speak this magic weapon's command word, causing it to be engulfed in flame. These flames shed bright light in a 30-foot radius and dim light for an additional 30 feet. While the greatclub is aflame, it deals fire damage instead of bludgeoning damage. The flames last until you use a bonus action to speak the command word again or until you drop the weapon. When you hit a Large or larger creature with this greatclub, the creature must succeed on a DC 17 Constitution saving throw or be pushed up to 30 feet away from you. If the creature strikes a solid object, such as a door or wall, during this movement, it and the object take 1d6 bludgeoning damage for each 10 feet the creature traveled before hitting the object.",
+   "rarity": "Legendary",
+   "attunement": true,
+   "base": "greatclub"
+  },
+  {
+   "source": "vom",
+   "name": "Sacrificial Knife",
+   "desc": "Runes dance along the blade of this keen knife. Sacrificial Knife (Common). While attuned to it, you can use this magic, rune-inscribed dagger as a spellcasting focus. Ceremonial Sacrificial Knife (Uncommon). More powerful versions of this blade also exist. While holding the greater version of this dagger, you can use it to perform a sacrificial ritual during a short rest. If you sacrifice a Tiny or Small creature, you regain one expended 1st-level spell slot. If you sacrifice a Medium or larger creature, you regain one expended 2nd-level spell slot.",
+   "rarity": "Common",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Sanguine Lance",
+   "desc": "This fiendish lance runs red with blood. You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you hit a creature that has blood with this lance, the target takes an extra 1d6 necrotic damage, and you regain hit points equal to half the amount of necrotic damage dealt.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "lance"
+  },
+  {
+   "source": "vom",
+   "name": "Scimitar of Fallen Saints",
+   "desc": "This enchanted blade is infused with the spirits of fallen warriors who carried it in battle long ago. You gain a +1 bonus to attack and damage rolls made with this magic weapon. If you die while attuned to the sword, you gain the effect of the gentle repose spell. This effect lasts until another creature attunes to the sword.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Scimitar of the Desert Winds",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. While holding or carrying this scimitar, you can tolerate temperatures as low as –50 degrees Fahrenheit or as high as 150 degrees Fahrenheit without any additional protection.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Scourge of Devotion",
+   "desc": "This cat o' nine tails is used primarily for self-flagellation, and its tails have barbs of silver woven into them. You gain a +1 bonus to attack and damage rolls made with this magic weapon, and the weapon deals slashing damage instead of bludgeoning damage. You can spend 10 minutes using the scourge in a self-flagellating ritual, which can be done during a short rest. If you do so, your hit point maximum is reduced by 2d8. In addition, you have advantage on Constitution saving throws that you make to maintain your concentration on a spell when you take damage while your hit point maximum is reduced. This hit point maximum reduction can't be removed with the greater restoration spell or similar magic and lasts until you finish a long rest.",
+   "rarity": "Common",
+   "attunement": true,
+   "base": "flail"
+  },
+  {
+   "source": "vom",
+   "name": "Sea Witch's Blade",
+   "desc": "This slim, slightly curved blade has a ghostly sheen and a wickedly sharp edge. You can use a bonus action to speak this magic sword's command word (“memory”) and cause the air around the blade to shimmer with a pale, violet glow. This glow sheds bright light in a 20-foot radius and dim light for an additional 20 feet. While the sword is glowing, it deals an extra 2d6 psychic damage to any target it hits. The glow lasts until you use a bonus action to speak the command word again or until you drop or sheathe the sword. When a creature takes psychic damage from the sword, you can choose to have the creature make a DC 15 Wisdom saving throw. On a failure, you take 2d6 psychic damage, and the creature is stunned until the end of its next turn. Once used, this feature of the sword shouldn't be used again until the next dawn. Each time it is used before then, the psychic damage you take increases by 2d6.",
+   "rarity": "Common",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Searing Whip",
+   "desc": "Inspired by the searing breath weapon of a light drake (see Tome of Beasts 2), this whip seems to have filaments of light interwoven within its strands. You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you hit a creature with this weapon, the creature takes an extra 1d4 radiant damage. When you roll a 20 on an attack roll made with this weapon, the target is blinded until the end of its next turn. The whip has 3 charges, and it regains 1d3 expended charges daily at dawn or when exposed to a daylight spell for 1 minute. While wielding the whip, you can use an action to expend 1 of its charges to transform the whip into a searing beam of light. Choose one creature you can see within 30 feet of you and make one attack roll with this whip against that creature. If the attack hits, that creature and each creature in a line that is 5 feet wide between you and the target takes damage as if hit by this whip. All of this damage is radiant. If the target is undead, you have advantage on the attack roll.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "whip"
+  },
+  {
+   "source": "vom",
+   "name": "Serpent's Tooth",
+   "desc": "When you hit with an attack using this magic spear, the target takes an extra 1d6 poison damage. In addition, while you hold the spear, you have advantage on Dexterity (Acrobatics) checks.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "spear"
+  },
+  {
+   "source": "vom",
+   "name": "Shepherd's Flail",
+   "desc": "The handle of this simple flail is made of smooth lotus wood. The three threshers are made of carved and painted wooden beads. You gain a + 1 bonus to attack and damage rolls made with this magic weapon. True Authority (Requires Attunement). You must be attuned to a crook of the flock (see page 72) to attune to this weapon. The attunement ends if you are no longer attuned to the crook. While you are attuned to this weapon and holding it, your Charisma score increases by 4 and can exceed 20, but not 30. When you hit a beast with this weapon, the beast takes an extra 3d6 bludgeoning damage. For the purpose of this weapon, “beast” refers to any creature with the beast type. The flail also has 5 charges. When you reduce a humanoid to 0 hit points with an attack from this weapon, you can expend 1 charge. If you do so, the humanoid stabilizes, regains 1 hit point, and is charmed by you for 24 hours. While charmed in this way, the humanoid regards you as its trusted leader, but it otherwise retains its statistics and regains hit points as normal. If harmed by you or your companions, or commanded to do something contrary to its nature, the target ceases to be charmed in this way. The flail regains 1d4 + 1 expended charges daily at dawn.",
+   "rarity": "Legendary",
+   "attunement": false,
+   "base": "flail"
+  },
+  {
+   "source": "vom",
+   "name": "Shortbow of Accuracy",
+   "desc": "The normal range of this bow is doubled, but its long range remains the same.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "shortbow"
+  },
+  {
+   "source": "vom",
+   "name": "Shortsword of Fallen Saints",
+   "desc": "This enchanted blade is infused with the spirits of fallen warriors who carried it in battle long ago. You gain a +1 bonus to attack and damage rolls made with this magic weapon. If you die while attuned to the sword, you gain the effect of the gentle repose spell. This effect lasts until another creature attunes to the sword.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Sickle of Thorns",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this weapon. As an action, you can swing the sickle to cut nonmagical vegetation up to 60 feet away from you. Each cut is a separate action with one action equaling one swing of your arm. Thus, you can lead a party through a jungle or briar thicket at a normal pace, simply swinging the sickle back and forth ahead of you to clear the path. It can't be used to cut trunks of saplings larger than 1 inch in diameter. It also can't cut through unliving wood (such as a door or wall). When you hit a plant creature with a melee attack with this weapon, that target takes an extra 1d6 slashing damage. This weapon can make very precise cuts, such as to cut fruit or flowers high up in a tree without damaging the tree.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "sickle"
+  },
+  {
+   "source": "vom",
+   "name": "Slimeblade Greatsword",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The blade of the sword is coated in an endless supply of violet-colored slime. Despite the sword's tendency to drip, the slime does not flow over the pommel, regardless of the angle at which it is held. You are immune to the effect of the slime while attuned to this sword. While holding this sword, you can communicate telepathically with ooze creatures, and you have advantage on Charisma (Deception, Intimidation, and Persuasion) checks against ooze creatures. In addition, you can use an action to fling some of the sword's slime at a creature you can see within 30 feet of you. The target must make a DC 15 Constitution saving throw. On a failure, the target takes 2d4 poison damage and is poisoned until the end of its next turn. On a success, the target takes half the damage and isn't poisoned. The sword can't be used this way again until 1 hour has passed.",
+   "rarity": "Common",
+   "attunement": true,
+   "base": "greatsword"
+  },
+  {
+   "source": "vom",
+   "name": "Slimeblade Longsword",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The blade of the sword is coated in an endless supply of violet-colored slime. Despite the sword's tendency to drip, the slime does not flow over the pommel, regardless of the angle at which it is held. You are immune to the effect of the slime while attuned to this sword. While holding this sword, you can communicate telepathically with ooze creatures, and you have advantage on Charisma (Deception, Intimidation, and Persuasion) checks against ooze creatures. In addition, you can use an action to fling some of the sword's slime at a creature you can see within 30 feet of you. The target must make a DC 15 Constitution saving throw. On a failure, the target takes 2d4 poison damage and is poisoned until the end of its next turn. On a success, the target takes half the damage and isn't poisoned. The sword can't be used this way again until 1 hour has passed.",
+   "rarity": "Common",
+   "attunement": true,
+   "base": "longsword"
+  },
+  {
+   "source": "vom",
+   "name": "Slimeblade Rapier",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The blade of the sword is coated in an endless supply of violet-colored slime. Despite the sword's tendency to drip, the slime does not flow over the pommel, regardless of the angle at which it is held. You are immune to the effect of the slime while attuned to this sword. While holding this sword, you can communicate telepathically with ooze creatures, and you have advantage on Charisma (Deception, Intimidation, and Persuasion) checks against ooze creatures. In addition, you can use an action to fling some of the sword's slime at a creature you can see within 30 feet of you. The target must make a DC 15 Constitution saving throw. On a failure, the target takes 2d4 poison damage and is poisoned until the end of its next turn. On a success, the target takes half the damage and isn't poisoned. The sword can't be used this way again until 1 hour has passed.",
+   "rarity": "Common",
+   "attunement": true,
+   "base": "rapier"
+  },
+  {
+   "source": "vom",
+   "name": "Slimeblade Scimitar",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The blade of the sword is coated in an endless supply of violet-colored slime. Despite the sword's tendency to drip, the slime does not flow over the pommel, regardless of the angle at which it is held. You are immune to the effect of the slime while attuned to this sword. While holding this sword, you can communicate telepathically with ooze creatures, and you have advantage on Charisma (Deception, Intimidation, and Persuasion) checks against ooze creatures. In addition, you can use an action to fling some of the sword's slime at a creature you can see within 30 feet of you. The target must make a DC 15 Constitution saving throw. On a failure, the target takes 2d4 poison damage and is poisoned until the end of its next turn. On a success, the target takes half the damage and isn't poisoned. The sword can't be used this way again until 1 hour has passed.",
+   "rarity": "Common",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Slimeblade Shortsword",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The blade of the sword is coated in an endless supply of violet-colored slime. Despite the sword's tendency to drip, the slime does not flow over the pommel, regardless of the angle at which it is held. You are immune to the effect of the slime while attuned to this sword. While holding this sword, you can communicate telepathically with ooze creatures, and you have advantage on Charisma (Deception, Intimidation, and Persuasion) checks against ooze creatures. In addition, you can use an action to fling some of the sword's slime at a creature you can see within 30 feet of you. The target must make a DC 15 Constitution saving throw. On a failure, the target takes 2d4 poison damage and is poisoned until the end of its next turn. On a success, the target takes half the damage and isn't poisoned. The sword can't be used this way again until 1 hour has passed.",
+   "rarity": "Common",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Slipshod Hammer",
+   "desc": "This large smith's hammer appears well-used and rough in make and maintenance. If you use this hammer as part of a set of smith's tools, you can repair metal items in half the time, but the appearance of the item is always sloppy and haphazard. When you roll a 20 on an attack roll made with this magic weapon against a target wearing metal armor, the target's armor is partly damaged and takes a permanent and cumulative –2 penalty to the AC it offers. The armor is destroyed if the penalty reduces its AC to 10.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "light-hammer"
+  },
+  {
+   "source": "vom",
+   "name": "Spear of the North",
+   "desc": "This spear has an ivory haft, and tiny snowflakes occasionally fall from its tip. You gain a +2 bonus to attack and damage rolls made with this magic weapon. When you hit with an attack using this magic spear, the target takes an extra 1d6 cold damage. You can use an action to transform the spear into a pair of snow skis. While wearing the snow skis, you have a walking speed of 40 feet when you walk across snow or ice, and you can walk across icy surfaces without needing to make an ability check. You can use a bonus action to transform the skis back into the spear. While the spear is transformed into a pair of skis, you can't make attacks with it.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "spear"
+  },
+  {
+   "source": "vom",
+   "name": "Spear of the Stilled Heart",
+   "desc": "This rowan wood spear has a thick knot in the center of the haft that uncannily resembles a petrified human heart. When you hit with an attack using this magic spear, the target takes an extra 1d6 necrotic damage. The spear has 3 charges, and it regains all expended charges daily at dusk. When you hit a creature with an attack using it, you can expend 1 charge to deal an extra 3d6 necrotic damage to the target. You regain hit points equal to the necrotic damage dealt.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "spear"
+  },
+  {
+   "source": "vom",
+   "name": "Spear of the Western Whale",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. Fashioned in the style of a whaling spear, this long, barbed weapon is made from bone and heavy, yet pliant, ash wood. Its point is lined with decorative engravings of fish, clam shells, and waves. While you carry this spear, you have advantage on any Wisdom (Survival) checks to acquire food via fishing, and you have advantage on all Strength (Athletics) checks to swim. When set on the ground, the spear always spins to point west. When thrown in a westerly direction, the spear deals an extra 2d6 cold damage to the target.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "spear"
+  },
+  {
+   "source": "vom",
+   "name": "Spectral Blade",
+   "desc": "This blade seems to flicker in and out of existence but always strikes true. You gain a +1 bonus to attack and damage rolls made with this magic weapon, and you can choose for its attacks to deal force damage instead of piercing damage. As an action while holding this sword or as a reaction when you deal damage to a creature with it, you can turn incorporeal until the start of your next turn. While incorporeal, you can move through other creatures and objects as if they were difficult terrain. You take 1d10 force damage if you end your turn inside an object.",
+   "rarity": "Common",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Standard of Divinity (Glaive)",
+   "desc": "This weapon was created in a long-forgotten holy war. A woven banner bearing the symbol of a god hangs from it. When you attune to it, the banner changes to the colors and symbol of your deity. You gain a +1 bonus to attack and damage rolls made with this magic weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "glaive"
+  },
+  {
+   "source": "vom",
+   "name": "Standard of Divinity (Halberd)",
+   "desc": "This weapon was created in a long-forgotten holy war. A woven banner bearing the symbol of a god hangs from it. When you attune to it, the banner changes to the colors and symbol of your deity. You gain a +1 bonus to attack and damage rolls made with this magic weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "halberd"
+  },
+  {
+   "source": "vom",
+   "name": "Standard of Divinity (Lance)",
+   "desc": "This weapon was created in a long-forgotten holy war. A woven banner bearing the symbol of a god hangs from it. When you attune to it, the banner changes to the colors and symbol of your deity. You gain a +1 bonus to attack and damage rolls made with this magic weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "lance"
+  },
+  {
+   "source": "vom",
+   "name": "Standard of Divinity (Pike)",
+   "desc": "This weapon was created in a long-forgotten holy war. A woven banner bearing the symbol of a god hangs from it. When you attune to it, the banner changes to the colors and symbol of your deity. You gain a +1 bonus to attack and damage rolls made with this magic weapon.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "pike"
+  },
+  {
+   "source": "vom",
+   "name": "Stinger",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you hit a creature with an attack using this weapon, you can use a bonus action to inject paralyzing venom in the target. The target must succeed on a DC 15 Constitution saving throw or become paralyzed for 1 minute. It can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. Creatures immune to poison are also immune to this dagger's paralyzing venom. The dagger can't be used this way again until the next dawn.",
+   "rarity": "Rare",
+   "attunement": false,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Survival Knife",
+   "desc": "When holding this sturdy knife, you can use an action to transform it into a crowbar, a fishing rod, a hunting trap, or a hatchet (mainly a chopping tool; if wielded as a weapon, it uses the same statistics as this dagger, except it deals slashing damage). While holding or touching the transformed knife, you can use an action to transform it into another form or back into its original shape.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Sweet Nature",
+   "desc": "You have a +1 bonus to attack and damage rolls made with this magic weapon. When you hit a humanoid with this weapon, the humanoid takes an extra 1d6 slashing damage. If you use the axe to damage a plant creature or an object made of wood, the axe's blade liquifies into harmless honey, and it can't be used again until 24 hours have passed.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "battleaxe"
+  },
+  {
+   "source": "vom",
+   "name": "Tamer's Whip",
+   "desc": "This whip is braided from leather tanned from the hides of a dozen different, dangerous beasts. You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you attack a beast using this weapon, you have advantage on the attack roll.\nWhen you roll a 20 on the attack roll made with this weapon and the target is a beast, the beast must succeed on a DC 15 Wisdom saving throw or become charmed or frightened (your choice) for 1 minute.\nIf the creature is charmed, it understands and obeys one-word commands, such as “attack,” “approach,” “stay,” or similar. If it is charmed and understands a language, it obeys any command you give it in that language. The charmed or frightened creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "whip"
+  },
+  {
+   "source": "vom",
+   "name": "Tenebrous Flail of Screams",
+   "desc": "The handle of this flail is made of mammoth bone wrapped in black leather made from bat wings. Its pommel is adorned with raven's claws, and the head of the flail dangles from a flexible, preserved braid of entrails. The head is made of petrified wood inlaid with owlbear and raven beaks. When swung, the flail lets out an otherworldly screech. You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you hit a creature with this flail, the target takes an extra 1d6 psychic damage. When you roll a 20 on an attack roll made with this weapon, the target must succeed on a DC 15 Wisdom saving throw or be incapacitated until the end of its next turn.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "flail"
+  },
+  {
+   "source": "vom",
+   "name": "Thirsting Scalpel",
+   "desc": "You gain a +1 bonus to attack and damage rolls with this magic weapon, which deals slashing damage instead of piercing damage. When you attack a creature with this weapon and roll a 20 on the attack roll, that target takes an extra 2d6 slashing damage. If the target is a creature other than an undead or construct, it must succeed on a DC 13 Constitution saving throw or lose 2d6 hit points at the start of each of its turns from a bleeding wound. Any creature can take an action to stanch the wound with a successful DC 11 Wisdom (Medicine) check. The wound also closes if the target receives magical healing. In addition, once every 7 days while the scalpel is on your person, you must succeed on a DC 15 Charisma saving throw or become driven to feed blood to the scalpel. You have advantage on attack rolls with the scalpel until it is sated. The dagger is sated when you roll a 20 on an attack roll with it, after you deal 14 slashing damage with it, or after 1 hour elapses. If the hour elapses and you haven't sated its thirst for blood, the dagger deals 14 slashing damage to you. If the dagger deals damage to you as a result of the curse, you can't heal the damage for 24 hours. The remove curse spell removes your attunement to the item and frees you from the curse. Alternatively, casting the banishment spell on the dagger forces the bearded devil's essence to leave it. The scalpel then becomes a +1 dagger with no other properties.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Thirsting Thorn",
+   "desc": "You gain a +1 bonus to attack and damage rolls made with this weapon. In addition, while carrying the sword, you have resistance to necrotic damage. Each time you reduce a creature to 0 hit points with this weapon, you can regain 2d8+2 hit points. Each time you regain hit points this way, you must succeed a DC 12 Wisdom saving throw or be incapacitated by terrible visions until the end of your next turn. If you reach your maximum hit points using this effect, you automatically fail the saving throw. As long as you remain cursed, you are unwilling to part with the sword, keeping it within reach at all times. If you have not damaged a creature with this sword within the past 24 hours, you have disadvantage on attack rolls with weapons other than this one as its hunger for blood drives you to slake its thirst.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "shortsword"
+  },
+  {
+   "source": "vom",
+   "name": "Tipstaff",
+   "desc": "To the uninitiated, this short ebony baton resembles a heavy-duty truncheon with a cord-wrapped handle and silver-capped tip. The weapon has 5 charges, and it regains 1d4 + 1 expended charges daily at dawn. When you hit a creature with a melee attack with this magic weapon, you can expend 1 charge to force the target to make a DC 15 Constitution saving throw. If the creature took 20 damage or more from this attack, it has disadvantage on the saving throw. On a failure, the target is paralyzed for 1 minute. It can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "club"
+  },
+  {
+   "source": "vom",
+   "name": "Tracking Dart",
+   "desc": "When you hit a Large or smaller creature with an attack using this colorful magic dart, the target is splattered with magical paint, which outlines the target in a dim glow (your choice of color) for 1 minute. Any attack roll against a creature outlined in the glow has advantage if the attacker can see the creature, and the creature can't benefit from being invisible. The creature outlined in the glow can end the effect early by using an action to wipe off the splatter of paint.",
+   "rarity": "Common",
+   "attunement": false,
+   "base": "dart"
+  },
+  {
+   "source": "vom",
+   "name": "Trident of the Vortex",
+   "desc": "This bronze trident has a shaft of inlaid blue pearl. You gain a +2 bonus to attack and damage rolls with this magic weapon. Whirlpool. While wielding the trident underwater, you can use an action to speak its command word and cause the water around you to whip into a whirlpool for 1 minute. For the duration, each creature that enters or starts its turn in a space within 10 feet of you must succeed on a DC 15 Strength saving throw or be restrained by the whirlpool. The whirlpool moves with you, and creatures restrained by it move with it. A creature within 5 feet of the whirlpool can pull a creature out of it by taking an action to make a DC 15 Strength check and succeeding. A restrained creature can try to escape by taking an action to make a DC 15 Strength check. On a success, the creature escapes and enters a space of its choice within 5 feet of the whirlpool. Once used, this property can’t be used again until the next dawn.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "whip"
+  },
+  {
+   "source": "vom",
+   "name": "Trident of the Yearning Tide",
+   "desc": "The barbs of this trident are forged from mother-of-pearl and its shaft is fashioned from driftwood. You gain a +2 bonus on attack and damage rolls made with this magic weapon. While holding the trident, you can breathe underwater. The trident has 3 charges for the following other properties. It regains 1d3 expended charges daily at dawn. Call Sealife. While holding the trident, you can use an action to expend 3 of its charges to cast the conjure animals spell from it. The creatures you summon must be beasts that can breathe water. Yearn for the Tide. When you hit a creature with a melee attack using the trident, you can use a bonus action to expend 1 charge to force the target to make a DC 17 Wisdom saving throw. On a failure, the target must spend its next turn leaping into the nearest body of water and swimming toward the bottom. A creature that can breathe underwater automatically succeeds on the saving throw. If no water is in the target’s line of sight, the target automatically succeeds on the saving throw.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "trident"
+  },
+  {
+   "source": "vom",
+   "name": "Tyrant's Whip",
+   "desc": "This wicked whip has 3 charges and regains all expended charges daily at dawn. When you hit with an attack using this magic whip, you can use a bonus action to expend 1 of its charges to cast the command spell (save DC 13) from it on the creature you hit. If the attack is a critical hit, the target has disadvantage on the saving throw.",
+   "rarity": "Uncommon",
+   "attunement": false,
+   "base": "whip"
+  },
+  {
+   "source": "vom",
+   "name": "Umbral Chopper",
+   "desc": "This simple axe looks no different from a standard forester's tool. A single-edged head is set into a slot in the haft and bound with strong cord. The axe was found by a timber-hauling crew who disappeared into the shadows of a cave deep in an old forest. Retrieved in the dark of the cave, the axe was found to possess disturbing magical properties. You gain a +1 bonus to attack and damage rolls made with this weapon, which deals necrotic damage instead of slashing damage. When you hit a plant creature with an attack using this weapon, the target must make a DC 15 Constitution saving throw. On a failure, the creature takes 4d6 necrotic damage and its speed is halved until the end of its next turn. On a success, the creature takes half the damage and its speed isn't reduced.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "greataxe"
+  },
+  {
+   "source": "vom",
+   "name": "Unquiet Dagger",
+   "desc": "Forged by creatures with firsthand knowledge of what lies between the stars, this dark gray blade sometimes appears to twitch or ripple like water when not directly observed. You gain a +1 bonus to attack and damage rolls with this magic weapon. In addition, when you hit with an attack using this dagger, the target takes an extra 2d6 psychic damage. You can use an action to cause the blade to ripple for 1 minute. While the blade is rippling, each creature that takes psychic damage from the dagger must succeed on a DC 15 Charisma saving throw or become frightened of you for 1 minute. A frightened creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. The dagger can't be used this way again until the next dawn.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Valkyrie's Bite",
+   "desc": "This black-bladed scimitar has a guard that resembles outstretched raven wings, and a polished amethyst sits in its pommel. You have a +2 bonus to attack and damage rolls made with this magic weapon. While attuned to the scimitar, you have advantage on initiative rolls. While you hold the scimitar, it sheds dim purple light in a 10-foot radius.",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "scimitar"
+  },
+  {
+   "source": "vom",
+   "name": "Vile Razor",
+   "desc": "This perpetually blood-stained straight razor deals slashing damage instead of piercing damage. You gain a +1 bonus to attack and damage rolls made with this magic weapon. Inhuman Alacrity. While holding the dagger, you can take two bonus actions on your turn, instead of one. Each bonus action must be different; you can’t use the same bonus action twice in a single turn. Once used, this property can’t be used again until the next dusk. Unclean Cut. When you hit a creature with a melee attack using the dagger, you can use a bonus action to deal an extra 2d4 necrotic damage. If you do so, the target and each of its allies that can see this attack must succeed on a DC 15 Wisdom saving throw or be frightened for 1 minute. Once used, this property can’t be used again until the next dusk. ",
+   "rarity": "Rare",
+   "attunement": true,
+   "base": "dagger"
+  },
+  {
+   "source": "vom",
+   "name": "Whip of Fangs",
+   "desc": "The skin of a large asp is woven into the leather of this whip. The asp's head sits nestled among the leather tassels at its tip. You gain a +1 bonus to attack and damage rolls made with this magic weapon. When you hit with an attack using this magic weapon, the target takes an extra 1d4 poison damage and must succeed on a DC 13 Constitution saving throw or be poisoned until the end of its next turn.",
+   "rarity": "Uncommon",
+   "attunement": true,
+   "base": "whip"
+  },
+  {
+   "source": "vom",
+   "name": "Wolf Brush",
+   "desc": "From a distance, this weapon bears a passing resemblance to a fallen tree branch. This unique polearm was first crafted by a famed martial educator and military general from the collected weapons of his fallen compatriots. Each point on this branching spear has a history of its own and is infused with the pain of loss and the glory of military service. When wielded in battle, each of the small, branching spear points attached to the polearm's shaft pulses with a warm glow and burns with the desire to protect the righteous. When not using it, you can fold the branches inward and sheathe the polearm in a leather wrap. You gain a +1 bonus to attack and damage rolls made with this magic weapon. While you hold this weapon, it sheds dim light in a 5-foot radius. You can fold and wrap the weapon as an action, extinguishing the light. While holding or carrying the weapon, you have resistance to piercing damage. The weapon has 10 charges for the following other properties. The weapon regains 1d8 + 2 charges daily at dawn. In addition, it regains 1 charge when exposed to powerful magical sunlight, such as the light created by the sunbeam and sunburst spells, and it regains 1 charge each round it remains exposed to such sunlight. Spike Barrage. While wielding this weapon, you can use an action to expend 1 or more of its charges and sweep the weapon in a small arc to release a barrage of spikes in a 15-foot cone. Each creature in the area must make a DC 17 Dexterity saving throw, taking 1d10 piercing damage for each charge you expend on a failed save, or half as much damage on a successful one. Spiked Wall. While wielding this weapon, you can use an action to expend 6 charges to cast the wall of thorns spell (save DC 17) from it.",
+   "rarity": "Very Rare",
+   "attunement": true,
+   "base": "pike"
+  }
+ ]
+}

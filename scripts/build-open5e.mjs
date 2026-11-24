@@ -10,6 +10,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { convertCreature, addLegendaryActions, addMythic } from './open5e/monsters.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = async (f) => JSON.parse(await readFile(path.join(root, f), 'utf8'));
@@ -26,7 +27,20 @@ const SHORT = {
   kp: 'Kobold Press',
   wz: 'Warlock Zine',
   'spells-that-dont-suck': "Spells That Don't Suck",
+  'tob-2023': 'Tome of Beasts',
+  tob: 'Tome of Beasts (2016)',
+  tob2: 'Tome of Beasts 2',
+  tob3: 'Tome of Beasts 3',
+  ccdx: 'Creature Codex',
+  bfrd: 'Black Flag',
+  'a5e-mm': 'Level Up Monsters',
+  vom: 'Vault of Magic',
 };
+// For monsters in several books, the first book listed wins. The 2023 Tome of
+// Beasts is the updated 2016 one.
+const MONSTER_ORDER = ['tob-2023', 'tob', 'tob2', 'tob3', 'ccdx', 'tdcs', 'bfrd', 'a5e-mm'];
+/** Same monster, different word order: "Dragon, Ancient Red" = "Ancient Red Dragon". */
+export const monsterKey = (name) => slug(name).split('-').filter(Boolean).sort().join(' ');
 // When two books have a spell with the same name, the first one listed keeps
 // the plain name and the others get the book's name added.
 const SPELL_ORDER = ['toh', 'deepm', 'deepmx', 'kp', 'wz', 'open5e', 'tdcs', 'spells-that-dont-suck', 'a5e-ag'];
@@ -265,18 +279,103 @@ export function convertFeat(f) {
   };
 }
 
+/* ------------------------------------------------------------- weapons */
+
+const titleProp = (p) =>
+  p
+    .trim()
+    .replace(/\b[a-z]/g, (c) => c.toUpperCase())
+    .replace(/^(Ammunition|Thrown) \((?:Range )?(\d+\/\d+)\)$/i, (m, k, r) => `${k} (Range ${r})`);
+
+/** A Tome of Heroes weapon (2014-style data) in the site's weapon format. */
+export function convertWeapon(w) {
+  const [cat, kind] = String(w.category).split(' ');
+  const props = w.properties.map(titleProp);
+  const dice = String(w.damageDice || '').trim();
+  const type = cap(String(w.damageType || '').trim());
+  const notes = [];
+  for (const p of props) {
+    const dh = p.match(/^Double-Headed \((\d+d\d+)\)$/);
+    if (dh) notes.push(`**Double-headed.** The weapon's other end can be used for attacks too, dealing ${dh[1]} damage.`);
+    const mag = p.match(/^Magazine \((\d+)\)$/);
+    if (mag) notes.push(`**Magazine.** Holds ${mag[1]} shots before it needs reloading.`);
+  }
+  if (props.includes('Gunpowder')) notes.push('**Gunpowder.** A firearm; it needs powder and shot as ammunition.');
+  if (props.includes('Special')) notes.push(`**Special.** This weapon has an extra rule of its own in ${SHORT.toh}; ask your DM.`);
+  return {
+    id: slug(w.name),
+    name: w.name.trim(),
+    category: cap(cat.toLowerCase()),
+    kind: kind.toLowerCase(),
+    damage: dice ? { dice, type } : null,
+    damageText: dice ? `${dice} ${type}` : 'Special',
+    properties: props,
+    mastery: null,
+    weight: w.weight,
+    cost: String(w.cost || '').toUpperCase().replace(/\b(GP|SP|CP)\b/, (m) => m),
+    description: notes.join('\n\n') || null,
+    source: w.source,
+    sourceName: SHORT[w.source] || w.source,
+  };
+}
+
+// Open5e's weapon keys -> this site's SRD weapon ids.
+const BASE_ID = { 'crossbow-hand': 'hand-crossbow', 'crossbow-heavy': 'heavy-crossbow', 'crossbow-light': 'light-crossbow' };
+
+/** A Vault of Magic weapon, built on its SRD weapon, plus its magic-item entry. */
+export function convertMagicWeapon(m, srdWeapons) {
+  const base = srdWeapons.find((w) => w.id === (BASE_ID[m.base] || m.base));
+  const description = cleanText(m.desc);
+  const bonus = Number(description.match(/\+(\d) bonus to attack and damage rolls/i)?.[1]) || 0;
+  const att = m.attunement ? ` (Requires Attunement${typeof m.attunement === 'string' ? ` ${m.attunement.replace(/^\(?requires attunement\s*/i, '').replace(/\)$/, '')}` : ''})` : '';
+  const item = {
+    id: slug(m.name),
+    name: m.name.trim(),
+    category: 'Weapon',
+    rarity: [m.rarity || 'Varies'],
+    meta: `Weapon (${base?.name || cap(String(m.base || 'any').replace(/-/g, ' '))}), ${m.rarity || 'Rarity Varies'}${att}`,
+    attunement: m.attunement ? (typeof m.attunement === 'string' ? m.attunement : 'Requires Attunement') : null,
+    description,
+    creatureStatBlock: null,
+    source: m.source,
+    sourceName: SHORT[m.source] || m.source,
+  };
+  const weapon = base
+    ? {
+        ...base,
+        id: `magic-${slug(m.name)}`,
+        name: m.name.trim(),
+        baseId: base.id,
+        baseName: base.name,
+        bonus,
+        damageText: base.damageText,
+        magic: { rarity: item.rarity[0], attunement: item.attunement, itemId: item.id },
+        description,
+        cost: null,
+        source: m.source,
+        sourceName: item.sourceName,
+      }
+    : null;
+  return { item, weapon };
+}
+
 /* ---------------------------------------------------------------- main */
 
 export async function buildOpen5e() {
-  const [documents, subclasses, spells, feats, licenses, srdClasses, srdSpells, srdFeats] = await Promise.all([
+  const [documents, subclasses, spells, feats, licenses, creatures, weaponSrc, srdClasses, srdSpells, srdFeats, srdMonsters, srdEquipment, srdItems] = await Promise.all([
     read('open5e-source/documents.json'),
     read('open5e-source/subclasses.json'),
     read('open5e-source/spells.json'),
     read('open5e-source/feats.json'),
     read('open5e-source/licenses.json'),
+    read('open5e-source/creatures.json'),
+    read('open5e-source/weapons.json'),
     read('public/data/srd/classes.json'),
     read('public/data/srd/spells.json'),
     read('public/data/srd/feats.json'),
+    read('public/data/srd/monsters.json'),
+    read('public/data/srd/equipment.json'),
+    read('public/data/srd/magic-items.json'),
   ]);
 
   // Subclasses, by class, sorted by name.
@@ -319,7 +418,65 @@ export async function buildOpen5e() {
   }
   outFeats.sort((a, b) => a.name.localeCompare(b.name));
 
-  const usedSources = new Set([...subclasses, ...spells, ...feats].map((x) => x.source));
+  // Monsters: one of each, SRD first, then the books in MONSTER_ORDER.
+  const seen = new Set(srdMonsters.map((m) => monsterKey(m.name)));
+  const monsterIds = new Set(srdMonsters.map((m) => m.id));
+  const outMonsters = [];
+  const sortedCreatures = [...creatures].sort((a, b) => MONSTER_ORDER.indexOf(a.source) - MONSTER_ORDER.indexOf(b.source));
+  for (const cr of sortedCreatures) {
+    const key = monsterKey(cr.name);
+    if (seen.has(key) || !cr.actions.length) continue;
+    seen.add(key);
+    const m = convertCreature(cr, cleanText, SHORT[cr.source] || cr.source);
+    m.id = slug(m.name);
+    if (monsterIds.has(m.id)) m.id = `${m.id}-${slug(m.sourceName)}`;
+    monsterIds.add(m.id);
+    outMonsters.push(m);
+  }
+  outMonsters.sort((a, b) => a.name.localeCompare(b.name));
+  // Legendary and mythic actions for major monsters, including SRD ones
+  // (stored as additions so the SRD file itself stays as published).
+  let legendaryAdded = 0;
+  let mythicAdded = 0;
+  for (const m of outMonsters) {
+    legendaryAdded += addLegendaryActions(m);
+    mythicAdded += addMythic(m);
+  }
+  const srdAdds = {};
+  for (const base of srdMonsters) {
+    const m = structuredClone(base);
+    const leg = addLegendaryActions(m);
+    const myth = addMythic(m);
+    legendaryAdded += leg;
+    mythicAdded += myth;
+    if (leg || myth) {
+      const keys = ['legendaryActions', 'legendaryActionsIntro', 'siteLegendary', 'mythicTrait', 'mythicActions', 'mythicActionsIntro'];
+      srdAdds[m.id] = Object.fromEntries(keys.filter((k) => m[k] !== undefined && (leg || !k.startsWith('legendary'))).map((k) => [k, m[k]]));
+    }
+  }
+
+  // Weapons: one of each name, SRD first.
+  const weaponNames = new Set(srdEquipment.weapons.map((w) => norm(w.name)));
+  const itemNames = new Set(srdItems.map((i) => norm(i.name)));
+  const outWeapons = [];
+  const outItems = [];
+  for (const w of weaponSrc.weapons) {
+    if (weaponNames.has(norm(w.name))) continue;
+    weaponNames.add(norm(w.name));
+    outWeapons.push(convertWeapon(w));
+  }
+  for (const m of weaponSrc.magicWeapons) {
+    if (weaponNames.has(norm(m.name)) || itemNames.has(norm(m.name))) continue;
+    weaponNames.add(norm(m.name));
+    itemNames.add(norm(m.name));
+    const { item, weapon } = convertMagicWeapon(m, srdEquipment.weapons);
+    outItems.push(item);
+    if (weapon) outWeapons.push(weapon);
+  }
+  outWeapons.sort((a, b) => a.name.localeCompare(b.name));
+  outItems.sort((a, b) => a.name.localeCompare(b.name));
+
+  const usedSources = new Set([...subclasses, ...spells, ...feats, ...creatures, ...weaponSrc.weapons, ...weaponSrc.magicWeapons].map((x) => x.source));
   const sources = documents
     .filter((d) => usedSources.has(d.key))
     .map((d) => ({
@@ -340,17 +497,26 @@ export async function buildOpen5e() {
     subclasses: Object.fromEntries(Object.entries(byClass).map(([k, v]) => [k, v.length])),
     spells: outSpells.length,
     feats: outFeats.length,
+    monsters: outMonsters.length,
+    weapons: outWeapons.length,
+    magicItems: outItems.length,
+    legendaryAdded,
+    mythicAdded,
   };
   await Promise.all([
     write('subclasses', byClass),
     write('spells', outSpells),
     write('feats', outFeats),
+    write('monsters', { added: outMonsters, srdAdds }),
+    write('equipment', { weapons: outWeapons }),
+    write('magic-items', outItems),
     write('index', {
       attribution:
         'This site also includes Open Game Content from the books listed below, taken from the Open5e API (https://open5e.com). ' +
         'Material under the Open Game License 1.0a is used under its terms; the full licence and the Section 15 notices follow. ' +
         'Material under the Creative Commons Attribution 4.0 International License (https://creativecommons.org/licenses/by/4.0/) ' +
-        'is credited to its authors below. The text was reformatted for this site, and 2014 subclass features were moved to the 2024 class levels.',
+        'is credited to its authors below. The text was reformatted for this site, 2014 subclass features were moved to the 2024 class levels, ' +
+        'and major monsters without them were given legendary actions (CR 12+) and mythic actions (CR 17+) built from their own stat blocks.',
       sources,
       section15: [
         'Open Game License v 1.0a Copyright 2000, Wizards of the Coast, LLC.',
@@ -369,5 +535,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   buildOpen5e().then(({ counts, skipped }) => {
     console.log('Subclasses:', counts.subclasses);
     console.log(`Spells: ${counts.spells} (skipped ${skipped} already in the SRD). Feats: ${counts.feats}.`);
+    console.log(`Weapons: ${counts.weapons} (magic items: ${counts.magicItems}).`);
+    console.log(`Monsters: ${counts.monsters}. Legendary actions added: ${counts.legendaryAdded}. Mythic: ${counts.mythicAdded}.`);
   });
 }

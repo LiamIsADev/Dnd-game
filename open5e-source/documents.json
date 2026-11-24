@@ -12,6 +12,39 @@
   "permalink": "https://a5esrd.com/a5esrd"
  },
  {
+  "key": "a5e-mm",
+  "name": "Monstrous Menagerie",
+  "publisher": "EN Publishing",
+  "author": "Paul Hughes",
+  "year": "2021",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://enpublishingrpg.com/collections/level-up-advanced-5th-edition-a5e/products/level-up-monstrous-menagerie-a5e"
+ },
+ {
+  "key": "bfrd",
+  "name": "Black Flag SRD",
+  "publisher": "Kobold Press",
+  "author": "Open Design LLC d/b/a Kobold Press",
+  "year": "2023",
+  "licenses": [
+   "cc-by-40"
+  ],
+  "permalink": "https://koboldpress.com/black-flag-reference-document/"
+ },
+ {
+  "key": "ccdx",
+  "name": "Creature Codex",
+  "publisher": "Kobold Press",
+  "author": "Wolfgang Baur, Dan Dillon, Richard Green, James Haeck, Chris Harris, Jeremy Hochhalter, James Introcaso, Chris Lockey, Shawn Merwin, and Jon Sawatsky",
+  "year": "2018",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/kpstore/product/creature-codex-for-5th-edition-dnd/"
+ },
+ {
   "key": "deepm",
   "name": "Deep Magic for 5th Edition",
   "publisher": "Kobold Press",
@@ -78,6 +111,50 @@
   "permalink": "https://en.wikipedia.org/wiki/Critical_Role%3A_Tal'Dorei_Campaign_Setting"
  },
  {
+  "key": "tob",
+  "name": "Tome of Beasts",
+  "publisher": "Kobold Press",
+  "author": "Chris Harris, Dan Dillon, Rodrigo Garcia Carmona, and Wolfgang Baur",
+  "year": "2016",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/tome-of-beasts/"
+ },
+ {
+  "key": "tob-2023",
+  "name": "Tome of Beasts 1 (2023 Edition)",
+  "publisher": "Kobold Press",
+  "author": "Dan Dillon, Chris Harris, Rodrigo Garcia Carmona, Wolfgang Baur",
+  "year": "2024",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/kpstore/product/tome-of-beasts-1-2023-edition-hardcover/"
+ },
+ {
+  "key": "tob2",
+  "name": "Tome of Beasts 2",
+  "publisher": "Kobold Press",
+  "author": "Wolfgang Baur, Celeste Conowitch, Darrin Drader, James Introcaso, Philip Larwood, Jeff Lee, Kelly Pawlik, Brian Suskind, Mike Welham",
+  "year": "2020",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/tome-of-beasts-2/"
+ },
+ {
+  "key": "tob3",
+  "name": "Tome of Beasts 3",
+  "publisher": "Kobold Press",
+  "author": "Wolfgang Baur, Celeste Conowitch, Darrin Drader, James Introcaso, Philip Larwood, Jeff Lee, Kelly Pawlik, Brian Suskind, Mike Welham",
+  "year": "2022",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/tome-of-beasts-3/"
+ },
+ {
   "key": "toh",
   "name": "Tome of Heroes",
   "publisher": "Kobold Press",
@@ -87,6 +164,17 @@
    "ogl-10a"
   ],
   "permalink": "https://koboldpress.com/kpstore/product/tome-of-heroes-for-5th-edition/"
+ },
+ {
+  "key": "vom",
+  "name": "Vault of Magic",
+  "publisher": "Kobold Press",
+  "author": "Phillip Larwood, Jeff Lee, and Christopher Lockey",
+  "year": "2021",
+  "licenses": [
+   "ogl-10a"
+  ],
+  "permalink": "https://koboldpress.com/kpstore/product/vault-of-magic-for-5th-edition/"
  },
  {
   "key": "wz",

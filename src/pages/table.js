@@ -630,7 +630,7 @@ export async function renderTable(root, { params, navigate }) {
   /* ---------------------------------------------------------- DM: enemies */
   function enemiesTab() {
     const q = ui.search.trim().toLowerCase();
-    const found = (q ? monsters.filter((m) => m.name.toLowerCase().includes(q) || (m.group || '').toLowerCase().includes(q)) : monsters).slice(0, 60);
+    const found = (q ? monsters.filter((m) => [m.name, m.group || '', m.sourceName || '', m.type || ''].some((x) => x.toLowerCase().includes(q))) : monsters).slice(0, 60);
     return html`
       <div class="panel">
         <p class="muted small">Drag an enemy onto the map, or press <strong>Place</strong> and click a square.</p>
@@ -641,7 +641,7 @@ export async function renderTable(root, { params, navigate }) {
         <ul class="spawn-list">
           ${found.map(
             (m) => html`<li class="spawn" draggable="true" data-drag="${JSON.stringify({ type: 'monster', id: m.id })}">
-              <span class="spawn-name"><strong>${m.name}</strong><span class="muted small">CR ${m.cr?.rating ?? '—'} · ${m.size?.join('/')} · HP ${m.hp?.average ?? '—'} · AC ${m.acValue ?? m.ac}</span></span>
+              <span class="spawn-name"><strong>${m.name}</strong><span class="muted small">CR ${m.cr?.rating ?? '—'} · ${m.size?.join('/')} · HP ${m.hp?.average ?? '—'} · AC ${m.acValue ?? m.ac}${m.mythicTrait ? ' · Mythic' : m.legendaryActions?.length ? ' · Legendary' : ''}${m.source && m.source !== 'srd' ? ` · ${m.sourceName}` : ''}</span></span>
               <button type="button" class="button small secondary" data-act="place" data-type="monster" data-id="${m.id}">Place</button>
             </li>`,
           )}

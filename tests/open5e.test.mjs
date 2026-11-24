@@ -4,10 +4,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { cleanText, levelFor2024, convertSubclass, castingTimeText, spellClasses } from '../scripts/build-open5e.mjs';
+import { cleanText, levelFor2024, convertSubclass, castingTimeText, spellClasses, monsterKey } from '../scripts/build-open5e.mjs';
+import { parseAttack, parseSave } from '../scripts/open5e/monsters.mjs';
 import { mergeExtra } from '../src/lib/srd.js';
 import * as R from '../src/lib/character/rules.js';
-import { spellMechanics, castableSpells, applyLevelUp } from '../src/lib/character/automation.js';
+import { spellMechanics, castableSpells, applyLevelUp, monsterActions } from '../src/lib/character/automation.js';
 
 const load = (dir, n) => JSON.parse(readFileSync(new URL(`../public/data/${dir}/${n}.json`, import.meta.url)));
 const base = Object.fromEntries(['classes', 'species', 'backgrounds', 'feats', 'equipment', 'spells'].map((n) => [n, load('srd', n)]));
@@ -134,4 +135,63 @@ test('subclass conversion keeps ids unique', () => {
   const taken = new Set(['path-of-thorns']);
   const s = convertSubclass({ name: 'Path of Thorns', source: 'toh', classKey: 'barbarian', rules: '2014', desc: 'x', features: [{ name: 'A', desc: 'a', levels: [3] }] }, taken);
   assert.equal(s.id, 'path-of-thorns-tome-of-heroes');
+});
+
+const monsters = mergeExtra('monsters', load('srd', 'monsters'), load('open5e', 'monsters'));
+const equipment = mergeExtra('equipment', base.equipment, load('open5e', 'equipment'));
+
+test('monsters: hundreds more, no duplicates', () => {
+  assert.ok(monsters.length > 2000, `${monsters.length} monsters`);
+  assert.equal(new Set(monsters.map((m) => m.id)).size, monsters.length, 'ids are unique');
+  const keys = monsters.map((m) => monsterKey(m.name));
+  assert.equal(new Set(keys).size, keys.length, 'no monster appears twice, even with the words in another order');
+  for (const m of monsters) {
+    assert.ok(m.hp?.average > 0 || m.hp?.average === 0, `${m.name} has HP`);
+    assert.ok(m.actions.length + m.traits.length + m.reactions.length + m.bonusActions.length, `${m.name} has something to do`);
+    assert.ok(Number.isFinite(m.cr.value) && Number.isFinite(m.acValue), `${m.name} CR and AC`);
+  }
+});
+
+test('2014-style monster actions are parsed for the table', () => {
+  const a = parseAttack('Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) piercing damage plus 7 (2d6) fire damage.');
+  assert.deepEqual(a, { kind: 'melee', bonus: 6, reach: 'reach 5 ft.', range: null, damage: [{ average: 10, dice: '2d6+3', type: 'Piercing' }, { average: 7, dice: '2d6', type: 'Fire' }] });
+  const s = parseSave('Each creature in a 30-foot cone must make a DC 15 Dexterity saving throw, taking 28 (8d6) fire damage on a failed save, or half as much damage on a successful one.');
+  assert.deepEqual([s.ability, s.dc, s.damage[0].dice, s.half], ['dex', 15, '8d6', true]);
+  assert.equal(parseSave('must succeed on a DC 13 Wisdom saving throw or be frightened for 1 minute.').condition, 'Frightened');
+  const bear = monsters.find((m) => m.name === 'Bear King');
+  const acts = monsterActions(bear);
+  assert.ok(acts.some((x) => x.kind === 'attack' && x.bonus > 0 && x.damage), 'Bear King can attack at the table');
+});
+
+test('major monsters get legendary and mythic actions', () => {
+  for (const m of monsters) {
+    if (m.cr.value >= 12) assert.ok(m.legendaryActions.length, `${m.name} (CR ${m.cr.rating}) has legendary actions`);
+    if (m.cr.value >= 17) assert.ok(m.mythicTrait && m.mythicActions.length >= 3, `${m.name} (CR ${m.cr.rating}) is mythic`);
+    if (m.cr.value < 12) assert.ok(!m.siteLegendary && !m.mythicTrait, `${m.name} left alone`);
+  }
+  // SRD monsters too, without changing what they already had.
+  const red = monsters.find((m) => m.id === 'ancient-red-dragon');
+  const srdRed = load('srd', 'monsters').find((m) => m.id === 'ancient-red-dragon');
+  assert.deepEqual(red.legendaryActions, srdRed.legendaryActions);
+  assert.match(red.mythicTrait.text, /regains 253 Hit Points/);
+  assert.ok(monsterActions(red).some((a) => a.name.startsWith('Relentless')));
+  const archmage = monsters.find((m) => m.id === 'archmage');
+  assert.equal(archmage.siteLegendary, true);
+  assert.match(archmage.legendaryActionsIntro, /Added by this site/);
+});
+
+test('weapons: new and magic ones, no duplicates, usable on the sheet', () => {
+  const names = equipment.weapons.map((w) => w.name.toLowerCase());
+  assert.equal(new Set(names).size, names.length, 'no duplicate weapon names');
+  assert.equal(new Set(equipment.weapons.map((w) => w.id)).size, names.length, 'no duplicate ids');
+  assert.ok(equipment.weapons.length >= 280, `${equipment.weapons.length} weapons`);
+  const khopesh = equipment.weapons.find((w) => w.name === 'Khopesh');
+  assert.equal(khopesh.sourceName, 'Tome of Heroes');
+  const blade = equipment.weapons.find((w) => w.name === 'Akaasit Blade');
+  assert.deepEqual([blade.baseId, blade.bonus, blade.category], ['dagger', 1, 'Simple']);
+  const c = { ...hero('rogue', null, 1), inventory: [{ uid: 'x', name: 'Akaasit Blade', qty: 1, ref: { kind: 'weapon', id: blade.id }, equipped: true }] };
+  const d = R.derive(c, { ...srd, equipment });
+  const atk = d.attacks.find((a) => a.uid === 'x');
+  assert.equal(atk.toHit, 2 + 2 + 1, 'Dex + proficiency + 1');
+  assert.equal(atk.damage, '1d4+3');
 });

@@ -562,8 +562,10 @@ export function derive(c, srd) {
       const finesse = w.properties.some((p) => p.startsWith('Finesse'));
       const ability = w.kind === 'ranged' ? 'dex' : finesse ? (mods.dex > mods.str ? 'dex' : 'str') : 'str';
       const prof = weaponProficient(cls, w);
-      const toHit = mods[ability] + (prof ? pb : 0);
-      const dmgMod = mods[ability];
+      // Magic weapons (+1, +2...) add their bonus to both rolls.
+      const magic = Number(w.bonus) || 0;
+      const toHit = mods[ability] + (prof ? pb : 0) + magic;
+      const dmgMod = mods[ability] + magic;
       const dice = w.damage?.dice || '1';
       return {
         uid: i.uid,
